@@ -1,0 +1,49 @@
+//wprintf para unicode (guarda caracteres e simbolos que precisam de mais espaço na memoria)
+
+int main(int argc, char **argv)
+{
+    setlocale(LC_ALL, "");
+    int naipe = atoi(argv[1]);
+    int valor = atoi(argv[1]);
+
+    wprintf(L"%lc \n", 0x1)
+    return 0;
+}
+
+// "U+1F0" ++ "naipe" ++ "valor"
+
+// 
+
+
+
+printf    -----------
+case (valor == 1)
+printf    |  A      |
+
+
+case (naipe == 0)
+printf    |  COPAS  |
+
+
+
+printf("\n");
+printf("⬛    ⬛\n");
+printf("Naipe");
+printf("   ⬛\n");
+⬛    ⬛
+   ⬛  1 ⬛
+   ⬛    ⬛     
+   ⬛⬛⬛⬛
+
+
+U+20E7 U+20E7 U+20E7 <====== aqui
+♥ ♥ ♥ ♥ ♥ ♥ ♥♥♥♥ 
+
+
+U+23BE U+23BF U+23CB U+23CC
+
+⎾⏋
+⏐ ⏐
+⎿⏌
+
+䂅䂤䂀䁠䃁
