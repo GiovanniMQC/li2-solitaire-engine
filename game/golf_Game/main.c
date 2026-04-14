@@ -4,6 +4,7 @@
 #include <time.h>
 #include <locale.h>
 #include "golf.c"
+#include "simpleSimon.c"
 
 int main(void)
 {
@@ -14,5 +15,9 @@ int main(void)
     if (gameType == 1)
     {
         golfSetup();
+    }
+    else if (gameType == 2)
+    {
+        simonSetup();
     }
 }
