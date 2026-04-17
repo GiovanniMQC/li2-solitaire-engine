@@ -3,13 +3,13 @@ CC = gcc
 # -Wall ativa os avisos importantes do compilador
 CFLAGS = -Wall -g
 
-golf: main.c cartasGolf.o logicaGolf.o
+golf: main.c cartas.o logica.o
 	$(CC) $(CFLAGS) -o $@ $^ 
 
-cartas.o: cartasGolf.c
+cartas.o: cartas.c
 	$(CC) $(CFLAGS) -c -o $@ $<
-logica.o: logicaGolf.c
+logica.o: logica.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf golf cartasGolf.o logicaGolf.o
+	rm -rf golf cartas.o

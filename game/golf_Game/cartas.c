@@ -3,7 +3,21 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
-#include "cartasGolf.h"
+#include "cartas.h"
+
+//INTERFACE: Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
+void print_valor(struct carta c) 
+{
+    switch (c.valor) 
+    {
+        case 1:  printf(" A   "); break;
+        case 10: printf(" 10  "); break; 
+        case 11: printf(" J   "); break;
+        case 12: printf(" Q   "); break;
+        case 13: printf(" K   "); break;
+        default: printf(" %d   ", c.valor); break;
+    }  
+}
 
 //INTERFACE: Recebe uma carta e le o seu naipe, printa o naipe correspondente no terminal
 void print_naipe(struct carta c)
@@ -34,7 +48,7 @@ void print_carta(struct carta c)
 //INTERFACE: Recebe um baralho e da print nas 35 primeiras cartas para o golf, separa em 7 colunas de 5 cartas
 void print_colunas(struct carta baralho[])
 {
-    printf("    1          2          3          4          5          6          7\n");
+    printf("    1          2          3          4          5          6          7          8          9         10\n");
 
     for (int i = 0; i < 35; i++) 
     {

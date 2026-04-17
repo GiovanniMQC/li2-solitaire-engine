@@ -3,8 +3,8 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
-#include "cartasGolf.h"
-#include "logicaGolf.h"
+#include "cartas.h"
+#include "logica.h"
 
 //número de pilhas + regras de cada pilha
 int regras_Pilhas (int a)

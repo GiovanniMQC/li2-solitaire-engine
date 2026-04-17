@@ -3,7 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
-#include "cartasGolf.h"
+#include "cartas.h"
 
 //LOGICA: Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
@@ -63,15 +63,14 @@ int achar_base_coluna(struct carta baralho[], int coluna)
 }
 
 //LOGICA: Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
-void iniciar_jogoGolf(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver) 
+void iniciar_jogo(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver) 
 {
     cria_baralho(baralho);
     shuffle_baralho(baralho);
-    //TODO Definir num de pilhas e tamanhos (modular para cada jogo).
-
+    
     *stock = 16;
     *gameOver = 0;
-    *ultima = baralho[51];
+    *ultima = baralho[51]; 
 }
 
 //LOGICA: Puxa uma carta do stock para a mao atual, as ultimas 16 cartas correspondem ao stock, sao selecionados consecutivamente ate 35
