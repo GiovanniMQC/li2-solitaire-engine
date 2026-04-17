@@ -4,19 +4,12 @@
 #include <time.h>
 #include <locale.h>
 #include "cartas.h"
+#include "cartas.c"
 #include "logica.h"
+#include "logica.c"
 
 int main(void)
 {
-
-    int gameType = 0;
-    while (!(gameType == 1 || gameType == 2))
-        scanf("%d", &gameType);
-    
-    if (gameType ==1 )
-    {
-        
-    }
     //instrucoes
     printf("1 a 7 --> Escolhe uma coluna e tenta a jogada \n8 --> Tira uma carta do stock para sua mão \n9 --> Restart \n0 --> Sair\n");
     //declarar variaveis

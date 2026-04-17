@@ -48,7 +48,7 @@ void print_carta(struct carta c)
 //INTERFACE: Recebe um baralho e da print nas 35 primeiras cartas para o golf, separa em 7 colunas de 5 cartas
 void print_colunas(struct carta baralho[])
 {
-    printf("    1          2          3          4          5          6          7          8          9         10\n");
+    printf("    1          2          3          4          5          6          7\n");
 
     for (int i = 0; i < 35; i++) 
     {
