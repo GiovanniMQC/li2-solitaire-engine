@@ -46,7 +46,8 @@ void shuffle_baralho(struct carta *baralho)
     
 }
 
-// Cria uma pilha a partir de um baralho, um número de cartas na pilha e a quantidade de pilhas. Coloca a nova pilha no fim da lista de células
+// Cria uma pilha a partir de um baralho, um número de cartas na pilha e a quantidade de pilhas. Coloca a nova pilha no fim da lista de células.
+// Retorna o endereço da primeira pilha
 Pilhas cria_pilha(struct carta *baralho, int tamPilha, int *j)
 {
     // Um apontador para o início de uma pilha.
@@ -85,10 +86,51 @@ Pilhas cria_pilhas(struct carta *baralho, int tamPilha[], int numPilhas)
     return inicioPilha;
 }
 
-// Recebe uma pilha e uma array de posição que deve ter a [coluna, linha], tanto para origem quanto o destino.
-Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[])
+// Recebe uma pilha e uma array de posição que deve ter a [coluna, linha, quantidade], tanto para origem quanto o destino.
+Pilhas mover_cartas(Pilhas *p, int cartOrig[], int cartDest[])
 {
+    if (p == NULL || *p == NULL) return NULL;
+
+    // Extração dos dados baseados na array (assumindo índice 0 para as colunas)
+    int orig_col = cartOrig[0];
+    int orig_linha = cartOrig[1];
+    int qtd = cartOrig[2];
     
+    
+    int dest_col = cartDest[0];
+
+    if (qtd <= 0) return *p; // Nada a mover
+
+    Pilhas orig_node = *p;
+    Pilhas dest_node = *p;
+
+    // 1. Encontrar as colunas (nós) na lista ligada
+    for (int i = 0; i < orig_col && orig_node != NULL; i++) orig_node = orig_node->prox;
+    for (int i = 0; i < dest_col && dest_node != NULL; i++) dest_node = dest_node->prox;
+
+    // Validar se as colunas existem e se a linha e quantidade fazem sentido na origem
+    if (orig_node == NULL || dest_node == NULL || orig_node == dest_node) return *p;
+    if (orig_linha < 0 || orig_linha + qtd > orig_node->numCartas) return *p;
+
+    // 2. Aumentar o tamanho da pilha de destino usando realloc
+    int novo_tam_dest = dest_node->numCartas + qtd;
+    struct carta *nova_pilha_dest = realloc(dest_node->pilha, novo_tam_dest * sizeof(struct carta));
+    if (nova_pilha_dest == NULL && novo_tam_dest > 0) return *p; // Falha de alocação de memória
+    dest_node->pilha = nova_pilha_dest;
+
+    // 3. Copiar as cartas da origem para o final da pilha de destino
+    for (int i = 0; i < qtd; i++) {
+        dest_node->pilha[dest_node->numCartas + i] = orig_node->pilha[orig_linha + i];
+    }
+    dest_node->numCartas = novo_tam_dest;
+
+    // 4. Reduzir a pilha de origem
+    int novo_tam_orig = orig_node->numCartas - qtd;
+    // Em vez de realocar para menor (o que às vezes não é estritamente necessário em C),
+    // nós simplesmente ajustamos o contador. A memória extra é irrelevante e economiza processamento.
+    orig_node->numCartas = novo_tam_orig;
+
+    return *p;
 }
 
 //LOGICA: Recebe um baralho e uma coluna, retorna o index da ultima carta de cima pra baixo da coluna

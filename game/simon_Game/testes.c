@@ -1,8 +1,8 @@
 #include <CUnit/Basic.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "cartas.h"
-#include "logica.h"
+#include "cartasSimon.h"
+#include "logicaSimon.h"
 
 int init_suite(void) 
 {

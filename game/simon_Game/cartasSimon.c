@@ -3,7 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
-#include "cartas.h"
+#include "cartasSimon.h"
 
 //INTERFACE: Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
