@@ -18,14 +18,14 @@ int main(void)
     int j = 0;
     int capacidade[] = {8,8,8,7,6,5,4,3,2,1};
     Pilhas celula = cria_pilhas(baralho, capacidade, 10);
-    print_pilhas(celula, 8);
+    print_pilhas(celula, acharLimite(celula));
     
     // Movimentação de teste de cartas
     int posOrigem[2] = {5,4};
     int posDestino[2] = {1,8};
     mover_cartas(&celula, posOrigem, posDestino, 1);
-    // printf("\n");
-    print_pilhas(celula, 8);
 
+    print_pilhas(celula, 8);
+    
     return EXIT_SUCCESS;    
 }
