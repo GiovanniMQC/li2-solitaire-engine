@@ -5,7 +5,7 @@
 #include <locale.h>
 #include "cartasSimon.h"
 
-//INTERFACE: Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
+// Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
 {
     switch (c.valor) 
@@ -19,7 +19,7 @@ void print_valor(struct carta c)
     }  
 }
 
-//INTERFACE: Recebe uma carta e le o seu naipe, printa o naipe correspondente no terminal
+// Recebe uma carta e le o seu naipe, printa o naipe correspondente no terminal
 void print_naipe(struct carta c)
 {
     switch (c.naipe)
@@ -31,7 +31,7 @@ void print_naipe(struct carta c)
     }
 }
 
-//INTERFACE: Recebe uma carta e da print a ela com formato apropriado (valor e naipe com fundo branco)
+// Recebe uma carta e da print a ela com formato apropriado (valor e naipe com fundo branco)
 void print_carta(struct carta c) 
 {
     if(c.valor == 0)
@@ -45,7 +45,7 @@ void print_carta(struct carta c)
     } 
 }
 
-//INTERFACE: Recebe uma pilha e da print dependendo do tamanho. No Simple Simon são 3 pilhas de 8 cartas e o restante decrescente de 7 a 1.
+// Recebe uma pilha e da print dependendo do tamanho. No Simple Simon são 3 pilhas de 8 cartas e o restante decrescente de 7 a 1.
 void print_colunas(struct carta baralho[])
 {
     printf("    1          2          3          4          5          6          7          8          9          10\n");
@@ -58,7 +58,7 @@ void print_colunas(struct carta baralho[])
     printf("\n");
 }
 
-//INTERFACE: Da print no estado atual do jogo
+// Da print no estado atual do jogo
 void print_game(struct carta baralho[], int stock, struct carta ultima){
     print_colunas(baralho);
     printf("Stock: %d ", stock);
@@ -66,7 +66,7 @@ void print_game(struct carta baralho[], int stock, struct carta ultima){
     putchar('\n');
 }
 
-//INTERFACE/LOGICA: Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
+// Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
 //0 -> sair
 //1 a 7 -> fazer a jogada normal
 //8 -> puxar do stock
