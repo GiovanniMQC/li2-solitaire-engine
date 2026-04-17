@@ -40,11 +40,19 @@ void print_carta(struct carta c)
     printf("\033[0m"); //reseta pro normal
 }
 
+<<<<<<< HEAD
 void print_pilhas(Pilhas p, int lim){
     Pilhas pTemp = p;
     int linha = 0;
 
     while (linha<(lim+1)){
+=======
+void print_pilhas(Pilhas p){
+    Pilhas pTemp = p;
+    int linha = 0;
+    
+    while (linha<8){
+>>>>>>> 696074bc0f26fd41ec3a74a6dec0a2791b3c1fe3
         
         for (int i=0; i<10; i++){
             if(pTemp->numCartas <= linha)
