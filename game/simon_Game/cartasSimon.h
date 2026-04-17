@@ -4,16 +4,15 @@ struct carta{
     int valor; 
 };
 
-typedef struct celula
+typedef struct celula //guarda a lista ligada de pilhas
 {
     int numCartas;
-    struct carta *pilha;
-    struct celula *prox;
+    struct carta *pilha; //apontador para a primeira carta
+    struct celula *prox; //apontador para a proxima celula (proxima pilha)
 } *Pilhas;
 
 void print_valor(struct carta c);
 void print_naipe(struct carta c);
 void print_carta(struct carta c);
-void print_colunas(struct carta baralho[]);
-void print_game(struct carta baralho[], int stock, struct carta ult);
-int pedir_jogada();
+void print_game();
+void print_pilha(Pilhas);

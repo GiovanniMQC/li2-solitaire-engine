@@ -222,27 +222,5 @@ void checa_gameOver(struct carta baralho[], int *stock, int *gameOver, unsigned 
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver)
 {
-    unsigned int jogadaEscolhida = pedir_jogada();
-    
-    //RESTART
-    if(jogadaEscolhida == 9)
-    {
-        iniciar_jogo(baralho, &*stock,&*ultima,&*gameOver);
-    }
 
-    //Jogar
-    else if(jogadaEscolhida<=7 && jogadaEscolhida>=1)
-    {
-        jogada_Coluna(baralho,&*stock,&*ultima,jogadaEscolhida);
-        return;
-    }
-    
-    //Checar se deu gameOver
-    checa_gameOver(baralho, stock, gameOver, jogadaEscolhida);
-    
-    //Puxar carta
-    if (jogadaEscolhida == 8)
-    {
-        puxar_Stock(baralho,&*stock,&*ultima);
-    }
 }

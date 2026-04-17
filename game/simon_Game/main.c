@@ -10,31 +10,15 @@
 
 int main(void)
 {
-    //instrucoes
-    printf("1 a 7 --> Escolhe uma coluna e tenta a jogada \n8 --> Tira uma carta do stock para sua mão \n9 --> Restart \n0 --> Sair\n");
     //declarar variaveis
     struct carta baralho[52];
-    struct carta ultima;
-    int stock = 0;
-    int gameOver = 0;
-    
-    iniciar_jogo(baralho, &stock, &ultima, &gameOver);
-    
-    while (!(gameOver==1 || gameOver==2))
-    {
-        print_game(baralho,stock,ultima);
-        processar_jogada(baralho,&stock,&ultima,&gameOver);
-        printf("\n");
-    }
-    
-    if (gameOver == 1)
-    {
-        printf("Não ganhaste\n");
-    }
-    else
-    {
-        printf("Você ganhou!!!\n");
-    }
+    cria_baralho(baralho);
+    shuffle_baralho(baralho);
+
+    int j = 0;
+    int capacidade[] = {8,8,8,7,6,5,4,3,2,1};
+    Pilhas celula = cria_pilhas(baralho, capacidade, 10);
+    print_pilhas(celula);
 
     return EXIT_SUCCESS;    
 }
