@@ -1,23 +1,6 @@
-/*
-    Struct cria uma estruturas com dados/variáveis
-    
-    naipe: Copas, Espadas, Ouros, Paus
-    
-    Com enum pode deixar explicito os valores das cartas, mas precisa 
-    modificar o restante do código
-
-*/ 
-
-enum naipe
-{
-    COPAS,
-    ESPADAS,
-    DIAMANTES,
-    PAUS
-};
-
 struct carta{
-    enum naipe naipe;
+    int naipe;
+    // 0 - Copas, 1 - Espadas, 2 - Diamantes, 3 - Paus
     int valor; 
 };
 
@@ -34,4 +17,3 @@ void print_carta(struct carta c);
 void print_colunas(struct carta baralho[]);
 void print_game(struct carta baralho[], int stock, struct carta ult);
 int pedir_jogada();
-
