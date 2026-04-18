@@ -87,10 +87,10 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     return inicioPilha;
 }
 
-Pilhas procura_pilha(Pilhas p, int pos)
+Pilhas procura_pilha(Pilhas *p, int pos)
 {
     // Cria um apontador que será usado para procurar a pilha desejada
-    Pilhas pilhaResultado = p;
+    Pilhas pilhaResultado = *p;
 
     // Mudando o endereço para a coluna correta
     for(int i = 0; i < pos && pilhaResultado != NULL; i++)
@@ -161,12 +161,10 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[])
     int orig_linha = posOrig[1] + 1;
     int dest_col = posDest[0];
     
-    Pilhas pilhaOrigem = *p;
-    Pilhas pilhaDestino = *p;
-    
     // Avança o apontador para as colunas de origem e destino das cartas
-    pilhaOrigem = procura_pilha(pilhaOrigem, orig_col);
-    pilhaDestino = procura_pilha(pilhaDestino, dest_col);
+    Pilhas pilhaOrigem = procura_pilha(p, orig_col);
+    Pilhas pilhaDestino = procura_pilha(p, dest_col);
+    
 
     // Prevenção de erros caso as colunas não existam ou quantidade seja inválida
     if(pilhaOrigem == NULL || pilhaDestino == NULL || orig_linha < 1) return 1;
@@ -209,16 +207,9 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
     int destCol = posDest[0];
     int destLin = posDest[1];
 
-    Pilhas pilhaOrigem = *p;
-    Pilhas pilhaDestino = *p;
-
+    Pilhas pilhaOrigem = procura_pilha(p, origCol);
+    Pilhas pilhaDestino = procura_pilha(p, destCol);
     
-
-    for (int i = 0; i<origCol;i++)
-        pilhaOrigem = pilhaOrigem->prox;
-    for (int i = 0; i<destCol;i++)
-        pilhaDestino = pilhaDestino->prox;
-
     struct carta origem = (pilhaOrigem->pilha)[origLin];
     struct carta chegada = (pilhaDestino->pilha)[destLin];
 
