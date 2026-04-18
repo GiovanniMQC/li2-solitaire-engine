@@ -69,9 +69,9 @@ void print_pilhas(Pilhas p, int lim){
 //9 -> restart
 int pedir_jogada()
 {
-    unsigned int jogada_escolhida = 10;
+    unsigned int jogada_escolhida = 0;
     
-    printf("Digite o número para sua Jogada: ");
+    printf("Digite o número da coluna origem: ");
     scanf("%d", &jogada_escolhida);
     
     while(jogada_escolhida > 9 || jogada_escolhida < 0)

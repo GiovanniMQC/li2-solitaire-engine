@@ -14,5 +14,5 @@ typedef struct celula // guarda a lista ligada de pilhas
 void print_valor(struct carta c);
 void print_naipe(struct carta c);
 void print_carta(struct carta c);
-void print_game();
-void print_pilha(Pilhas);
+void print_pilhas(Pilhas p, int lim);
+int pedir_jogada();
