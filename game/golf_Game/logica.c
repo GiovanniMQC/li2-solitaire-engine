@@ -5,7 +5,7 @@
 #include <locale.h>
 #include "cartas.h"
 
-//LOGICA: Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
+// Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
 {
     int val = 1;
@@ -25,7 +25,7 @@ void cria_baralho(struct carta *baralho)
     }
 }
 
-//LOGICA: Pega num baralho ja preenhido e mistura a ordem das cartas de forma aleatoria
+// Pega num baralho ja preenhido e mistura a ordem das cartas de forma aleatoria
 void shuffle_baralho(struct carta *baralho)
 {
     srand(time(NULL)); //seed para randomizar baralho (segundos atuais)
@@ -45,7 +45,7 @@ void shuffle_baralho(struct carta *baralho)
 
 }
 
-//LOGICA: Recebe um baralho e uma coluna, retorna o index da ultima carta de cima pra baixo da coluna
+// Recebe um baralho e uma coluna, retorna o index da ultima carta de cima pra baixo da coluna
 int achar_base_coluna(struct carta baralho[], int coluna) 
 {
     int i = coluna-1;
@@ -62,7 +62,7 @@ int achar_base_coluna(struct carta baralho[], int coluna)
     return -1;
 }
 
-//LOGICA: Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
+// Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
 void iniciar_jogo(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver) 
 {
     cria_baralho(baralho);
@@ -73,14 +73,14 @@ void iniciar_jogo(struct carta baralho[], int *stock, struct carta *ultima, int 
     *ultima = baralho[51]; 
 }
 
-//LOGICA: Puxa uma carta do stock para a mao atual, as ultimas 16 cartas correspondem ao stock, sao selecionados consecutivamente ate 35
+// Puxa uma carta do stock para a mao atual, as ultimas 16 cartas correspondem ao stock, sao selecionados consecutivamente ate 35
 void puxar_Stock(struct carta baralho[], int *stock, struct carta *ultima)
 {
     (*stock)--;
     *ultima = baralho[35 + *stock];
 }
 
-//LOGICA: Pega na carta atual da mao e na carta correspondente a base da coluna escolhida e     
+// Pega na carta atual da mao e na carta correspondente a base da coluna escolhida e     
 //        checka se os valores das duas estao em um intervalo de -1/+1
 int valores_Check(struct carta baralho[], struct carta *ultima, int jogadaEscolhida)
 {    
@@ -94,7 +94,7 @@ int valores_Check(struct carta baralho[], struct carta *ultima, int jogadaEscolh
             return 0;
 }
 
-//LOGICA: Recebe o n de uma coluna (1 a 7) e verifica se os valores da carta na mao e da carta na base da coluna 
+// Recebe o n de uma coluna (1 a 7) e verifica se os valores da carta na mao e da carta na base da coluna 
 //        estao em um intervalo valido para realizar a jogada, caso contrario a jogada nao e feita
 void jogada_Coluna(struct carta baralho[], int *stock, struct carta *ultima, int jogadaEscolhida)
 {    
@@ -112,7 +112,7 @@ void jogada_Coluna(struct carta baralho[], int *stock, struct carta *ultima, int
         }
 }
 
-// LOGICA: Recebe o baralho, quantidade de cartas do stock e jogadaEscolhida para definir o estado do gameOver dependendo
+// Recebe o baralho, quantidade de cartas do stock e jogadaEscolhida para definir o estado do gameOver dependendo
 //         se o player perdeu, ganhou ou apenas saiu do jogo. 
 void checa_gameOver(struct carta baralho[], int *stock, int *gameOver, unsigned int jogadaEscolhida)
 {
@@ -131,7 +131,7 @@ void checa_gameOver(struct carta baralho[], int *stock, int *gameOver, unsigned 
         *gameOver = 1;
 }
 
-//LOGICA: A partir da jogada selecionada, processa a jogada correta para o numero dado
+// A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver)
 {
     unsigned int jogadaEscolhida = pedir_jogada();

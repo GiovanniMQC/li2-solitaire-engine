@@ -87,12 +87,75 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     return inicioPilha;
 }
 
+Pilhas procura_pilha(Pilhas p, int pos)
+{
+    // Cria um apontador que será usado para procurar a pilha desejada
+    Pilhas pilhaResultado = p;
+
+    // Mudando o endereço para a coluna correta
+    for(int i = 0; i < pos && pilhaResultado != NULL; i++)
+    {
+        pilhaResultado = pilhaResultado->prox;
+    }
+    return pilhaResultado;
+}
+
+void libera_memoria_cartas(Pilhas p)
+{
+    // Liberta o espaço de memória que deixou de ser usado na origem
+    if (p->numCartas > 0) {
+        p->pilha = realloc(p->pilha, p->numCartas * sizeof(struct carta));
+    } else {
+        free(p->pilha);
+        p->pilha = NULL;
+    }
+}
+
+void insere_carta(struct carta origem, Pilhas destino)
+{
+    // Aumenta o espaço da memória para inserir as cartas movidas
+        destino->pilha = realloc(destino->pilha, (destino->numCartas + 1) * sizeof(struct carta));
+    
+    // Adiciona a carta na pilha destino
+    destino->pilha[destino->numCartas] = origem;
+
+    // Atualiza quantidade de cartas nas pilhas
+    destino->numCartas++;
+}
+
+void insere_cartas(Pilhas origem, Pilhas destino, int linha, int numMovidas)
+{
+    // Aumenta o espaço da memória para inserir as cartas movidas
+    destino->pilha = realloc(destino->pilha, (destino->numCartas + numMovidas) * sizeof(struct carta));
+    // Coloca os valores das cartas no novo espaço
+    for(int i = 0; i < numMovidas; i++)
+    {
+        destino->pilha[destino->numCartas + i] = origem->pilha[(linha - 1) + i];
+    }
+
+    // Atualiza quantidade de cartas nas pilhas
+    destino->numCartas += numMovidas;
+    origem->numCartas -= numMovidas;
+
+    // Liberta o espaço de memória que deixou de ser usado na origem
+    libera_memoria_cartas(origem);
+}
+
+void corrige_seq_cartas(Pilhas p, int linha)
+{
+    // Desloca as cartas restantes na pilha de origem para preencher o buraco deixado pela carta movida
+    for (int i = linha - 1; i < p->numCartas - 1; i++)
+    {
+        p->pilha[i] = p->pilha[i + 1];
+    }
+
+    // Atualiza quantidade de cartas nas pilhas
+    p->numCartas--;
+}
 
 // Recebe uma pilha e uma array de posição que deve ter a [coluna, linha], tanto para origem quanto o destino.
-Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
+int mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
 {
-    if (p == NULL || *p == NULL) return NULL;
-
     // Extração dos dados baseados na array
     int orig_col = posOrig[0];
     int orig_linha = posOrig[1];
@@ -101,81 +164,32 @@ Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
     Pilhas pilhaOrigem = *p;
     Pilhas pilhaDestino = *p;
     
-    // Mudando o endereço para a coluna correta
-    for(int i = 0; i < orig_col && pilhaOrigem != NULL; i++)
-    {
-        pilhaOrigem = pilhaOrigem->prox;
-    }
-    // Avança para a coluna que será movida as cartas
-    for(int i = 0; i < dest_col && pilhaDestino != NULL; i++)
-    {
-        pilhaDestino = pilhaDestino->prox;
-    }
+    // Avança o apontador para as colunas de origem e destino das cartas
+    pilhaOrigem = procura_pilha(pilhaOrigem, orig_col);
+    pilhaDestino = procura_pilha(pilhaDestino, dest_col);
 
     // Prevenção de erros caso as colunas não existam ou quantidade seja inválida
-    if(pilhaOrigem == NULL || pilhaDestino == NULL || orig_linha < 1) return *p;
+    if(pilhaOrigem == NULL || pilhaDestino == NULL || orig_linha < 1) return 1;
 
+    // Guarda o número de cartas que serão movidas
+    int numMovidas = pilhaOrigem->numCartas - (orig_linha - 1);
+
+    // Checa se o número de carta movidas é menor ou igual a zero
+    if (numMovidas <= 0) return 1; // Nada a mover
+    
     if(moveInferiores)
     {
-        // Guarda o número de cartas que serão acrescentadas a pilha destino
-        int numMovidas = pilhaOrigem->numCartas - (orig_linha - 1);
-        if (numMovidas <= 0) return *p; // Nada a mover
-
-        // Aumenta o espaço da memória para inserir as cartas movidas
-        pilhaDestino->pilha = realloc(pilhaDestino->pilha, (pilhaDestino->numCartas + numMovidas) * sizeof(struct carta));
-
-        // Coloca os valores das cartas no novo espaço
-        for(int i = 0; i < numMovidas; i++)
-        {
-            pilhaDestino->pilha[pilhaDestino->numCartas + i] = pilhaOrigem->pilha[(orig_linha - 1) + i];
-        }
-
-        // Atualiza quantidade de cartas nas pilhas
-        pilhaDestino->numCartas += numMovidas;
-        pilhaOrigem->numCartas -= numMovidas;
-
-        // Liberta o espaço de memória que deixou de ser usado na origem
-        if (pilhaOrigem->numCartas > 0) {
-            pilhaOrigem->pilha = realloc(pilhaOrigem->pilha, pilhaOrigem->numCartas * sizeof(struct carta));
-        } else {
-            free(pilhaOrigem->pilha);
-            pilhaOrigem->pilha = NULL;
-        }
+        insere_cartas(pilhaOrigem, pilhaDestino, orig_linha, numMovidas);
     }
     else
     {
-        // Guarda o número de cartas que serão acrescentadas a pilha destino
-        int numMovidas = 1;
+        insere_carta(pilhaOrigem->pilha[orig_linha - 1], pilhaDestino);
 
-        // Copia a carta que será movida
-        struct carta cartaMovida = pilhaOrigem->pilha[orig_linha - 1];
-        
-        // Aumenta o espaço da memória para inserir as cartas movidas
-        pilhaDestino->pilha = realloc(pilhaDestino->pilha, (pilhaDestino->numCartas + numMovidas) * sizeof(struct carta));
+        corrige_seq_cartas(pilhaOrigem, orig_linha);
 
-        // Adiciona a carta na pilha destino
-        pilhaDestino->pilha[pilhaDestino->numCartas] = cartaMovida;
-
-        // Desloca as cartas restantes na pilha de origem para preencher o buraco deixado pela carta movida
-        for (int i = orig_linha - 1; i < pilhaOrigem->numCartas - 1; i++)
-        {
-            pilhaOrigem->pilha[i] = pilhaOrigem->pilha[i + 1];
-        }
-
-        // Atualiza quantidade de cartas nas pilhas
-        pilhaDestino->numCartas++;
-        pilhaOrigem->numCartas--;
-
-        // Liberta o espaço de memória que deixou de ser usado na origem
-        if (pilhaOrigem->numCartas > 0) {
-            pilhaOrigem->pilha = realloc(pilhaOrigem->pilha, pilhaOrigem->numCartas * sizeof(struct carta));
-        } else {
-            free(pilhaOrigem->pilha);
-            pilhaOrigem->pilha = NULL;
-        }
+        libera_memoria_cartas(pilhaOrigem);
     }
-    
-    return *p;
+    return 0;
 }
 
 // Acha a pilha com maior número de carta e retorna o número que há
