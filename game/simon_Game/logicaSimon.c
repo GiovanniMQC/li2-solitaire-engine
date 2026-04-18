@@ -198,3 +198,45 @@ int acharLimite(Pilhas p){
 
     return maior;
 }
+
+int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
+{
+    if ((posOrig[0] || posDest[0])>=10 || (posDest[0] || posOrig[0] || posDest[1] || posOrig[1])<0)
+        return 1;
+    
+    int origCol = posOrig[0];
+    int origLin = posOrig[1];
+    int destCol = posDest[0];
+
+    Pilhas pilhaOrigem = *p;
+    Pilhas pilhaDestino = *p;
+
+    
+
+    for (int i = 1; i<origCol;i++)
+        pilhaOrigem = pilhaOrigem->prox;
+    for (int i = 1; i<destCol;i++)
+        pilhaDestino = pilhaDestino->prox;
+
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+    struct carta chegada = (pilhaDestino->pilha)[(pilhaDestino->numCartas)-1];
+
+    int naipeSelecionado = origem.naipe;
+
+    if ((pilhaOrigem->numCartas)<(origLin-1) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
+        return 1;
+    if ((pilhaOrigem->numCartas) == (origLin-1))
+    {
+        mover_cartas(*p, posOrig, posDest);
+        return 0;
+    }
+    
+    for (int i = origLin; i < pilhaOrigem->numCartas; i++)
+    {
+        struct carta cartaAverificar = (pilhaOrigem->pilha)[i];
+        if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
+            return 1;
+        
+        mover_cartas(*p, posOrig, posDest);
+    }
+}
