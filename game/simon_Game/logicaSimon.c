@@ -133,6 +133,14 @@ Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
         // Atualiza quantidade de cartas nas pilhas
         pilhaDestino->numCartas += numMovidas;
         pilhaOrigem->numCartas -= numMovidas;
+
+        // Liberta o espaço de memória que deixou de ser usado na origem
+        if (pilhaOrigem->numCartas > 0) {
+            pilhaOrigem->pilha = realloc(pilhaOrigem->pilha, pilhaOrigem->numCartas * sizeof(struct carta));
+        } else {
+            free(pilhaOrigem->pilha);
+            pilhaOrigem->pilha = NULL;
+        }
     }
     else
     {
@@ -148,9 +156,23 @@ Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
         // Adiciona a carta na pilha destino
         pilhaDestino->pilha[pilhaDestino->numCartas] = cartaMovida;
 
+        // Desloca as cartas restantes na pilha de origem para preencher o buraco deixado pela carta movida
+        for (int i = orig_linha - 1; i < pilhaOrigem->numCartas - 1; i++)
+        {
+            pilhaOrigem->pilha[i] = pilhaOrigem->pilha[i + 1];
+        }
+
         // Atualiza quantidade de cartas nas pilhas
         pilhaDestino->numCartas++;
         pilhaOrigem->numCartas--;
+
+        // Liberta o espaço de memória que deixou de ser usado na origem
+        if (pilhaOrigem->numCartas > 0) {
+            pilhaOrigem->pilha = realloc(pilhaOrigem->pilha, pilhaOrigem->numCartas * sizeof(struct carta));
+        } else {
+            free(pilhaOrigem->pilha);
+            pilhaOrigem->pilha = NULL;
+        }
     }
     
     return *p;
