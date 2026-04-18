@@ -4,7 +4,7 @@ struct carta{
     int valor; 
 };
 
-typedef struct celula //guarda a lista ligada de pilhas
+typedef struct celula // guarda a lista ligada de pilhas
 {
     int numCartas;
     struct carta *pilha; //apontador para a primeira carta

@@ -68,6 +68,7 @@ Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
 // Cria uma lista de pilhas a partir de um baralho, número de pilhas e recebe uma array que guarda em sequência os tamanhos das pilhas.
 Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
 {
+    // Se o número de pilhas é 0 retorna NULL
     if(numPilhas <= 0) return NULL;
     // Variável que guarda quantas cartas foram percorridas no baralho.
     int contagemBaralho = 0;
@@ -155,6 +156,7 @@ Pilhas mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
     return *p;
 }
 
+// Acha a pilha com maior número de carta e retorna o número que há
 int acharLimite(Pilhas p){
     Pilhas pTemp = p->prox;
     int maior = p->numCartas;
