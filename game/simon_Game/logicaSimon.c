@@ -197,11 +197,8 @@ int acharLimite(Pilhas p){
     return maior;
 }
 
-int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
+int carta_check (Pilhas *p, int posOrig[], int posDest[])
 {
-    if ((posOrig[0] || posDest[0])>=10 || (posDest[0] || posOrig[0] || posDest[1] || posOrig[1])<0)
-        return 1;
-    
     int origCol = posOrig[0];
     int origLin = posOrig[1];
     int destCol = posDest[0];
@@ -224,5 +221,17 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
         if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
             return 1;
     }
-        mover_cartas(p, posOrig, posDest);
+    return 0;
+}
+
+int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
+{
+    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
+        return 1;
+    
+    if (carta_check(p, posOrig, posDest) == 1)
+        return 1;
+
+    mover_cartas(p, posOrig, posDest);
+    return 0;
 }
