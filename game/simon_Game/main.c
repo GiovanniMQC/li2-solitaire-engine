@@ -12,12 +12,11 @@ int main(void)
 {
     //declarar variaveis
     struct carta baralho[52];
-    cria_baralho(baralho);
-    // shuffle_baralho(baralho);
-
-    int j = 0;
+    int contagemBaralho = 0;
     int capacidade[] = {8,8,8,7,6,5,4,3,2,1};
+    int gameOver = 0;
     Pilhas celula = cria_pilhas(baralho, capacidade, 10);
+    iniciar_jogo(baralho, &j, capacidade, &gameOver);
     print_pilhas(celula, acharLimite(celula));
     
     // Movimentação de teste de cartas

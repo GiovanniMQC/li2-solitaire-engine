@@ -224,5 +224,44 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
         if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
             return 1;
     }
-        mover_cartas(p, posOrig, posDest);
+    mover_cartas(p, posOrig, posDest);
+}
+
+// Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
+void iniciar_jogo(struct carta baralho[], int *contagemBaralho, int tamPilhas[], int *gameOver) 
+{
+    cria_baralho(baralho);
+    shuffle_baralho(baralho);
+    
+
+    tamPilhas = {8,8,8,7,6,5,4,3,2,1};
+    *gameOver = 0;
+}
+
+// A partir da jogada selecionada, processa a jogada correta para o numero dado
+void processar_jogada(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver)
+{
+    unsigned int jogadaEscolhida = pedir_jogada();
+    
+    //RESTART
+    if(jogadaEscolhida == 9)
+    {
+        iniciar_jogo(baralho, &*stock,&*ultima,&*gameOver);
+    }
+
+    //Jogar
+    else if(jogadaEscolhida<=7 && jogadaEscolhida>=1)
+    {
+        jogada_Coluna(baralho,&*stock,&*ultima,jogadaEscolhida);
+        return;
+    }
+    
+    //Checar se deu gameOver
+    checa_gameOver(baralho, stock, gameOver, jogadaEscolhida);
+    
+    //Puxar carta
+    if (jogadaEscolhida == 8)
+    {
+        puxar_Stock(baralho,&*stock,&*ultima);
+    }
 }
