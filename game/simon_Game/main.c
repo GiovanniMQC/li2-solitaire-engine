@@ -3,29 +3,28 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
+// É uma má prática incluir ficheiros .c. Inclua apenas os .h
+// e compile todos os .c juntos.
 #include "cartasSimon.h"
 #include "logicaSimon.h"
-#include "cartasSimon.c"
-#include "logicaSimon.c"
 
 int main(void)
 {
     //declarar variaveis
     struct carta baralho[52];
-    cria_baralho(baralho);
-    // shuffle_baralho(baralho);
-
-    int j = 0;
-    int capacidade[] = {8,8,8,7,6,5,4,3,2,1};
-    Pilhas celula = cria_pilhas(baralho, capacidade, 10);
-    print_pilhas(celula, acharLimite(celula));
+    int contagemBaralho = 0;
+    int tamPilhas[] = {8,8,8,7,6,5,4,3,2,1};
+    int gameOver = 0;
+    Pilhas celula = NULL; // Declarado como ponteiro simples e inicializado
     
-    // Movimentação de teste de cartas
-    int posOrigem[2] = {8,0};
-    int posDestino[2] = {7,2};
-    valida_jogada(&celula, posOrigem, posDestino);
-
-    print_pilhas(celula, acharLimite(celula));
+    // Passa o endereço de 'celula' para que a função possa modificá-la
+    iniciar_jogo(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
+    
+    while (!(gameOver==1 || gameOver==2))
+    {
+        print_pilhas(celula, acharLimite(celula));
+        processar_jogada(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
+    }
     
     return EXIT_SUCCESS;    
 }

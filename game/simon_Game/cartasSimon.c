@@ -61,4 +61,24 @@ void print_pilhas(Pilhas p, int lim){
         printf("\n");
     }
 }
- 
+
+// Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
+//0 -> sair
+//1 a 7 -> fazer a jogada normal
+//8 -> puxar do stock
+//9 -> restart
+int pedir_jogada()
+{
+    unsigned int jogada_escolhida = 0;
+    
+    printf("Digite o número da coluna origem: ");
+    scanf("%d", &jogada_escolhida);
+    
+    while(jogada_escolhida > 9 || jogada_escolhida < 0)
+    {
+       printf("Jogada Inválida - Tente Novamente: ");
+       scanf("%d", &jogada_escolhida);
+    }
+
+    return jogada_escolhida;
+}

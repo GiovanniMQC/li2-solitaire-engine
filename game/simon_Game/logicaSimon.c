@@ -46,8 +46,8 @@ void shuffle_baralho(struct carta *baralho)
     
 }
 
-// Cria uma pilha a partir de um baralho, um número de cartas na pilha e a quantidade de pilhas. Coloca a nova pilha no fim da lista de células.
-// Retorna o endereço da primeira pilha
+// Cria uma pilha a partir de um baralho e guarda o número de cartas na pilha. Coloca a nova pilha no fim da lista de células.
+// Retorna o endereço da nova pilha
 Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
 {
     // Um apontador para o início de uma pilha.
@@ -87,10 +87,10 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     return inicioPilha;
 }
 
-Pilhas procura_pilha(Pilhas *p, int pos)
+Pilhas procura_pilha(Pilhas p, int pos)
 {
     // Cria um apontador que será usado para procurar a pilha desejada
-    Pilhas pilhaResultado = *p;
+    Pilhas pilhaResultado = p;
 
     // Mudando o endereço para a coluna correta
     for(int i = 0; i < pos && pilhaResultado != NULL; i++)
@@ -162,8 +162,8 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[])
     int dest_col = posDest[0];
     
     // Avança o apontador para as colunas de origem e destino das cartas
-    Pilhas pilhaOrigem = procura_pilha(p, orig_col);
-    Pilhas pilhaDestino = procura_pilha(p, dest_col);
+    Pilhas pilhaOrigem = procura_pilha(*p, orig_col);
+    Pilhas pilhaDestino = procura_pilha(*p, dest_col);
     
 
     // Prevenção de erros caso as colunas não existam ou quantidade seja inválida
@@ -197,41 +197,95 @@ int acharLimite(Pilhas p){
     return maior;
 }
 
-int carta_check (Pilhas *p, int posOrig[], int posDest[])
+int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, struct carta chegada, int origLin, int naipeSelecionado)
 {
-    int origCol = posOrig[0];
-    int origLin = posOrig[1];
-    int destCol = posDest[0];
-    int destLin = posDest[1];
-
-    Pilhas pilhaOrigem = procura_pilha(p, origCol);
-    Pilhas pilhaDestino = procura_pilha(p, destCol);
     
-    struct carta origem = (pilhaOrigem->pilha)[origLin];
-    struct carta chegada = (pilhaDestino->pilha)[destLin];
-
-    int naipeSelecionado = origem.naipe;
-
     if ((pilhaOrigem->numCartas)<(origLin) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
-        return 1;
+    return 1;
     
     for (int i = origLin; i < pilhaOrigem->numCartas; i++)
     {
         struct carta cartaAverificar = (pilhaOrigem->pilha)[i];
         if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
-            return 1;
+        return 1;
     }
     return 0;
 }
 
 int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
 {
+    int origCol = posOrig[0];
+    int origLin = posOrig[1];
+    int destCol = posDest[0];
+    int destLin = posDest[1];
+    
+    Pilhas pilhaOrigem = procura_pilha(*p, origCol);
+    Pilhas pilhaDestino = procura_pilha(*p, destCol);
+    
+    struct carta origem = (pilhaOrigem->pilha)[origLin];
+    struct carta chegada = (pilhaDestino->pilha)[destLin];
+    
     if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
         return 1;
     
-    if (carta_check(p, posOrig, posDest) == 1)
+    if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
         return 1;
 
     mover_cartas(p, posOrig, posDest);
     return 0;
+}
+
+// Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
+void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver) 
+{
+    cria_baralho(baralho);
+    shuffle_baralho(baralho);
+    *p = cria_pilhas(baralho, tamPilhas, 10);
+    
+    *contagemBaralho = 0;
+    // Define os tamanhos iniciais para cada uma das 10 pilhas
+    int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1};
+    for (int i = 0; i < 10; i++)
+    {
+        tamPilhas[i] = valoresIniciais[i];
+    }
+    *gameOver = 0;
+}
+
+void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
+{
+    valida_jogada(p, posOrig, posDest);
+}
+
+// A partir da jogada selecionada, processa a jogada correta para o numero dado
+void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver)
+{
+    unsigned int jogadaEscolhida = pedir_jogada();
+    unsigned int posOrig[2] = {0,0};
+    unsigned int posDest[2] = {0,0};
+    
+    //RESTART
+    if(jogadaEscolhida == 4)
+    {
+        iniciar_jogo(baralho, p, contagemBaralho, tamPilhas, gameOver);
+    }
+
+    //Jogar
+    else if(jogadaEscolhida==1)
+    {
+        printf("Digite a coluna da carta que vai mover:");
+        scanf("%d", &posOrig[0]);
+        printf("Digite a linha da carta que vai mover:");
+        scanf("%d", &posOrig[1]);
+
+        printf("Digite a coluna destino:");
+        scanf("%d", &posDest[0]);
+
+        jogar_Coluna(p, posOrig, posDest);
+        return;
+    }
+    
+    //Checar se deu gameOver
+    // checa_gameOver(baralho, stock, gameOver, jogadaEscolhida);
+    
 }
