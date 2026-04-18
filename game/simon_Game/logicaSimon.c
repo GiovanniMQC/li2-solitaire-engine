@@ -154,7 +154,7 @@ void corrige_seq_cartas(Pilhas p, int linha)
 }
 
 // Recebe uma pilha e uma array de posição que deve ter a [coluna, linha], tanto para origem quanto o destino.
-int mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
+int mover_cartas(Pilhas *p, int posOrig[], int posDest[])
 {
     // Extração dos dados baseados na array
     int orig_col = posOrig[0];
@@ -177,18 +177,8 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[], int moveInferiores)
     // Checa se o número de carta movidas é menor ou igual a zero
     if (numMovidas <= 0) return 1; // Nada a mover
     
-    if(moveInferiores)
-    {
-        insere_cartas(pilhaOrigem, pilhaDestino, orig_linha, numMovidas);
-    }
-    else
-    {
-        insere_carta(pilhaOrigem->pilha[orig_linha - 1], pilhaDestino);
+    insere_cartas(pilhaOrigem, pilhaDestino, orig_linha, numMovidas);
 
-        corrige_seq_cartas(pilhaOrigem, orig_linha);
-
-        libera_memoria_cartas(pilhaOrigem);
-    }
     return 0;
 }
 

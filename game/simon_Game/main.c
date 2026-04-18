@@ -23,7 +23,7 @@ int main(void)
     // Movimentação de teste de cartas
     int posOrigem[2] = {5,4};
     int posDestino[2] = {1,8};
-    mover_cartas(&celula, posOrigem, posDestino, 1);
+    mover_cartas(&celula, posOrigem, posDestino);
 
     print_pilhas(celula, acharLimite(celula));
     
