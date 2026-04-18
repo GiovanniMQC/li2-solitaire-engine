@@ -13,7 +13,7 @@ int main(void)
     //declarar variaveis
     struct carta baralho[52];
     cria_baralho(baralho);
-    shuffle_baralho(baralho);
+    // shuffle_baralho(baralho);
 
     int j = 0;
     int capacidade[] = {8,8,8,7,6,5,4,3,2,1};
@@ -21,9 +21,9 @@ int main(void)
     print_pilhas(celula, acharLimite(celula));
     
     // Movimentação de teste de cartas
-    int posOrigem[2] = {5,4};
-    int posDestino[2] = {1,8};
-    mover_cartas(&celula, posOrigem, posDestino);
+    int posOrigem[2] = {8,0};
+    int posDestino[2] = {7,2};
+    valida_jogada(&celula, posOrigem, posDestino);
 
     print_pilhas(celula, acharLimite(celula));
     

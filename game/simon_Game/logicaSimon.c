@@ -8,7 +8,7 @@
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
 {
-    int val = 1;
+    int val = 13;
     int np = 0;
 
     for(int idx=0; idx<52; idx++)
@@ -16,10 +16,10 @@ void cria_baralho(struct carta *baralho)
         baralho[idx].valor = val;
         baralho[idx].naipe = np;
 
-        val++;
+        val--;
 
-        if(val>13){
-            val = 1;
+        if(val<1){
+            val = 13;
             np++;
         }
     }
@@ -158,7 +158,7 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[])
 {
     // Extração dos dados baseados na array
     int orig_col = posOrig[0];
-    int orig_linha = posOrig[1];
+    int orig_linha = posOrig[1] + 1;
     int dest_col = posDest[0];
     
     Pilhas pilhaOrigem = *p;
@@ -207,27 +207,28 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
     int origCol = posOrig[0];
     int origLin = posOrig[1];
     int destCol = posDest[0];
+    int destLin = posDest[1];
 
     Pilhas pilhaOrigem = *p;
     Pilhas pilhaDestino = *p;
 
     
 
-    for (int i = 1; i<origCol;i++)
+    for (int i = 0; i<origCol;i++)
         pilhaOrigem = pilhaOrigem->prox;
-    for (int i = 1; i<destCol;i++)
+    for (int i = 0; i<destCol;i++)
         pilhaDestino = pilhaDestino->prox;
 
-    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
-    struct carta chegada = (pilhaDestino->pilha)[(pilhaDestino->numCartas)-1];
+    struct carta origem = (pilhaOrigem->pilha)[origLin];
+    struct carta chegada = (pilhaDestino->pilha)[destLin];
 
     int naipeSelecionado = origem.naipe;
 
-    if ((pilhaOrigem->numCartas)<(origLin-1) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
+    if ((pilhaOrigem->numCartas)<(origLin) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
         return 1;
-    if ((pilhaOrigem->numCartas) == (origLin-1))
+    if ((pilhaOrigem->numCartas) == (origLin))
     {
-        mover_cartas(*p, posOrig, posDest);
+        mover_cartas(p, posOrig, posDest);
         return 0;
     }
     
@@ -237,6 +238,6 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
         if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
             return 1;
         
-        mover_cartas(*p, posOrig, posDest);
     }
-}
+        mover_cartas(p, posOrig, posDest);
+    }
