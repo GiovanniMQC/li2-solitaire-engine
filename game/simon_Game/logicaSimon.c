@@ -161,9 +161,11 @@ int acharLimite(Pilhas p){
 
     for (int i=0; i<9; i++){
         if (maior < pTemp->numCartas)
+        {
             maior = pTemp->numCartas;
+        }
         
-        pTemp->prox;
+        pTemp = pTemp->prox;
     }
 
     return maior;

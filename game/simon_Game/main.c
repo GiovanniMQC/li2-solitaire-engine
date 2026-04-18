@@ -25,7 +25,7 @@ int main(void)
     int posDestino[2] = {1,8};
     mover_cartas(&celula, posOrigem, posDestino, 1);
 
-    print_pilhas(celula, 8);
+    print_pilhas(celula, acharLimite(celula));
     
     return EXIT_SUCCESS;    
 }
