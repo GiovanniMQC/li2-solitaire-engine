@@ -355,32 +355,36 @@ int existe_jogadaValida (Pilhas p)
     return 1;
 }
 
+int check_gameOver2(Pilhas p, Pilhas testeSeq, int i)
+{
+    if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
+    {
+        i++;
+        testeSeq=testeSeq->prox;
+    }
+    
+    if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
+    {
+        int origem[2] = {i, (testeSeq->numCartas)-13};
+        int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
+        mover_cartas(&p, origem, destino);
+    }
+
+    Pilhas copas = procura_pilha(p, 10), espadas = procura_pilha(p, 11), ouros = procura_pilha(p, 12), paus = procura_pilha(p, 13);
+    
+    if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
+    {
+        return 1;
+    }
+}
+
 int check_gameOver(Pilhas p)
 {
     Pilhas testeSeq = p;
 
     for (int i = 0; i<10; i++)
     {
-        if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
-        {
-            i++;
-            testeSeq=testeSeq->prox;
-        }
-        
-        if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
-        {
-            int origem[2] = {i, (testeSeq->numCartas)-13};
-            int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
-
-            mover_cartas(&p, origem, destino);
-        }
-
-        Pilhas copas = procura_pilha(p, 10), espadas = procura_pilha(p, 11), ouros = procura_pilha(p, 12), paus = procura_pilha(p, 13);
-        
-        if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
-        {
-            return 1;
-        }
+        check_gameOver2(p, testeSeq, i);
     }
 
     if (existe_jogadaValida(p) == 1)
