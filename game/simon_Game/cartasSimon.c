@@ -8,27 +8,31 @@
 // Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
 {
-    switch (c.valor) 
-    {
-        case 1:  printf(" A   "); break;
-        case 10: printf(" 10  "); break; 
-        case 11: printf(" J   "); break;
-        case 12: printf(" Q   "); break;
-        case 13: printf(" K   "); break;
-        default: printf(" %d   ", c.valor); break;
-    }  
+    if (c.valor == 1) 
+        printf(" A   ");
+    else if (c.valor == 10) 
+        printf(" 10  ");
+    else if (c.valor == 11) 
+        printf(" J   ");
+    else if (c.valor == 12) 
+        printf(" Q   ");
+    else if (c.valor == 13) 
+        printf(" K   ");
+    else 
+        printf(" %d   ", c.valor);  
 }
 
 // Recebe uma carta e le o seu naipe, printa o naipe correspondente no terminal
 void print_naipe(struct carta c)
 {
-    switch (c.naipe)
-    {
-        case 0: printf("  ♥  "); break;
-        case 1: printf("  ♠  "); break;
-        case 2: printf("  ♦  "); break;
-        case 3: printf("  ♣  "); break;
-    }
+    if (c.naipe == 0) 
+        printf("  ♥  ");
+    else if (c.naipe == 1) 
+        printf("  ♠  ");
+    else if (c.naipe == 2) 
+        printf("  ♦  ");
+    else if (c.naipe == 3) 
+        printf("  ♣  ");
 }
 
 // Recebe uma carta e da print a ela com formato apropriado (valor e naipe com fundo branco)
