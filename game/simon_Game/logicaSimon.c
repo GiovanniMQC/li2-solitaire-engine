@@ -375,11 +375,8 @@ int check_gameOver(Pilhas p)
             mover_cartas(&p, origem, destino);
         }
 
-        Pilhas copas = procura_pilha(p, 10);
-        Pilhas espadas = procura_pilha(p, 11);
-        Pilhas ouros = procura_pilha(p, 12);
-        Pilhas paus = procura_pilha(p, 13);
-
+        Pilhas copas = procura_pilha(p, 10), espadas = procura_pilha(p, 11), ouros = procura_pilha(p, 12), paus = procura_pilha(p, 13);
+        
         if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
         {
             return 1;
