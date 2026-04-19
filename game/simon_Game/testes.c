@@ -269,8 +269,8 @@ void teste_sequencias(void) {
     p->numCartas = 2, p->pilha = malloc(2 * sizeof(struct carta));
 
     //sequencia
-    p->pilha[0].naipe = 0, p->pilha[0].valor = 5;
-    p->pilha[1].naipe = 0, p->pilha[1].valor = 6;
+    p->pilha[0].naipe = 0, p->pilha[0].valor = 6;
+    p->pilha[1].naipe = 0, p->pilha[1].valor = 5;
     
     CU_ASSERT_EQUAL(sequencias(p), 2);
     

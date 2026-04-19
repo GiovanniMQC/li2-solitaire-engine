@@ -25,7 +25,6 @@ void cria_baralho(struct carta *baralho)
     }
 }
 
-
 // Pega num baralho ja preenhido e mistura a ordem das cartas de forma aleatoria
 void shuffle_baralho(struct carta *baralho)
 {
@@ -87,7 +86,8 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     return inicioPilha;
 }
 
-
+// Recebe a pilha inicial e procura a partir de uma posição a pilha destino
+// Retorna a pilha destino
 Pilhas procura_pilha(Pilhas p, int pos)
 {
     // Cria um apontador que será usado para procurar a pilha desejada
@@ -134,6 +134,7 @@ void insere_cartas(Pilhas origem, Pilhas destino, int linha, int numMovidas)
     libera_memoria_cartas(origem);
 }
 
+// Recebe uma pilha e a linha movida e passa a carta a frente da linha para trás e todas as outras também
 void corrige_seq_cartas(Pilhas p, int linha)
 {
     // Desloca as cartas restantes na pilha de origem para preencher o buraco deixado pela carta movida
@@ -252,7 +253,7 @@ int valida_jogada(Pilhas p, int posOrig[], int posDest[])
 void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver) 
 {
     cria_baralho(baralho);
-    shuffle_baralho(baralho);
+    // shuffle_baralho(baralho);
     *contagemBaralho = 0;
     // Define os tamanhos iniciais para cada uma das 10 pilhas 
     int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
@@ -266,6 +267,7 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
     *gameOver = 0;
 }
 
+// Atualiza os valores para compatíveis com array e verifica se a jogada é válida
 void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
 {
     posOrig[0]--;
@@ -281,6 +283,8 @@ void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
     }
 }
 
+// Recebe a pilha e pede ao jogador as posições de jogadas.
+// Chama ao jogar coluna com as informações
 void pedir_jogada(Pilhas *p)
 {
     int posOrig[2] = {0,0};
@@ -303,6 +307,7 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
+    //Sair do jogo
     if(jogadaEscolhida == 3)
     {
         printf("Saindo do jogo...\n");
@@ -328,7 +333,7 @@ int sequencias(Pilhas p)
     int seq = 1;
     for (int i = p->numCartas-1; i>=1; i--)
     {
-        if(!(((p->pilha)[i].naipe == (p->pilha)[i-1].naipe) && ((p->pilha)[i].valor == (p->pilha)[i-1].valor+1)))
+        if(!(((p->pilha)[i].naipe == (p->pilha)[i-1].naipe) && ((p->pilha)[i].valor == (p->pilha)[i-1].valor-1)))
             return seq;
         seq++;
     }
@@ -397,14 +402,13 @@ int check_gameOver(Pilhas p)
 
     for (int i = 0; i<10; i++)
     {
-        if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
-        {
-            i++;
-            testeSeq=testeSeq->prox;
-        }
-
         if(verifica_ganhou(p, testeSeq, i))
+        {
+            printf("Ganhaste!\n");
             return 1;
+        }
+            
+        testeSeq = testeSeq->prox;
     }
 
     if (existe_jogadaValida(p) == 1)
