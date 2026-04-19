@@ -12,4 +12,4 @@ logica.o: logica.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -rf golf cartas.o
+	rm -rf golf cartas.o logica.o

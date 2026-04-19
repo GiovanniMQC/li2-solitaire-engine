@@ -45,6 +45,7 @@ void print_carta(struct carta c)
     printf("\033[0m"); //reseta pro normal
 }
 
+// Percorre as pilhas e dá print de todas as cartas presentes nelas
 void print_pilhas(Pilhas p, int lim){
     Pilhas pTemp = p;
     int linha = 0;
@@ -67,6 +68,7 @@ void print_pilhas(Pilhas p, int lim){
     }
 }
 
+// Mostra os naipes que o usuário já completou ou não
 void print_naipes_completos(Pilhas p)
 {
     Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
@@ -89,10 +91,9 @@ void print_naipes_completos(Pilhas p)
     putchar('\n');
 }
 // Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
-//0 -> sair
-//1 a 7 -> fazer a jogada normal
-//8 -> puxar do stock
-//9 -> restart
+//1 -> fazer a jogada
+//2 -> restart
+//3 -> sair
 int opcao_inicio()
 {
     unsigned int jogada_escolhida = 0;

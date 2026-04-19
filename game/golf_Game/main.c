@@ -4,9 +4,7 @@
 #include <time.h>
 #include <locale.h>
 #include "cartas.h"
-#include "cartas.c"
 #include "logica.h"
-#include "logica.c"
 
 int main(void)
 {
