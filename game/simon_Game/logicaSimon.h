@@ -13,7 +13,7 @@ int acharLimite(Pilhas p);
 int carta_check (Pilhas *p, int posOrig[], int posDest[]);
 int valida_jogada(Pilhas *p, int posOrig[], int posDest[]);
 
-void iniciar_jogo(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver);
+void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver);
 int valores_Check(struct carta baralho[], struct carta *ultima, int jogadaEscolhida);
-void jogada_Coluna(struct carta baralho[], int *stock, struct carta *ultima, int jogadaEscolhida);
-void processar_jogada(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver);
+void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[]);
+void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver);

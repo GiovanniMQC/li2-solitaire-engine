@@ -221,9 +221,11 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
     
     Pilhas pilhaOrigem = procura_pilha(*p, origCol);
     Pilhas pilhaDestino = procura_pilha(*p, destCol);
+    destLin = pilhaDestino->numCartas - 1;
     
     struct carta origem = (pilhaOrigem->pilha)[origLin];
     struct carta chegada = (pilhaDestino->pilha)[destLin];
+
     
     if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
         return 1;
@@ -254,18 +256,24 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
 
 void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
 {
-    valida_jogada(p, posOrig, posDest);
+    posOrig[0]--;
+    posOrig[1]--;
+    posDest[0]--;
+    if(valida_jogada(p, posOrig, posDest))
+    {
+        printf("Jogada Inválida\n");
+    }
 }
 
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
     unsigned int jogadaEscolhida = pedir_jogada();
-    unsigned int posOrig[2] = {0,0};
-    unsigned int posDest[2] = {0,0};
+    int posOrig[2] = {0,0};
+    int posDest[2] = {0,0};
     
     //RESTART
-    if(jogadaEscolhida == 4)
+    if(jogadaEscolhida == 2)
     {
         iniciar_jogo(baralho, p, contagemBaralho, tamPilhas, gameOver);
     }

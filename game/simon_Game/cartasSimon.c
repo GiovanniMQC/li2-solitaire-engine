@@ -71,13 +71,14 @@ int pedir_jogada()
 {
     unsigned int jogada_escolhida = 0;
     
-    printf("Digite o número da coluna origem: ");
+    printf("Digite 1 para jogar ou 2 para reiniciar: ");
     scanf("%d", &jogada_escolhida);
     
-    while(jogada_escolhida > 9 || jogada_escolhida < 0)
+    while(jogada_escolhida > 2 || jogada_escolhida < 1)
     {
-       printf("Jogada Inválida - Tente Novamente: ");
-       scanf("%d", &jogada_escolhida);
+        printf("Opção inválida\n");
+        printf("Digite 1 para jogar ou 2 para reiniciar: ");
+        scanf("%d", &jogada_escolhida);
     }
 
     return jogada_escolhida;
