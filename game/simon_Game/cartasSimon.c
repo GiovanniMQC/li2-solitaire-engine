@@ -43,15 +43,14 @@ void print_carta(struct carta c)
 void print_pilhas(Pilhas p, int lim){
     Pilhas pTemp = p;
     int linha = 0;
-    printf("    1          2          3          4          5          6          7          8          9          10\n");
     while (linha<(lim+1)){
-        
+
         for (int i=0; i< 10; i++){
             if(pTemp == NULL || pTemp->numCartas <= linha)
                 printf("          "); //espaco vazio
             else
                 print_carta(pTemp->pilha[linha]);
-           
+                
             printf(" ");
             if (pTemp != NULL) {
                 pTemp = pTemp->prox;
@@ -59,7 +58,6 @@ void print_pilhas(Pilhas p, int lim){
         }
         pTemp = p;
         linha++;
-
         printf("\n");
     }
 }

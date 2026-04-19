@@ -87,6 +87,7 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     return inicioPilha;
 }
 
+
 Pilhas procura_pilha(Pilhas p, int pos)
 {
     // Cria um apontador que será usado para procurar a pilha desejada
@@ -100,10 +101,12 @@ Pilhas procura_pilha(Pilhas p, int pos)
     return pilhaResultado;
 }
 
+// Realoca o espaço de memória para a quantidade atualizada de cartas.
 void libera_memoria_cartas(Pilhas p)
 {
     // Liberta o espaço de memória que deixou de ser usado na origem
     if (p->numCartas > 0) {
+        // Redimensiona a array da pilha
         p->pilha = realloc(p->pilha, p->numCartas * sizeof(struct carta));
     } else {
         free(p->pilha);
@@ -111,18 +114,8 @@ void libera_memoria_cartas(Pilhas p)
     }
 }
 
-void insere_carta(struct carta origem, Pilhas destino)
-{
-    // Aumenta o espaço da memória para inserir as cartas movidas
-        destino->pilha = realloc(destino->pilha, (destino->numCartas + 1) * sizeof(struct carta));
-    
-    // Adiciona a carta na pilha destino
-    destino->pilha[destino->numCartas] = origem;
-
-    // Atualiza quantidade de cartas nas pilhas
-    destino->numCartas++;
-}
-
+// Recebe duas pilhas para acessar as cartas e também a linha escolhida e o número de cartas movidas.
+// Modifica os espaços de memória para acrescentar ou retirar cartas das duas pilhas e acrescenta as cartas que devem ser movidas na pilha destino.
 void insere_cartas(Pilhas origem, Pilhas destino, int linha, int numMovidas)
 {
     // Aumenta o espaço da memória para inserir as cartas movidas
@@ -286,6 +279,8 @@ void pedir_jogada(Pilhas *p)
 
     jogar_Coluna(p, posOrig, posDest);
 }
+
+
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
