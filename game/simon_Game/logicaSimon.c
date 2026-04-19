@@ -355,7 +355,7 @@ int existe_jogadaValida (Pilhas p)
     return 1;
 }
 
-int check_gameOver2(Pilhas p, Pilhas testeSeq, int i)
+int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
 {
     if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
     {
@@ -370,12 +370,13 @@ int check_gameOver2(Pilhas p, Pilhas testeSeq, int i)
         mover_cartas(&p, origem, destino);
     }
 
-    Pilhas copas = procura_pilha(p, 10), espadas = procura_pilha(p, 11), ouros = procura_pilha(p, 12), paus = procura_pilha(p, 13);
+    Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
     
     if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
     {
         return 1;
     }
+    return 0;
 }
 
 int check_gameOver(Pilhas p)
@@ -384,7 +385,8 @@ int check_gameOver(Pilhas p)
 
     for (int i = 0; i<10; i++)
     {
-        check_gameOver2(p, testeSeq, i);
+        if(verifica_ganhou(p, testeSeq, i))
+            return 1;
     }
 
     if (existe_jogadaValida(p) == 1)
