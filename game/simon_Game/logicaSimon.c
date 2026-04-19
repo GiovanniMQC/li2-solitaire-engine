@@ -309,6 +309,51 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
         pedir_jogada(p);
         return;
     }
+}
+
+int sequencias(Pilhas p)
+{
+    int seq = 1;
+    for (int i = p->numCartas-1; i>=1; i--)
+    {
+        if(!(((p->pilha)[i].naipe == (p->pilha)[i-1].naipe) && ((p->pilha)[i].valor == (p->pilha)[i-1].valor+1)))
+            return seq;
+        seq++;
+    }
+    return seq;
+}
+
+int existe_jogadaValida (Pilhas p)
+{
+    Pilhas p2 = p, p3 = p;
     
+    for (int colunaOrig = 0; colunaOrig<10; colunaOrig++)
+    {
+        if (p3->numCartas == 0)
+            return 0;
+
+        int coordenadaAtestar[2] = {colunaOrig, ((p3->numCartas)-(sequencias(p)))};
+
+        for (int colunaDest = 0; colunaDest<10; colunaDest++)
+        {
+            if (colunaDest>=9 && colunaOrig>=9)
+                return 1;
+            if (colunaDest == colunaOrig)
+                colunaDest++;
+
+            int coordenadasChegada[2] = {colunaDest, ((p2->numCartas)-1)};
+
+            if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
+                return 0;
+            
+            p2=p2->prox;
+        }
+        p3 = p3->prox;
+    }
+}
+/*
+int check_gameOver(Pilhas *p, int posOrig[], int posDest[])
+{
     
 }
+*/

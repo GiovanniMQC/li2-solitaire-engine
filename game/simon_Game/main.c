@@ -25,6 +25,7 @@ int main(void)
     {
         print_pilhas(celula, acharLimite(celula));
         processar_jogada(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
+        existe_jogadaValida(celula);
     }
     
     return EXIT_SUCCESS;    
