@@ -71,13 +71,13 @@ int pedir_jogada()
 {
     unsigned int jogada_escolhida = 0;
     
-    printf("Digite 1 para jogar ou 2 para reiniciar: ");
+    printf("1 - Jogar, 2 - Reiniciar, 3 - Sair: ");
     scanf("%d", &jogada_escolhida);
     
-    while(jogada_escolhida > 2 || jogada_escolhida < 1)
+    while(jogada_escolhida > 3 || jogada_escolhida < 1)
     {
         printf("Opção inválida\n");
-        printf("Digite 1 para jogar ou 2 para reiniciar: ");
+        printf("1 - Jogar, 2 - Reiniciar, 3 - Sair: ");
         scanf("%d", &jogada_escolhida);
     }
 

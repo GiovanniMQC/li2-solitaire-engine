@@ -272,8 +272,13 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
     int posOrig[2] = {0,0};
     int posDest[2] = {0,0};
     
+    if(jogadaEscolhida == 3)
+    {
+        *gameOver = 2;
+    }
+
     //RESTART
-    if(jogadaEscolhida == 2)
+    else if(jogadaEscolhida == 2)
     {
         iniciar_jogo(baralho, p, contagemBaralho, tamPilhas, gameOver);
     }
@@ -293,7 +298,5 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
         return;
     }
     
-    //Checar se deu gameOver
-    // checa_gameOver(baralho, stock, gameOver, jogadaEscolhida);
     
 }
