@@ -346,9 +346,42 @@ int existe_jogadaValida (Pilhas p)
         p3 = p3->prox;
     }
 }
-/*
-int check_gameOver(Pilhas *p, int posOrig[], int posDest[])
+
+int check_gameOver(Pilhas *p)
 {
-    
+    Pilhas testeSeq = p;
+
+    for (int i = 0; i<10; i++)
+    {
+        if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
+        {
+            i++;
+            testeSeq=testeSeq->prox;
+        }
+        
+        if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
+        {
+            int origem[2] = {i, (testeSeq->numCartas)-13};
+            int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
+
+            mover_cartas(p, origem, destino);
+        }
+
+        Pilhas copas = procura_pilha(p, 10);
+        Pilhas espadas = procura_pilha(p, 11);
+        Pilhas ouros = procura_pilha(p, 12);
+        Pilhas paus = procura_pilha(p, 13);
+
+        if (copas != p && espadas != p && ouros != p && paus != p) // ???????????????????
+        {
+            return 1;
+        }
+    }
+
+    if (existe_jogadaValida(p) == 1)
+    {
+        return 2;
+    }
+
+    return 0;
 }
-*/
