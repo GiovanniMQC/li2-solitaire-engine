@@ -10,10 +10,11 @@
 
 int main(void)
 {
-    //declarar variaveis
+    // Declarar variaveis
     struct carta baralho[52];
     int contagemBaralho = 0;
-    int tamPilhas[] = {8,8,8,7,6,5,4,3,2,1};
+    // Tamanho da array é igual a quantidade de pilhas/colunas no jogo
+    int tamPilhas[14];
     int gameOver = 0;
     Pilhas celula = NULL; // Declarado como ponteiro simples e inicializado
     

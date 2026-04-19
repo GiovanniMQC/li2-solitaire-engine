@@ -68,8 +68,8 @@ Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
 // Cria uma lista de pilhas a partir de um baralho, número de pilhas e recebe uma array que guarda em sequência os tamanhos das pilhas.
 Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
 {
-    // Se o número de pilhas é 0 retorna NULL
-    if(numPilhas <= 0) return NULL;
+    // Se a array for nula ou a quantidade for inválida, retorna NULL
+    if(numCartas == NULL || numPilhas <= 0) return NULL;
     // Variável que guarda quantas cartas foram percorridas no baralho.
     int contagemBaralho = 0;
 
@@ -182,10 +182,12 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[])
 
 // Acha a pilha com maior número de carta e retorna o número que há
 int acharLimite(Pilhas p){
-    Pilhas pTemp = p->prox;
+    if (p == NULL) return 0;
+
+    Pilhas pTemp = p;
     int maior = p->numCartas;
 
-    for (int i=0; i<9; i++){
+    while (pTemp != NULL) {
         if (maior < pTemp->numCartas)
         {
             maior = pTemp->numCartas;
@@ -243,14 +245,15 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
     cria_baralho(baralho);
     shuffle_baralho(baralho);
     *contagemBaralho = 0;
-    // Define os tamanhos iniciais para cada uma das 10 pilhas
-    int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1};
-    for (int i = 0; i < 10; i++)
+    // Define os tamanhos iniciais para cada uma das 10 pilhas 
+    int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
+    int tamanhoArray = sizeof(valoresIniciais) / sizeof(valoresIniciais[0]);
+    for (int i = 0; i < tamanhoArray; i++)
     {
         tamPilhas[i] = valoresIniciais[i];
     }
 
-    *p = cria_pilhas(baralho, tamPilhas, 10);
+    *p = cria_pilhas(baralho, tamPilhas, tamanhoArray);
     *gameOver = 0;
 }
 
@@ -274,6 +277,7 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
     
     if(jogadaEscolhida == 3)
     {
+        printf("Saindo do jogo...\n");
         *gameOver = 2;
     }
 

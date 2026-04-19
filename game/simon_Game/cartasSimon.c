@@ -46,14 +46,16 @@ void print_pilhas(Pilhas p, int lim){
     printf("    1          2          3          4          5          6          7          8          9          10\n");
     while (linha<(lim+1)){
         
-        for (int i=0; i<10; i++){
-            if(pTemp->numCartas <= linha)
+        for (int i=0; i< 10; i++){
+            if(pTemp == NULL || pTemp->numCartas <= linha)
                 printf("          "); //espaco vazio
             else
                 print_carta(pTemp->pilha[linha]);
            
             printf(" ");
-            pTemp = pTemp->prox;
+            if (pTemp != NULL) {
+                pTemp = pTemp->prox;
+            }
         }
         pTemp = p;
         linha++;
