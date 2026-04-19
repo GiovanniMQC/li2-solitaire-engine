@@ -15,4 +15,4 @@ void print_valor(struct carta c);
 void print_naipe(struct carta c);
 void print_carta(struct carta c);
 void print_pilhas(Pilhas p, int lim);
-int pedir_jogada();
+int opcao_inicio();

@@ -235,7 +235,6 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
     if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
         return 1;
 
-    mover_cartas(p, posOrig, posDest);
     return 0;
 }
 
@@ -266,14 +265,31 @@ void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
     {
         printf("Jogada Inválida\n");
     }
+    else
+    {
+        mover_cartas(p, posOrig, posDest);
+    }
 }
 
+void pedir_jogada(Pilhas *p)
+{
+    int posOrig[2] = {0,0};
+    int posDest[2] = {0,0};
+
+    printf("Digite a coluna da carta que vai mover:");
+    scanf("%d", &posOrig[0]);
+    printf("Digite a linha da carta que vai mover:");
+    scanf("%d", &posOrig[1]);
+
+    printf("Digite a coluna destino:");
+    scanf("%d", &posDest[0]);
+
+    jogar_Coluna(p, posOrig, posDest);
+}
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
-    unsigned int jogadaEscolhida = pedir_jogada();
-    int posOrig[2] = {0,0};
-    int posDest[2] = {0,0};
+    unsigned int jogadaEscolhida = opcao_inicio();
     
     if(jogadaEscolhida == 3)
     {
@@ -290,15 +306,7 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
     //Jogar
     else if(jogadaEscolhida==1)
     {
-        printf("Digite a coluna da carta que vai mover:");
-        scanf("%d", &posOrig[0]);
-        printf("Digite a linha da carta que vai mover:");
-        scanf("%d", &posOrig[1]);
-
-        printf("Digite a coluna destino:");
-        scanf("%d", &posDest[0]);
-
-        jogar_Coluna(p, posOrig, posDest);
+        pedir_jogada(p);
         return;
     }
     

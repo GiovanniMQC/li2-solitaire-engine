@@ -69,7 +69,7 @@ void print_pilhas(Pilhas p, int lim){
 //1 a 7 -> fazer a jogada normal
 //8 -> puxar do stock
 //9 -> restart
-int pedir_jogada()
+int opcao_inicio()
 {
     unsigned int jogada_escolhida = 0;
     
