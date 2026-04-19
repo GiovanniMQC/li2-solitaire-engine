@@ -209,6 +209,9 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
 
 int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
 {
+    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
+        return 1;
+
     int origCol = posOrig[0];
     int origLin = posOrig[1];
     int destCol = posDest[0];

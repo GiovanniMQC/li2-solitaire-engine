@@ -49,9 +49,9 @@ void teste_criaPilha(){
     struct carta meu_baralho[52];
     
     //gera 3 cartas para a pilha
-    meu_baralho[0].valor = 10; meu_baralho[0].naipe = 0; 
-    meu_baralho[1].valor = 11; meu_baralho[1].naipe = 1; 
-    meu_baralho[2].valor = 12; meu_baralho[2].naipe = 2; 
+    meu_baralho[0].valor = 10, meu_baralho[0].naipe = 0, 
+    meu_baralho[1].valor = 11, meu_baralho[1].naipe = 1, 
+    meu_baralho[2].valor = 12, meu_baralho[2].naipe = 2; 
     
     int contagem = 0; 
 
@@ -75,7 +75,7 @@ void teste_criaPilha(){
 
     // limpar memoria
     if (minha_pilha != NULL) {
-        free(minha_pilha->pilha);
+        free(minha_pilha->pilha),
         free(minha_pilha);        
     }
 }
@@ -92,14 +92,15 @@ void teste_procuraPilha(){
     pilha_A->prox = pilha_B;
     pilha_B->prox = NULL;
     
-    Pilhas resultado = procura_pilha(&pilha_A, 1);
+    Pilhas resultado = procura_pilha(pilha_A, 1);
+
     CU_ASSERT_PTR_NOT_NULL(resultado);
     //verifica se e a pilha_B (2 cartas)
     CU_ASSERT_EQUAL(resultado->numCartas, 2);
 
     // limpar
-    free(pilha_A->pilha); free(pilha_A);
-    free(pilha_B->pilha); free(pilha_B);
+    free(pilha_A->pilha), free(pilha_A),
+    free(pilha_B->pilha), free(pilha_B);
 }
 
 void teste_corrige_seq_cartas() {
@@ -134,6 +135,7 @@ void teste_acharLimite() {
         pilhas[i].prox = &pilhas[i+1];
     }
     pilhas[9].numCartas = 5;
+    pilhas[9].prox = NULL;
 
     pilhas[4].numCartas = 22; //maior pilha
 
@@ -224,22 +226,19 @@ void teste_moverCartas(void) {
 
 void teste_cartaCheck(void) {
 
-    Pilhas orig = malloc(sizeof(struct celula));
-    Pilhas dest = malloc(sizeof(struct celula));
-    orig->numCartas = 1; orig->pilha = malloc(sizeof(struct carta) * 1);
-    dest->numCartas = 1; dest->pilha = malloc(sizeof(struct carta) * 1);
-    orig->prox = dest; dest->prox = NULL;
-    Pilhas cabeca = orig;
+    Pilhas orig = malloc(sizeof(struct celula)), dest = malloc(sizeof(struct celula));
+    orig->numCartas = 1; dest->numCartas = 1; 
+    orig->pilha = malloc(2 * sizeof(struct carta)); 
+    dest->pilha = malloc(1 * sizeof(struct carta));
 
-    orig->pilha[0].valor = 4, orig->pilha[0].naipe = 0, 
-    dest->pilha[0].valor = 5, dest->pilha[0].naipe = 1; 
+    orig->pilha[0].valor = 4, orig->pilha[0].naipe = 0,
+    dest->pilha[0].valor = 5, dest->pilha[0].naipe = 1;
+    
+    orig->pilha[1].valor = 0, orig->pilha[1].naipe = 0; 
 
-    int posOrig[] = {0, 0};
-    int posDest[] = {1, 0}; 
+    CU_ASSERT_EQUAL(carta_check(orig, dest, orig->pilha[0], dest->pilha[0], 0, orig->pilha[0].naipe), 0);
 
-    CU_ASSERT_EQUAL(carta_check(&cabeca, posOrig, posDest), 0); // 0 e valido
-
-    free(orig->pilha), free(orig),
+    free(orig->pilha), free(orig);
     free(dest->pilha), free(dest);
 }
 
