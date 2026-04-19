@@ -375,7 +375,7 @@ int check_gameOver(Pilhas p)
         Pilhas ouros = procura_pilha(p, 12);
         Pilhas paus = procura_pilha(p, 13);
 
-        if (copas != p && espadas != p && ouros != p && paus != p) // ???????????????????
+        if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0) // ???????????????????
         {
             return 1;
         }
