@@ -207,7 +207,7 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
     return 0;
 }
 
-int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
+int valida_jogada(Pilhas p, int posOrig[], int posDest[])
 {
     if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
         return 1;
@@ -217,8 +217,8 @@ int valida_jogada(Pilhas *p, int posOrig[], int posDest[])
     int destCol = posDest[0];
     int destLin = posDest[1];
     
-    Pilhas pilhaOrigem = procura_pilha(*p, origCol);
-    Pilhas pilhaDestino = procura_pilha(*p, destCol);
+    Pilhas pilhaOrigem = procura_pilha(p, origCol);
+    Pilhas pilhaDestino = procura_pilha(p, destCol);
     destLin = pilhaDestino->numCartas - 1;
     
     struct carta origem = (pilhaOrigem->pilha)[origLin];
@@ -257,7 +257,7 @@ void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
     posOrig[0]--;
     posOrig[1]--;
     posDest[0]--;
-    if(valida_jogada(p, posOrig, posDest))
+    if(valida_jogada(*p, posOrig, posDest))
     {
         printf("Jogada Inválida\n");
     }
@@ -350,7 +350,7 @@ int existe_jogadaValida (Pilhas p)
     }
 }
 
-int check_gameOver(Pilhas *p)
+int check_gameOver(Pilhas p)
 {
     Pilhas testeSeq = p;
 
@@ -367,7 +367,7 @@ int check_gameOver(Pilhas *p)
             int origem[2] = {i, (testeSeq->numCartas)-13};
             int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
 
-            mover_cartas(p, origem, destino);
+            mover_cartas(&p, origem, destino);
         }
 
         Pilhas copas = procura_pilha(p, 10);
