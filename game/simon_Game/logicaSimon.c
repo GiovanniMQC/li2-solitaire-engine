@@ -223,10 +223,6 @@ int valida_jogada(Pilhas p, int posOrig[], int posDest[])
     
     struct carta origem = (pilhaOrigem->pilha)[origLin];
     struct carta chegada = (pilhaDestino->pilha)[destLin];
-
-    
-    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
-        return 1;
     
     if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
         return 1;
