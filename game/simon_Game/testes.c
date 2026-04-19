@@ -102,30 +102,6 @@ void teste_procuraPilha(){
     free(pilha_B->pilha); free(pilha_B);
 }
 
-/*void teste_insereCarta() {
-
-    Pilhas p = malloc(sizeof(struct celula));
-    p->numCartas = 1;
-    p->prox = NULL;
-
-    // aloca memória inicial para 1 carta
-    p->pilha = malloc(sizeof(struct carta) * 1);
-    p->pilha[0].valor = 5; 
-    p->pilha[0].naipe = 0;
-
-    struct carta nova_carta = {6, 1};
-
-    insere_carta(nova_carta, p);
-
-    CU_ASSERT_EQUAL(p->numCartas, 2); //checa se numCarta pegou a nova  
-    CU_ASSERT_EQUAL(p->pilha[1].valor, 6);         
-    CU_ASSERT_EQUAL(p->pilha[1].naipe, 1);
-
-    // limpar
-    free(p->pilha);
-    free(p);
-}*/
-
 void teste_corrige_seq_cartas() {
 
     Pilhas p = malloc(sizeof(struct celula));
@@ -280,23 +256,24 @@ int main() {
 
     // cria a suite (uma pasta para agrupar os teus testes)
     CU_pSuite pSuite = CU_add_suite("Suite_Simon_Solitaire", NULL, NULL);
+
+    //verifica a suite
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
     // adiciona os testes
-    CU_add_test(pSuite, "teste_criaBaralho", teste_criaBaralho);
-    CU_add_test(pSuite, "teste_shuffle", teste_shuffle);
-    CU_add_test(pSuite, "teste_criaPilha", teste_criaPilha);
-    CU_add_test(pSuite, "teste_procuraPilha", teste_procuraPilha);
-    CU_add_test(pSuite, "teste_liberaMem", teste_liberaMem);
-    //CU_add_test(pSuite, "teste_insereCarta", teste_insereCarta);
-    CU_add_test(pSuite, "teste_insereCartas", teste_insereCartas);
-    CU_add_test(pSuite, "teste_corrige_seq_cartas", teste_corrige_seq_cartas);
-    CU_add_test(pSuite, "teste_moverCartas", teste_moverCartas);
-    CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite);
-    CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck);
+    CU_add_test(pSuite, "teste_criaBaralho", teste_criaBaralho),
+    CU_add_test(pSuite, "teste_shuffle", teste_shuffle),
+    CU_add_test(pSuite, "teste_criaPilha", teste_criaPilha),
+    CU_add_test(pSuite, "teste_procuraPilha", teste_procuraPilha),
+    CU_add_test(pSuite, "teste_liberaMem", teste_liberaMem),
+    CU_add_test(pSuite, "teste_insereCartas", teste_insereCartas),
+    CU_add_test(pSuite, "teste_corrige_seq_cartas", teste_corrige_seq_cartas),
+    CU_add_test(pSuite, "teste_moverCartas", teste_moverCartas),
+    CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite),
+    CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck),
     CU_add_test(pSuite, "teste_validaJogada", teste_validaJogada);
 
     // corre tudo e limpa a memoria
