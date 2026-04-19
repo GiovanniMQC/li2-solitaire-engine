@@ -207,23 +207,26 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
     return 0;
 }
 
-int valida_jogada(Pilhas p, int posOrig[], int posDest[])
+int pos_valida(int posOrig[], int posDest[])
 {
     if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0 || posOrig[0] == posDest[0])
         return 1;
+    return 0;
+}
 
-    int origCol = posOrig[0];
-    int origLin = posOrig[1];
-    int destCol = posDest[0];
-    int destLin = posDest[1];
+int valida_jogada(Pilhas p, int posOrig[], int posDest[])
+{
     
-    Pilhas pilhaOrigem = procura_pilha(p, origCol);
-    Pilhas pilhaDestino = procura_pilha(p, destCol);
-
-    if (pilhaOrigem == NULL || pilhaDestino == NULL)
-    {
+    int origCol = posOrig[0],
+    origLin = posOrig[1],
+    destCol = posDest[0],
+    destLin = posDest[1];
+    
+    Pilhas pilhaOrigem = procura_pilha(p, origCol),
+    pilhaDestino = procura_pilha(p, destCol);
+        
+    if (pos_valida(posOrig, posDest) || pilhaOrigem == NULL || pilhaDestino == NULL)
         return 1;
-    }
 
     destLin = pilhaDestino->numCartas - 1;
 
@@ -232,8 +235,8 @@ int valida_jogada(Pilhas p, int posOrig[], int posDest[])
         return 1;
     }
 
-    struct carta origem = (pilhaOrigem->pilha)[origLin];
-    struct carta chegada = {destCol, 1}; // Carta placeholder caso a coluna destino esteja vazia
+    struct carta origem = (pilhaOrigem->pilha)[origLin],
+    chegada = {destCol, 1}; // Carta placeholder caso a coluna destino esteja vazia
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) {
         chegada = (pilhaDestino->pilha)[destLin];
