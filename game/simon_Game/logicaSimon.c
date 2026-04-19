@@ -209,7 +209,7 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
 
 int valida_jogada(Pilhas p, int posOrig[], int posDest[])
 {
-    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0)
+    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0 || posOrig[0] == posDest[0])
         return 1;
 
     int origCol = posOrig[0];
@@ -317,6 +317,21 @@ int sequencias(Pilhas p)
     return seq;
 }
 
+int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
+{
+    if (colunaDest>=9 && coordenadaAtestar[0]>=9)
+        return 1;
+    if (colunaDest == coordenadaAtestar[0])
+        colunaDest++;
+
+    int coordenadasChegada[2] = {colunaDest, ((p->numCartas)-1)};
+
+    if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
+        return 0;
+    
+    return 0;
+}
+
 int existe_jogadaValida (Pilhas p)
 {
     Pilhas p2 = p, p3 = p;
@@ -330,20 +345,14 @@ int existe_jogadaValida (Pilhas p)
 
         for (int colunaDest = 0; colunaDest<10; colunaDest++)
         {
-            if (colunaDest>=9 && colunaOrig>=9)
-                return 1;
-            if (colunaDest == colunaOrig)
-                colunaDest++;
-
-            int coordenadasChegada[2] = {colunaDest, ((p2->numCartas)-1)};
-
-            if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
+            if (verifica_colunas(p2, coordenadaAtestar, colunaDest) == 0)
                 return 0;
-            
-            p2=p2->prox;
+
+            p2 = p2->prox;
         }
         p3 = p3->prox;
     }
+    return 1;
 }
 
 int check_gameOver(Pilhas p)
@@ -371,7 +380,7 @@ int check_gameOver(Pilhas p)
         Pilhas ouros = procura_pilha(p, 12);
         Pilhas paus = procura_pilha(p, 13);
 
-        if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0) // ???????????????????
+        if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
         {
             return 1;
         }
