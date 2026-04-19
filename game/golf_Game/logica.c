@@ -45,6 +45,28 @@ void shuffle_baralho(struct carta *baralho)
 
 }
 
+void puxar_Stock(struct carta baralho[], int *stock, struct carta *ultima)
+{
+    (*stock)--;
+    *ultima = baralho[35 + *stock];
+}
+
+int achar_base_coluna(struct carta baralho[], int coluna) 
+{
+    int i = coluna-1;
+
+    //parte da primeira carta da coluna e desce (+7 no indice) pra ver se tem valor ou foi removida com valor 0
+    while(baralho[i].valor != 0)
+    {
+        if(baralho[i+7].valor != 0 && i+7 < 35)
+            i+=7;
+        else
+            return i;
+    }
+
+    return -1;
+}
+
 // Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
 void iniciar_jogo(struct carta baralho[], int *stock, struct carta *ultima, int *gameOver) 
 {
