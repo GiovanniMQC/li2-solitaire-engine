@@ -4,6 +4,7 @@
 #include <time.h>
 #include <locale.h>
 #include "cartasSimon.h"
+#include "logicaSimon.h"
 
 // Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
@@ -62,6 +63,27 @@ void print_pilhas(Pilhas p, int lim){
     }
 }
 
+void print_naipes_completos(Pilhas p)
+{
+    Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
+    if(copas->numCartas > 0)
+    {
+        printf("✓♥  ");
+    } else printf(" ♥   ");
+    if(espadas->numCartas > 0)
+    {
+        printf(" ✓♠  ");
+    } else printf("  ♠   ");
+    if(ouros->numCartas > 0)
+    {
+        printf(" ✓♦  ");
+    } else printf("  ♦   ");
+    if(paus->numCartas > 0)
+    {
+        printf(" ✓♣  ");
+    } else printf("  ♣  ");
+    putchar('\n');
+}
 // Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
 //0 -> sair
 //1 a 7 -> fazer a jogada normal

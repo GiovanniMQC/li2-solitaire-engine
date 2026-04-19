@@ -25,6 +25,7 @@ int main(void)
     {
         printf("    1          2          3          4          5          6          7          8          9          10\n");
         print_pilhas(celula, acharLimite(celula));
+        print_naipes_completos(celula);
         processar_jogada(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
         if (!(gameOver==1 || gameOver==2))
             gameOver = check_gameOver(celula);

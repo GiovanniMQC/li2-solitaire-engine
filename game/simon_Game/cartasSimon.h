@@ -15,4 +15,5 @@ void print_valor(struct carta c);
 void print_naipe(struct carta c);
 void print_carta(struct carta c);
 void print_pilhas(Pilhas p, int lim);
+void print_naipes_completos(Pilhas p);
 int opcao_inicio();
