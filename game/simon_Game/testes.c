@@ -102,30 +102,6 @@ void teste_procuraPilha(){
     free(pilha_B->pilha); free(pilha_B);
 }
 
-/*void teste_insereCarta() {
-
-    Pilhas p = malloc(sizeof(struct celula));
-    p->numCartas = 1;
-    p->prox = NULL;
-
-    // aloca memória inicial para 1 carta
-    p->pilha = malloc(sizeof(struct carta) * 1);
-    p->pilha[0].valor = 5; 
-    p->pilha[0].naipe = 0;
-
-    struct carta nova_carta = {6, 1};
-
-    insere_carta(nova_carta, p);
-
-    CU_ASSERT_EQUAL(p->numCartas, 2); //checa se numCarta pegou a nova  
-    CU_ASSERT_EQUAL(p->pilha[1].valor, 6);         
-    CU_ASSERT_EQUAL(p->pilha[1].naipe, 1);
-
-    // limpar
-    free(p->pilha);
-    free(p);
-}*/
-
 void teste_corrige_seq_cartas() {
 
     Pilhas p = malloc(sizeof(struct celula));
@@ -197,15 +173,15 @@ void teste_liberaMem() {
 void teste_insereCartas() {
 
     Pilhas orig = malloc(sizeof(struct celula));
-    orig->numCartas = 3;
     orig->pilha = malloc(sizeof(struct carta) * 3);
-    orig->pilha[0].valor = 10;
-    orig->pilha[1].valor = 9;
+    orig->numCartas = 3,
+    orig->pilha[0].valor = 10,
+    orig->pilha[1].valor = 9,
     orig->pilha[2].valor = 8; 
 
     Pilhas dest = malloc(sizeof(struct celula));
-    dest->numCartas = 1;
     dest->pilha = malloc(sizeof(struct carta) * 1);
+    dest->numCartas = 1,
     dest->pilha[0].valor = 99;
 
     // movemos 2 cartas, a partir da linha 2 (indice 1)
@@ -221,8 +197,8 @@ void teste_insereCartas() {
     CU_ASSERT_EQUAL(dest->pilha[1].valor, 9);
     CU_ASSERT_EQUAL(dest->pilha[2].valor, 8);
 
-    free(orig->pilha); free(orig);
-    free(dest->pilha); free(dest);
+    free(orig->pilha), free(orig),
+    free(dest->pilha), free(dest);
 }
 
 void teste_moverCartas(void) {
@@ -235,17 +211,15 @@ void teste_moverCartas(void) {
     orig->prox = dest;
     Pilhas cabeca = orig; // ponteiro inicial 
 
-    int posOrig[] = {0, 1}; 
+    int posOrig[] = {0, 1};
     int posDest[] = {1, 0};
 
-    int resultado = mover_cartas(&cabeca, posOrig, posDest);
-
-    CU_ASSERT_EQUAL(resultado, 0); // 0 significa Sucesso
+    CU_ASSERT_EQUAL(mover_cartas(&cabeca, posOrig, posDest), 0); // 0 significa Sucesso
     CU_ASSERT_EQUAL(orig->numCartas, 1); // verificamos se de facto moveu
     CU_ASSERT_EQUAL(dest->numCartas, 2);
 
-    free(orig->pilha); free(orig);
-    free(dest->pilha); free(dest);
+    free(orig->pilha), free(orig),
+    free(dest->pilha), free(dest);
 }
 
 void teste_cartaCheck(void) {
@@ -257,19 +231,16 @@ void teste_cartaCheck(void) {
     orig->prox = dest; dest->prox = NULL;
     Pilhas cabeca = orig;
 
-    orig->pilha[0].valor = 4; orig->pilha[0].naipe = 0; 
-    dest->pilha[0].valor = 5; dest->pilha[0].naipe = 1; 
+    orig->pilha[0].valor = 4, orig->pilha[0].naipe = 0, 
+    dest->pilha[0].valor = 5, dest->pilha[0].naipe = 1; 
 
-    int posOrig[] = {0, 0}; 
+    int posOrig[] = {0, 0};
     int posDest[] = {1, 0}; 
 
-    int resultado = carta_check(&cabeca, posOrig, posDest);
+    CU_ASSERT_EQUAL(carta_check(&cabeca, posOrig, posDest), 0); // 0 e valido
 
-    // 3. VERIFICAR
-    CU_ASSERT_EQUAL(resultado, 0); // 0 e valido
-
-    free(orig->pilha); free(orig);
-    free(dest->pilha); free(dest);
+    free(orig->pilha), free(orig),
+    free(dest->pilha), free(dest);
 }
 
 int main() {
@@ -280,23 +251,24 @@ int main() {
 
     // cria a suite (uma pasta para agrupar os teus testes)
     CU_pSuite pSuite = CU_add_suite("Suite_Simon_Solitaire", NULL, NULL);
+
+    //verifica a suite
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
     // adiciona os testes
-    CU_add_test(pSuite, "teste_criaBaralho", teste_criaBaralho);
-    CU_add_test(pSuite, "teste_shuffle", teste_shuffle);
-    CU_add_test(pSuite, "teste_criaPilha", teste_criaPilha);
-    CU_add_test(pSuite, "teste_procuraPilha", teste_procuraPilha);
-    CU_add_test(pSuite, "teste_liberaMem", teste_liberaMem);
-    //CU_add_test(pSuite, "teste_insereCarta", teste_insereCarta);
-    CU_add_test(pSuite, "teste_insereCartas", teste_insereCartas);
-    CU_add_test(pSuite, "teste_corrige_seq_cartas", teste_corrige_seq_cartas);
-    CU_add_test(pSuite, "teste_moverCartas", teste_moverCartas);
-    CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite);
-    CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck);
+    CU_add_test(pSuite, "teste_criaBaralho", teste_criaBaralho),
+    CU_add_test(pSuite, "teste_shuffle", teste_shuffle),
+    CU_add_test(pSuite, "teste_criaPilha", teste_criaPilha),
+    CU_add_test(pSuite, "teste_procuraPilha", teste_procuraPilha),
+    CU_add_test(pSuite, "teste_liberaMem", teste_liberaMem),
+    CU_add_test(pSuite, "teste_insereCartas", teste_insereCartas),
+    CU_add_test(pSuite, "teste_corrige_seq_cartas", teste_corrige_seq_cartas),
+    CU_add_test(pSuite, "teste_moverCartas", teste_moverCartas),
+    CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite),
+    CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck),
     CU_add_test(pSuite, "teste_validaJogada", teste_validaJogada);
 
     // corre tudo e limpa a memoria
