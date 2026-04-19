@@ -23,6 +23,7 @@ int main(void)
     
     while (!(gameOver==1 || gameOver==2))
     {
+        printf("    1          2          3          4          5          6          7          8          9          10\n");
         print_pilhas(celula, acharLimite(celula));
         processar_jogada(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
         existe_jogadaValida(celula);
