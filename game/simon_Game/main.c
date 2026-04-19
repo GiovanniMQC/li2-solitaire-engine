@@ -14,7 +14,7 @@ int main(void)
     struct carta baralho[52];
     int contagemBaralho = 0;
     // Tamanho da array é igual a quantidade de pilhas/colunas no jogo
-    int tamPilhas[14];
+    int tamPilhas[14] = {0};
     int gameOver = 0;
     Pilhas celula = NULL; // Declarado como ponteiro simples e inicializado
     
