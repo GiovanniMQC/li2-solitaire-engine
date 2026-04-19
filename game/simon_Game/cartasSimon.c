@@ -43,7 +43,7 @@ void print_carta(struct carta c)
 void print_pilhas(Pilhas p, int lim){
     Pilhas pTemp = p;
     int linha = 0;
-
+    printf("    1          2          3          4          5          6          7          8          9          10\n");
     while (linha<(lim+1)){
         
         for (int i=0; i<10; i++){
