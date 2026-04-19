@@ -274,7 +274,7 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
     // Liberta a memória do jogo anterior caso estejamos a reiniciar
     limpa_memoria_jogo(p);
     cria_baralho(baralho);
-    // shuffle_baralho(baralho);
+    shuffle_baralho(baralho);
     *contagemBaralho = 0;
     // Define os tamanhos iniciais para cada uma das 10 pilhas 
     int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
