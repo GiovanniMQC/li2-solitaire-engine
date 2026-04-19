@@ -240,8 +240,6 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
 {
     cria_baralho(baralho);
     shuffle_baralho(baralho);
-    *p = cria_pilhas(baralho, tamPilhas, 10);
-    
     *contagemBaralho = 0;
     // Define os tamanhos iniciais para cada uma das 10 pilhas
     int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1};
@@ -249,6 +247,8 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
     {
         tamPilhas[i] = valoresIniciais[i];
     }
+
+    *p = cria_pilhas(baralho, tamPilhas, 10);
     *gameOver = 0;
 }
 
