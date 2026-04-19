@@ -11,6 +11,7 @@ int mover_cartas(Pilhas *p, int posOrig[], int posDest[]);
 int acharLimite(Pilhas p);
 int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, struct carta chegada, int origLin, int naipeSelecionado);
 int valida_jogada(Pilhas p, int posOrig[], int posDest[]);
+void limpa_memoria_jogo(Pilhas *p);
 void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver);
 int valores_Check(struct carta baralho[], struct carta *ultima, int jogadaEscolhida);
 void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[]);
@@ -19,4 +20,3 @@ int check_gameOver(Pilhas p);
 int sequencias(Pilhas p);
 int existe_jogadaValida (Pilhas p);
 int check_gameOver(Pilhas p);
-

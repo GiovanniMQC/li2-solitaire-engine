@@ -16,7 +16,7 @@ int main(void)
     // Tamanho da array é igual a quantidade de pilhas/colunas no jogo
     int tamPilhas[14] = {0};
     int gameOver = 0;
-    Pilhas celula = NULL; // Declarado como ponteiro simples e inicializado
+    Pilhas celula = NULL;
     
     // Passa o endereço de 'celula' para que a função possa modificá-la
     iniciar_jogo(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);

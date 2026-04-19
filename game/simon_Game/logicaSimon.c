@@ -252,11 +252,29 @@ int valida_jogada(Pilhas p, int posOrig[], int posDest[])
     return 0;
 }
 
+// Liberta a memória de todas as pilhas do jogo
+void limpa_memoria_jogo(Pilhas *p)
+{
+    if (*p != NULL) {
+        Pilhas atual = *p;
+        Pilhas proximo;
+        while (atual != NULL) {
+            proximo = atual->prox;
+            if (atual->pilha != NULL) free(atual->pilha);
+            free(atual);
+            atual = proximo;
+        }
+        *p = NULL;
+    }
+}
+
 // Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
 void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver) 
 {
+    // Liberta a memória do jogo anterior caso estejamos a reiniciar
+    limpa_memoria_jogo(p);
     cria_baralho(baralho);
-    shuffle_baralho(baralho);
+    // shuffle_baralho(baralho);
     *contagemBaralho = 0;
     // Define os tamanhos iniciais para cada uma das 10 pilhas 
     int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
@@ -352,7 +370,7 @@ int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
     if (colunaDest == coordenadaAtestar[0])
         colunaDest++;
 
-    int coordenadasChegada[2] = {colunaDest, ((p->numCartas)-1)};
+    int coordenadasChegada[2] = {colunaDest, 0};
 
     if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
         return 0;
@@ -363,21 +381,19 @@ int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
 //subfunção do check gameover para ver se já não existem jogadas validas
 int existe_jogadaValida (Pilhas p)
 {
-    Pilhas p2 = p, p3 = p;
+    Pilhas p3 = p;
     
     for (int colunaOrig = 0; colunaOrig<10; colunaOrig++)
     {
-        if (p3->numCartas == 0)
-            return 0;
-
-        int coordenadaAtestar[2] = {colunaOrig, ((p3->numCartas)-(sequencias(p)))};
-
-        for (int colunaDest = 0; colunaDest<10; colunaDest++)
+        if (p3->numCartas > 0)
         {
-            if (verifica_colunas(p2, coordenadaAtestar, colunaDest) == 0)
-                return 0;
+            int coordenadaAtestar[2] = {colunaOrig, ((p3->numCartas)-(sequencias(p3)))};
 
-            p2 = p2->prox;
+            for (int colunaDest = 0; colunaDest<10; colunaDest++)
+            {
+                if (verifica_colunas(p, coordenadaAtestar, colunaDest) == 0)
+                    return 0;
+            }
         }
         p3 = p3->prox;
     }
