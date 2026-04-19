@@ -193,21 +193,23 @@ int acharLimite(Pilhas p){
     return maior;
 }
 
+// verifica se as as cartas são compatíveis
 int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, struct carta chegada, int origLin, int naipeSelecionado)
 {
     
     if ((pilhaOrigem->numCartas)<(origLin) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
-    return 1;
+        return 1;
     
     for (int i = origLin; i < pilhaOrigem->numCartas; i++)
     {
         struct carta cartaAverificar = (pilhaOrigem->pilha)[i];
         if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
-        return 1;
+            return 1;
     }
     return 0;
 }
 
+// verifica se as posiçoes pedidas sao validas
 int pos_valida(int posOrig[], int posDest[])
 {
     if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0 || posOrig[0] == posDest[0])
@@ -215,6 +217,7 @@ int pos_valida(int posOrig[], int posDest[])
     return 0;
 }
 
+// verifica se a jogada pedida é possivel
 int valida_jogada(Pilhas p, int posOrig[], int posDest[])
 {
     
@@ -328,6 +331,7 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
     }
 }
 
+// devolve o numero de cartas da mesma pinta seguidas
 int sequencias(Pilhas p)
 {
     int seq = 1;
@@ -340,6 +344,7 @@ int sequencias(Pilhas p)
     return seq;
 }
 
+// verifica se existe uma jogada valida entre duas colunas
 int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
 {
     if (colunaDest>=9 && coordenadaAtestar[0]>=9)
@@ -352,9 +357,10 @@ int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
     if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
         return 0;
     
-    return 0;
+    return 1;
 }
 
+//subfunção do check gameover para ver se já não existem jogadas validas
 int existe_jogadaValida (Pilhas p)
 {
     Pilhas p2 = p, p3 = p;
@@ -378,6 +384,7 @@ int existe_jogadaValida (Pilhas p)
     return 1;
 }
 
+// subfunção do check gameover para ver se ganhou (as pilhas de pintas estão todas feitas)
 int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
 {
     if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
@@ -396,6 +403,7 @@ int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
     return 0;
 }
 
+//verifica se o jogo acabou
 int check_gameOver(Pilhas p)
 {
     Pilhas testeSeq = p;
