@@ -152,7 +152,7 @@ void teste_validaJogada() {
     int posOrigem[2]  = {15, 2}; 
     int posDestino[2] = {1, 3};
 
-    int resultado = valida_jogada(&p_falsa, posOrigem, posDestino);
+    int resultado = valida_jogada(p_falsa, posOrigem, posDestino);
 
     // a função retorna 1 se a jogada for inválida
     CU_ASSERT_EQUAL(resultado, 1);
@@ -242,6 +242,66 @@ void teste_cartaCheck(void) {
     free(dest->pilha), free(dest);
 }
 
+void teste_iniciarJogo(void) {
+
+    struct carta baralho[52]; 
+    Pilhas p = NULL;
+    int cont, over, tam[14];
+
+    iniciar_jogo(baralho, &p, &cont, tam, &over);
+
+    CU_ASSERT_EQUAL(cont, 0); 
+    CU_ASSERT_EQUAL(over, 0);
+    CU_ASSERT_EQUAL(tam[0], 8); 
+    CU_ASSERT_EQUAL(tam[9], 1);
+    CU_ASSERT_PTR_NOT_NULL(p);
+
+    while (p != NULL) {
+        Pilhas temp = p;
+        p = p->prox;
+        free(temp->pilha), free(temp);
+    }
+}
+
+void teste_sequencias(void) {
+
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 2, p->pilha = malloc(2 * sizeof(struct carta));
+
+    //sequencia
+    p->pilha[0].naipe = 0, p->pilha[0].valor = 5;
+    p->pilha[1].naipe = 0, p->pilha[1].valor = 6;
+    
+    CU_ASSERT_EQUAL(sequencias(p), 2);
+    
+    free(p->pilha), free(p);
+}
+
+void teste_existe_jogadaValida(void) {
+
+    struct celula p_unica;
+    p_unica.numCartas = 0, p_unica.prox = NULL;
+    
+    CU_ASSERT_EQUAL(existe_jogadaValida(&p_unica), 0);
+}
+
+void teste_gameOver(void) {
+
+    struct celula t[14];
+    
+    //ligar todas pilhas e atribuir zeros
+    for(int i = 0; i < 13; i++) {
+        
+        t[i].numCartas = 0, t[i].prox = &t[i+1];
+        t[13].numCartas = 0, t[13].prox = NULL;
+    }
+        
+    // simular vitoria
+    t[10].numCartas = 1, t[11].numCartas = 1, t[12].numCartas = 1, t[13].numCartas = 1;
+    
+    CU_ASSERT_EQUAL(check_gameOver(&t[0]), 1);
+}
+
 int main() {
     
     // inicializa
@@ -269,6 +329,10 @@ int main() {
     CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite),
     CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck),
     CU_add_test(pSuite, "teste_validaJogada", teste_validaJogada);
+    CU_add_test(pSuite, "teste_iniciarJogo", teste_iniciarJogo);
+    CU_add_test(pSuite, "teste_sequencias", teste_sequencias);
+    CU_add_test(pSuite, "teste_existe_jogadaValida", teste_existe_jogadaValida);
+    CU_add_test(pSuite, "teste_gameOver", teste_gameOver);
 
     // corre tudo e limpa a memoria
     CU_basic_set_mode(CU_BRM_VERBOSE);
