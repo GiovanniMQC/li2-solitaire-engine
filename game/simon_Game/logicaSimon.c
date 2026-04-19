@@ -219,10 +219,25 @@ int valida_jogada(Pilhas p, int posOrig[], int posDest[])
     
     Pilhas pilhaOrigem = procura_pilha(p, origCol);
     Pilhas pilhaDestino = procura_pilha(p, destCol);
+
+    if (pilhaOrigem == NULL || pilhaDestino == NULL)
+    {
+        return 1;
+    }
+
     destLin = pilhaDestino->numCartas - 1;
-    
+
+    if (pilhaOrigem->pilha == NULL)
+    {
+        return 1;
+    }
+
     struct carta origem = (pilhaOrigem->pilha)[origLin];
-    struct carta chegada = (pilhaDestino->pilha)[destLin];
+    struct carta chegada = {destCol, 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) {
+        chegada = (pilhaDestino->pilha)[destLin];
+    }
     
     if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
         return 1;
