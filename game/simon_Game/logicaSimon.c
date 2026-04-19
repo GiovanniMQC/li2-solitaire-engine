@@ -357,12 +357,6 @@ int existe_jogadaValida (Pilhas p)
 
 int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
 {
-    if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
-    {
-        i++;
-        testeSeq=testeSeq->prox;
-    }
-    
     if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
     {
         int origem[2] = {i, (testeSeq->numCartas)-13};
@@ -385,6 +379,12 @@ int check_gameOver(Pilhas p)
 
     for (int i = 0; i<10; i++)
     {
+        if (testeSeq->numCartas == 0 && i!=9 && testeSeq->prox != NULL)
+        {
+            i++;
+            testeSeq=testeSeq->prox;
+        }
+
         if(verifica_ganhou(p, testeSeq, i))
             return 1;
     }
