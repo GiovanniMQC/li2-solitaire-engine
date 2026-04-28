@@ -4,6 +4,10 @@ struct carta{
     int valor; 
 };
 
+struct baralho{
+    struct carta cartas[52];
+};
+
 typedef struct celula // guarda a lista ligada de pilhas
 {
     int numCartas;

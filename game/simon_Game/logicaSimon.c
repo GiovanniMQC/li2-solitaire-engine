@@ -45,6 +45,16 @@ void shuffle_baralho(struct carta *baralho)
     
 }
 
+// Recebe uma array que terá os baralhos do jogo e um int com quantos baralhos devem exitir.
+void inicializa_baralhos (struct baralho *baralhos, int numBaralhos)
+{
+    for(int i = 0; i < numBaralhos; i++)
+    {
+        cria_baralho(baralhos[i].cartas);
+        shuffle_baralho(baralhos[i].cartas);
+    }
+}
+
 // Cria uma pilha a partir de um baralho e guarda o número de cartas na pilha. Coloca a nova pilha no fim da lista de células.
 // Retorna o endereço da nova pilha
 Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)

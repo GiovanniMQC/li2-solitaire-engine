@@ -10,8 +10,11 @@
 
 int main(void)
 {
+    int numBaralhos = 2;
+
     // Declarar variaveis
-    struct carta baralho[52];
+    struct baralho baralhos[numBaralhos];
+    
     int contagemBaralho = 0;
     // Tamanho da array é igual a quantidade de pilhas/colunas no jogo
     int tamPilhas[14] = {0};
