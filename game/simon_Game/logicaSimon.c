@@ -454,3 +454,118 @@ int check_gameOver(Pilhas p)
 
     return 0;
 }
+
+
+
+
+
+
+
+//
+// FUNCOES DA PARTE 3 PARA FICAR MAIS ORGANIZADO
+// METER VERIFICAÇAO DAS COORDENADAS ESCOLHIDAS NA FUNCAO PRINCIPAL (MUITO IMPORTANTE)
+//
+
+int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.valor = chegada.valor+1)
+        return 0;
+    return 1;
+}
+
+int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.valor = chegada.valor-1)
+        return 0;
+    return 1;
+}
+
+int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if ((origem.valor = chegada.valor-1) || (origem.valor = chegada.valor+1))
+        return 0;
+    return 1;
+}
+
+int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.naipe = chegada.naipe)
+        return 0;
+    return 1;
+}
+
+int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if ((origem.naipe == 0 || origem.naipe == 2) && (chegada.naipe == 0 || chegada.naipe == 2))
+        return 0;
+    if ((origem.naipe == 1 || origem.naipe == 3) && (chegada.naipe == 1 || chegada.naipe == 3))
+        return 0;
+    return 1;
+}
+
+int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        return 0;
+    }
+    return 1;
+}
+

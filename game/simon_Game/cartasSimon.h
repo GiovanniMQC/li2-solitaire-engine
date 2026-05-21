@@ -16,23 +16,24 @@ typedef struct celula // guarda a lista ligada de pilhas
     struct celula *prox; //apontador para a proxima celula (proxima pilha)
 } *Pilhas;
 
+// feito com * significa que a funçao que chama estas verificaçoes tem que checkar para a pilha que está a ser pega
 typedef enum {
-    NAO_HA_RESTRICOES,      // *
+    NAO_HA_RESTRICOES,      // * 0
     PODE_SER_SEQUENCIAS,    // +
-    ORDENADAS_DECRESCENTE,  // [
-    ORDENADAS_CRESCENTE,    // ]
-    VALOR_INFERIOR,         // <
-    VALOR_SUPERIOR,         // >
-    OU,                     // ~
-    MESMO_NAIPE,            // m
-    TOPO_MESMO_NAIPE,       // M
-    NAIPES_ALTERNADOS,      // x
-    NAIPE_DIFERENTE,        // X
-    MESMA_COR,              // c
-    TOPO_MESMA_COR,         // C
-    CORES_ALTERNADAS,       // d
-    TOPO_CORES_ALTERNADAS,  // D
-    PILHA_VAZIA,            // V
+    ORDENADAS_DECRESCENTE,  // [        
+    ORDENADAS_CRESCENTE,    // ]        
+    VALOR_INFERIOR,         // <        // feito*
+    VALOR_SUPERIOR,         // > 5      // feito*
+    OU,                     // ~        // feito*
+    MESMO_NAIPE,            // m        // feito*
+    TOPO_MESMO_NAIPE,       // M        // feito
+    NAIPES_ALTERNADOS,      // x        // feito* Not(mesmoNaipe) mas para a pilha de cartas toda
+    NAIPE_DIFERENTE,        // X 10     // feito* Not(mesmoNaipe)
+    MESMA_COR,              // c        // feito*
+    TOPO_MESMA_COR,         // C        // feito
+    CORES_ALTERNADAS,       // d        // feito* Not(mesmaCor)
+    TOPO_CORES_ALTERNADAS,  // D        // feito
+    PILHA_VAZIA,            // V 15     // feito
     TOPO_AS,                // a
     FUNDO_AS,               // A
     TOPO_REI,               // k
