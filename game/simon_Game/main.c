@@ -3,8 +3,8 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
-// É uma má prática incluir ficheiros .c. Inclua apenas os .h
-// e compile todos os .c juntos.
+#include <dirent.h> // checar arquivos, Checar wikibooks para entender
+// fgets pra ler o arquivo
 #include "cartasSimon.h"
 #include "logicaSimon.h"
 

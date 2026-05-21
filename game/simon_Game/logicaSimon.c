@@ -74,6 +74,7 @@ Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
     return p;
 }
 
+// TODO Deve receber a array de baralhos e não a de cartas
 // Cria uma lista de pilhas a partir de um baralho, número de pilhas e recebe uma array que guarda em sequência os tamanhos das pilhas.
 Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
 {
