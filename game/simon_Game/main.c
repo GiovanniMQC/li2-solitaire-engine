@@ -22,14 +22,14 @@ int main(void)
     Pilhas celula = NULL;
     
     // Passa o endereço de 'celula' para que a função possa modificá-la
-    iniciar_jogo(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
+    iniciar_jogo(baralhos, &celula, &contagemBaralho, tamPilhas, &gameOver, numBaralhos);
     
     while (!(gameOver==1 || gameOver==2))
     {
         printf("    1          2          3          4          5          6          7          8          9          10\n");
         print_pilhas(celula, acharLimite(celula));
         print_naipes_completos(celula);
-        processar_jogada(baralho, &celula, &contagemBaralho, tamPilhas, &gameOver);
+        processar_jogada(baralhos, &celula, &contagemBaralho, tamPilhas, &gameOver, numBaralhos);
         if (!(gameOver==1 || gameOver==2))
             gameOver = check_gameOver(celula);
     }

@@ -46,12 +46,12 @@ void teste_shuffle() {
 
 void teste_criaPilha(){
 
-    struct carta meu_baralho[52];
+    struct baralho meu_baralho[1];
     
     //gera 3 cartas para a pilha
-    meu_baralho[0].valor = 10, meu_baralho[0].naipe = 0, 
-    meu_baralho[1].valor = 11, meu_baralho[1].naipe = 1, 
-    meu_baralho[2].valor = 12, meu_baralho[2].naipe = 2; 
+    meu_baralho[0].cartas[0].valor = 10, meu_baralho[0].cartas[0].naipe = 0, 
+    meu_baralho[0].cartas[1].valor = 11, meu_baralho[0].cartas[1].naipe = 1, 
+    meu_baralho[0].cartas[2].valor = 12, meu_baralho[0].cartas[2].naipe = 2; 
     
     int contagem = 0; 
 
@@ -82,8 +82,8 @@ void teste_criaPilha(){
 
 void teste_procuraPilha(){
 
-    struct carta meu_baralho[52];
-    cria_baralho(meu_baralho); 
+    struct baralho meu_baralho[1];
+    cria_baralho(meu_baralho[0].cartas); 
     int contagem = 0;
 
     Pilhas pilha_A = cria_pilha(meu_baralho, 1, &contagem);
@@ -244,11 +244,11 @@ void teste_cartaCheck(void) {
 
 void teste_iniciarJogo(void) {
 
-    struct carta baralho[52]; 
+    struct baralho baralho[1]; 
     Pilhas p = NULL;
     int cont, over, tam[14];
 
-    iniciar_jogo(baralho, &p, &cont, tam, &over);
+    iniciar_jogo(baralho, &p, &cont, tam, &over, 1);
 
     CU_ASSERT_EQUAL(cont, 0); 
     CU_ASSERT_EQUAL(over, 0);

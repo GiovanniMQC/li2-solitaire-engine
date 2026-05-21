@@ -57,7 +57,7 @@ void inicializa_baralhos (struct baralho *baralhos, int numBaralhos)
 
 // Cria uma pilha a partir de um baralho e guarda o número de cartas na pilha. Coloca a nova pilha no fim da lista de células.
 // Retorna o endereço da nova pilha
-Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
+Pilhas cria_pilha(struct baralho *baralhos, int numCartas, int *contagemBaralho)
 {
     // Um apontador para o início de uma pilha.
     Pilhas p = malloc(sizeof(struct celula));
@@ -68,15 +68,17 @@ Pilhas cria_pilha(struct carta *baralho, int numCartas, int *contagemBaralho)
     // Um loop para criar uma pilha
     for(int i = 0; i < numCartas; i++, (*contagemBaralho)++)
     {
-        p->pilha[i].naipe = baralho[(*contagemBaralho)].naipe;
-        p->pilha[i].valor = baralho[(*contagemBaralho)].valor;
+        // Escolhe automaticamente o baralho e a carta baseados na quantidade já puxada
+        int numBaralho = (*contagemBaralho) / 52;
+        int idxCarta = (*contagemBaralho) % 52;
+        p->pilha[i].naipe = baralhos[numBaralho].cartas[idxCarta].naipe;
+        p->pilha[i].valor = baralhos[numBaralho].cartas[idxCarta].valor;
     }
     return p;
 }
 
-// TODO Deve receber a array de baralhos e não a de cartas
 // Cria uma lista de pilhas a partir de um baralho, número de pilhas e recebe uma array que guarda em sequência os tamanhos das pilhas.
-Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
+Pilhas cria_pilhas(struct baralho *baralhos, int numCartas[], int numPilhas)
 {
     // Se a array for nula ou a quantidade for inválida, retorna NULL
     if(numCartas == NULL || numPilhas <= 0) return NULL;
@@ -84,12 +86,12 @@ Pilhas cria_pilhas(struct carta *baralho, int numCartas[], int numPilhas)
     int contagemBaralho = 0;
 
     // Cria a primeira pilha.
-    Pilhas inicioPilha = cria_pilha(baralho, numCartas[0], &contagemBaralho);
+    Pilhas inicioPilha = cria_pilha(baralhos, numCartas[0], &contagemBaralho);
 
     Pilhas tmp = inicioPilha;
     for(int i = 1; i < numPilhas; i++)
     {
-        Pilhas nova = cria_pilha(baralho, numCartas[i], &contagemBaralho);
+        Pilhas nova = cria_pilha(baralhos, numCartas[i], &contagemBaralho);
         tmp->prox = nova;
         tmp = nova;
     }
@@ -280,12 +282,11 @@ void limpa_memoria_jogo(Pilhas *p)
 }
 
 // Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
-void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver) 
+void iniciar_jogo(struct baralho baralhos[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver, int numBaralhos) 
 {
     // Liberta a memória do jogo anterior caso estejamos a reiniciar
     limpa_memoria_jogo(p);
-    cria_baralho(baralho);
-    shuffle_baralho(baralho);
+    inicializa_baralhos(baralhos, numBaralhos);
     *contagemBaralho = 0;
     // Define os tamanhos iniciais para cada uma das 10 pilhas 
     int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
@@ -295,7 +296,7 @@ void iniciar_jogo(struct carta baralho[], Pilhas *p, int *contagemBaralho, int t
         tamPilhas[i] = valoresIniciais[i];
     }
 
-    *p = cria_pilhas(baralho, tamPilhas, tamanhoArray);
+    *p = cria_pilhas(baralhos, tamPilhas, tamanhoArray);
     *gameOver = 0;
 }
 
@@ -335,7 +336,7 @@ void pedir_jogada(Pilhas *p)
 
 
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
-void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver)
+void processar_jogada(struct baralho baralhos[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver, int numBaralhos)
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
@@ -349,7 +350,7 @@ void processar_jogada(struct carta baralho[], Pilhas *p, int *contagemBaralho, i
     //RESTART
     else if(jogadaEscolhida == 2)
     {
-        iniciar_jogo(baralho, p, contagemBaralho, tamPilhas, gameOver);
+        iniciar_jogo(baralhos, p, contagemBaralho, tamPilhas, gameOver, numBaralhos);
     }
 
     //Jogar
