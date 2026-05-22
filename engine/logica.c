@@ -3,70 +3,57 @@
 #include <dirent.h>
 #include <string.h>
 
-// Função simples apenas para listar os nomes na tela
-void listar_nomes(const char *caminho_pasta) {
-    DIR *dir;
-    struct dirent *entrada;
-    int index = 1;
+// funcao para listar os arquivos e guardar os caminhos num array
+int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
+    DIR *pasta = opendir(caminho_pasta);
+    struct dirent *arquivo;
+    int quantidade = 0;
 
-    dir = opendir(caminho_pasta);
-    if (dir == NULL) return;
+    printf("=== Menu de Paciencias ===\n");
 
-    printf("--- Escolha a Paciência ---\n");
+    while ((arquivo = readdir(pasta)) != NULL) {
+        // ignora as pastas ocultas do sistema
+        if (strcmp(arquivo->d_name, ".") != 0 && strcmp(arquivo->d_name, "..") != 0) {        
 
-    // Passa por cada arquivo na pasta
-    while ((entrada = readdir(dir)) != NULL) {
-        if (strcmp(entrada->d_name, ".") == 0 || strcmp(entrada->d_name, "..") == 0) {
-            continue;
+            // monta o caminho completo
+            char caminho_completo[512];
+            snprintf(caminho_completo, sizeof(caminho_completo), "%s/%s", caminho_pasta, arquivo->d_name);
+
+            // abre o arquivo em leitura
+            FILE *texto = fopen(caminho_completo, "r");
+            if (texto != NULL) {
+                char nome_do_jogo[256];
+                if (fgets(nome_do_jogo, sizeof(nome_do_jogo), texto) != NULL) {
+
+                    nome_do_jogo[strcspn(nome_do_jogo, "\r\n")] = '\0'; //remove o enter
+                
+                    printf("%d - %s\n", quantidade + 1, nome_do_jogo);
+                    strcpy(lista_de_caminhos[quantidade], caminho_completo); 
+                    quantidade++;
+                }
+                fclose(texto);
+            }
         }
-
-        char caminho_arquivo[512];
-        snprintf(caminho_arquivo, sizeof(caminho_arquivo), "%s/%s", caminho_pasta, entrada->d_name);
-
-        FILE *arquivo = fopen(caminho_arquivo, "r");
-        if (arquivo == NULL) continue;
-
-        char primeira_linha[256];
-        if (fgets(primeira_linha, sizeof(primeira_linha), arquivo) != NULL) {
-            // Remove a quebra de linha do texto para não estragar o print
-            primeira_linha[strcspn(primeira_linha, "\r\n")] = '\0';
-            
-            printf("%d - %s\n", index, primeira_linha);
-            index++; // Aumenta o contador para a próxima linha
-        }
-        fclose(arquivo);
     }
-    closedir(dir);
+    closedir(pasta);
+    return quantidade; 
 }
 
-// Função que pede um número e devolve o caminho do arquivo correspondente àquela ordem
-char* escolher_paciencia(const char *caminho_pasta) {
+char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
+    if (quantidade == 0) return NULL;
+
     int escolha = 0;
-    printf("Digite o número da paciência desejada: ");
-    scanf("%d", &escolha);
-
-    DIR *dir = opendir(caminho_pasta);
-    struct dirent *entrada;
-    int index = 1;
-
-    if (dir == NULL) return NULL;
-
-    // Percorre a pasta de novo para encontrar o arquivo no índice escolhido
-    while ((entrada = readdir(dir)) != NULL) {
-        if (strcmp(entrada->d_name, ".") == 0 || strcmp(entrada->d_name, "..") == 0) {
-            continue;
-        }
-
-        // Se o índice atual bater com o número que o usuário digitou...
-        if (index == escolha) {
-            char *caminho_escolhido = malloc(512);
-            snprintf(caminho_escolhido, 512, "%s/%s", caminho_pasta, entrada->d_name);
-            closedir(dir);
-            return caminho_escolhido; // Devolve apenas aquele que encontrou
-        }
-        index++;
+    printf("\nDigite o numero da paciencia que deseja (1 a %d): ", quantidade);
+    
+    // O scanf pega o número digitado. Se não for um número válido, retorna NULL.
+    if (scanf("%d", &escolha) != 1) {
+        return NULL;
     }
 
-    closedir(dir);
+    if (escolha >= 1 && escolha <= quantidade) {
+        // Retorna o ponteiro para a string dentro da nossa matriz
+        return lista_de_caminhos[escolha - 1]; 
+    }
+
     return NULL;
 }

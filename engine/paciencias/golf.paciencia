@@ -1,4 +1,4 @@
-JOGO Golf # Esta Paciência chama-se Golf
+JOGO Golf
 BARALHOS 1 # Joga-se com 1 baralho
 TIPO TAB = # Pilhas no tabuleiro têm as cartas todas visíveis
 TIPO STOCK _ # Pilha de stock não tem cartas visíveis
