@@ -3,6 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
+#include <dirent.h>
 #include "cartasSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
@@ -620,4 +621,32 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
     
     fclose(novoSave);
     return 0;
+}
+
+void lerSaves(int numSave, EstadoJogo g)
+{
+    DIR *dir;
+    struct dirent *entrada;
+    int saveEncontrado = 0;
+
+    dir = opendir("./saves");
+    if (dir == NULL) {
+        printf("Erro ao abrir a pasta de saves.\n");
+        return;
+    }
+
+    while((entrada = readdir(dir)) != NULL)
+    {
+        int numero_save;
+        
+        if (sscanf(entrada->d_name, "save_%d.txt", &numero_save) == 1) {
+            printf("Slot [%d] -> Arquivo: %s\n", numero_save, entrada->d_name);
+            saveEncontrado = 1;
+        }
+    }
+
+    if (!saveEncontrado) {
+        printf("Nenhum arquivo de save encontrado na pasta.\n");
+    }
+    closedir(dir);
 }
