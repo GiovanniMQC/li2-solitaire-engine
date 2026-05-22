@@ -18,10 +18,10 @@ typedef struct celula // guarda a lista ligada de pilhas
 
 // feito com * significa que a funçao que chama estas verificaçoes tem que checkar para a pilha que está a ser pega
 typedef enum {
-    NAO_HA_RESTRICOES,      // * 0
-    PODE_SER_SEQUENCIAS,    // +
-    ORDENADAS_DECRESCENTE,  // [        
-    ORDENADAS_CRESCENTE,    // ]        
+    NAO_HA_RESTRICOES,      // * 0      // "feito", so verificar na função principal e fazer o mover cartas 
+    PODE_SER_SEQUENCIAS,    // +        // feito
+    ORDENADAS_DECRESCENTE,  // [        // feito
+    ORDENADAS_CRESCENTE,    // ]        // feito
     VALOR_INFERIOR,         // <        // feito*
     VALOR_SUPERIOR,         // > 5      // feito*
     OU,                     // ~        // feito*
@@ -34,10 +34,10 @@ typedef enum {
     CORES_ALTERNADAS,       // d        // feito* Not(mesmaCor)
     TOPO_CORES_ALTERNADAS,  // D        // feito
     PILHA_VAZIA,            // V 15     // feito
-    TOPO_AS,                // a
-    FUNDO_AS,               // A
-    TOPO_REI,               // k
-    FUNDO_REI               // K
+    TOPO_AS,                // a        // 
+    FUNDO_AS,               // A        // 
+    TOPO_REI,               // k        // 
+    FUNDO_REI               // K        // 
 } FlagsMovimento;
 
 typedef struct {

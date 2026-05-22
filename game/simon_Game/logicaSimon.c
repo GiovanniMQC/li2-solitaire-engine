@@ -621,3 +621,44 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
     fclose(novoSave);
     return 0;
 }
+
+int EsoUma (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    if (posOrig[1] == p->numCartas-1)
+        return 0;
+    return 1;
+}
+
+int crescenteVerif (Pilhas p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+    int n = 1;
+    for (int i = posOrig[1]; i < (p->numCartas);i++)
+    {
+        
+        if (not(origem.valor == (p->pilha[i]).valor-n))
+            return 1;
+        n++;
+    }
+    return 0;
+}
+
+int decrescenteVerif (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+    int n = 1;
+    for (int i = posOrig[1]; i < (p->numCartas);i++)
+    {
+        if (not((origem.valor)-n == (p->pilha[i]).valor))
+            return 1;
+        n++;
+    }
+    return 0;
+}
