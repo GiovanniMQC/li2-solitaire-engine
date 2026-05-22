@@ -571,3 +571,53 @@ int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
+// Percorre as pilhas e salva as cartas presentes nelas por linha
+void salva_pilhas(FILE *save, Pilhas p)
+{
+    Pilhas pTemp = p;
+
+    while (pTemp != NULL) {
+        for (int i = 0; i < pTemp->numCartas; i++) {
+            struct carta c = pTemp->pilha[i];
+
+            // Imprime o valor da carta (A, 2-10, J, Q, K)
+            if (c.valor == 1) fprintf(save, "A");
+            else if (c.valor == 11) fprintf(save, "J");
+            else if (c.valor == 12) fprintf(save, "Q");
+            else if (c.valor == 13) fprintf(save, "K");
+            else fprintf(save, "%d", c.valor);
+
+            // Imprime o naipe (0-Copas/H, 1-Espadas/S, 2-Diamantes/D, 3-Paus/C)
+            if (c.naipe == 0) fprintf(save, "H");
+            else if (c.naipe == 1) fprintf(save, "S");
+            else if (c.naipe == 2) fprintf(save, "D");
+            else if (c.naipe == 3) fprintf(save, "C");
+
+            // Imprime um espaco entre cartas (mas não na última carta da linha)
+            if (i < pTemp->numCartas - 1) fprintf(save, " ");
+        }
+        // Coloca o \n no final de cada pilha (inclusive deixa uma linha vazia para pilhas vazias)
+        fprintf(save, "\n");
+        pTemp = pTemp->prox;
+    }
+}
+
+int salvaJogo (EstadoJogo g, int contagemSaves)
+{
+    char nomeArquivo[30];
+
+    sprintf(nomeArquivo, "save_%d.txt", contagemSaves);
+    FILE *novoSave = fopen(nomeArquivo, "w");
+
+    if(novoSave == NULL)
+    {
+        printf("Erro ao criar arquivo %s", nomeArquivo);
+        return 1;
+    }
+
+    fprintf(novoSave, "%s.paciencia\n", g.nome_paciencia);
+    salva_pilhas(novoSave, g.pilhas);
+    
+    fclose(novoSave);
+    return 0;
+}
