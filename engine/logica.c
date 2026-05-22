@@ -38,22 +38,3 @@ int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
     closedir(pasta);
     return quantidade; 
 }
-
-char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
-    if (quantidade == 0) return NULL;
-
-    int escolha = 0;
-    printf("\nDigite o numero da paciencia que deseja (1 a %d): ", quantidade);
-    
-    // O scanf pega o número digitado. Se não for um número válido, retorna NULL.
-    if (scanf("%d", &escolha) != 1) {
-        return NULL;
-    }
-
-    if (escolha >= 1 && escolha <= quantidade) {
-        // Retorna o ponteiro para a string dentro da nossa matriz
-        return lista_de_caminhos[escolha - 1]; 
-    }
-
-    return NULL;
-}
