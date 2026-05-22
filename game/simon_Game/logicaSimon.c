@@ -3,6 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
+#include <dirent.h>
 #include "cartasSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
