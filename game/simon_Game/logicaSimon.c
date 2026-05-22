@@ -3,6 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
+#include <dirent.h>
 #include "cartasSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
@@ -468,7 +469,7 @@ int check_gameOver(Pilhas p)
 // METER VERIFICAÇAO DAS COORDENADAS ESCOLHIDAS NA FUNCAO PRINCIPAL (MUITO IMPORTANTE)
 //
 
-int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
+int cartaChegadaEmenor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -486,7 +487,7 @@ int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
+int cartaChegadaEmaior (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -504,7 +505,7 @@ int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
+int cartaMaiorOuMenor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -522,7 +523,7 @@ int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
+int mesmoNaipe (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -540,7 +541,7 @@ int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
+int mesmaCor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -560,7 +561,7 @@ int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[])
+int pilhaDestinoVazia (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
@@ -620,4 +621,117 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
     
     fclose(novoSave);
     return 0;
+}
+
+void lerSaves(int numSave, EstadoJogo g)
+{
+    DIR *dir;
+    struct dirent *entrada;
+    int saveEncontrado = 0;
+
+    dir = opendir("./saves");
+    if (dir == NULL) {
+        printf("Erro ao abrir a pasta de saves.\n");
+        return;
+    }
+
+    while((entrada = readdir(dir)) != NULL)
+    {
+        int numero_save;
+        
+        if (sscanf(entrada->d_name, "save_%d.txt", &numero_save) == 1) {
+            printf("Slot [%d] -> Arquivo: %s\n", numero_save, entrada->d_name);
+            saveEncontrado = 1;
+        }
+    }
+
+    if (!saveEncontrado) {
+        printf("Nenhum arquivo de save encontrado na pasta.\n");
+    }
+    closedir(dir);
+}
+
+int EsoUma (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    if (posOrig[1] == p->numCartas-1)
+        return 0;
+    return 1;
+}
+
+int crescenteVerif (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+    int n = 1;
+    for (int i = posOrig[1]; i < (p->numCartas);i++)
+    {
+        
+        if (not(origem.valor == (p->pilha[i]).valor-n))
+            return 1;
+        n++;
+    }
+    return 0;
+}
+
+int decrescenteVerif (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+    int n = 1;
+    for (int i = posOrig[1]; i < (p->numCartas);i++)
+    {
+        
+        if (not((origem.valor)-n == (p->pilha[i]).valor))
+            return 1;
+        n++;
+    }
+    return 0;
+}
+
+int AStopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+
+    if (origem.valor == 1)
+        return 0;
+    return 1;
+}
+
+int REItopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+
+    if (origem.valor == 13)
+        return 0;
+    return 1;
+}
+
+int ASfundo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    if (origem.valor == 1)
+        return 0;
+    return 1;
+}
+
+int REItopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    if (origem.valor == 13)
+        return 0;
+    return 1;
 }
