@@ -3,6 +3,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <locale.h>
+#include <string.h>
 #include "cartasSimon.h"
 #include "logicaSimon.h"
 
@@ -45,24 +46,39 @@ void print_carta(struct carta c)
     printf("\033[0m"); //reseta pro normal
 }
 
+int conta_pilhas_visiveis(Pilhas p)
+{
+    int contagem = 0;
+    while(p != NULL)
+    {
+        if(p->tipo_Pilha != NULL && (strchr(p->tipo_Pilha, '=') || strchr(p->tipo_Pilha, '^')))
+        {
+            contagem++;
+        }
+        p = p->prox;
+    }
+    return contagem;
+}
+
 // Percorre as pilhas e dá print de todas as cartas presentes nelas
 void print_pilhas(Pilhas p, int lim){
-    Pilhas pTemp = p;
     int linha = 0;
     while (linha<(lim+1)){
-
-        for (int i=0; i< 10; i++){
-            if(pTemp == NULL || pTemp->numCartas <= linha)
-                printf("          "); //espaco vazio
-            else
-                print_carta(pTemp->pilha[linha]);
-                
-            printf(" ");
-            if (pTemp != NULL) {
-                pTemp = pTemp->prox;
+        Pilhas pTemp = p;
+        while (pTemp != NULL){
+            // Renderiza a coluna apenas se ela for uma pilha visível (regras = ou ^)
+            if (pTemp->tipo_Pilha != NULL && (strchr(pTemp->tipo_Pilha, '=') || strchr(pTemp->tipo_Pilha, '^'))) {
+                if(pTemp->numCartas <= linha)
+                    printf("          "); // espaco vazio
+                else if (strchr(pTemp->tipo_Pilha, '^') && linha < pTemp->numCartas - 1)
+                    printf("\033[30;47m  [****]  \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
+                else
+                    print_carta(pTemp->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
+                    
+                printf(" ");
             }
+            pTemp = pTemp->prox;
         }
-        pTemp = p;
         linha++;
         printf("\n");
     }

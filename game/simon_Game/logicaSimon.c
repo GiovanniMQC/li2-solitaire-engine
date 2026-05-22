@@ -469,7 +469,7 @@ int check_gameOver(Pilhas p)
 // METER VERIFICAÇAO DAS COORDENADAS ESCOLHIDAS NA FUNCAO PRINCIPAL (MUITO IMPORTANTE)
 //
 
-int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
+int cartaChegadaEmenor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -487,7 +487,7 @@ int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
+int cartaChegadaEmaior (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -505,7 +505,7 @@ int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
+int cartaMaiorOuMenor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -523,7 +523,7 @@ int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
+int mesmoNaipe (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -541,7 +541,7 @@ int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
+int mesmaCor (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -561,7 +561,7 @@ int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
     return 1;
 }
 
-int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[])
+int pilhaDestinoVazia (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
