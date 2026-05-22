@@ -622,6 +622,34 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
     return 0;
 }
 
+void lerSaves(int numSave, EstadoJogo g)
+{
+    DIR *dir;
+    struct dirent *entrada;
+    int saveEncontrado = 0;
+
+    dir = opendir("./saves");
+    if (dir == NULL) {
+        printf("Erro ao abrir a pasta de saves.\n");
+        return;
+    }
+
+    while((entrada = readdir(dir)) != NULL)
+    {
+        int numero_save;
+        
+        if (sscanf(entrada->d_name, "save_%d.txt", &numero_save) == 1) {
+            printf("Slot [%d] -> Arquivo: %s\n", numero_save, entrada->d_name);
+            saveEncontrado = 1;
+        }
+    }
+
+    if (!saveEncontrado) {
+        printf("Nenhum arquivo de save encontrado na pasta.\n");
+    }
+    closedir(dir);
+}
+
 int EsoUma (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
@@ -656,6 +684,7 @@ int decrescenteVerif (Pilhas p, int posOrig[])
     int n = 1;
     for (int i = posOrig[1]; i < (p->numCartas);i++)
     {
+        
         if (not((origem.valor)-n == (p->pilha[i]).valor))
             return 1;
         n++;

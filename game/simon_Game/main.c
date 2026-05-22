@@ -21,6 +21,7 @@ int main(void)
     int gameOver = 0;
     Pilhas celula = NULL;
     
+
     // Passa o endereço de 'celula' para que a função possa modificá-la
     iniciar_jogo(baralhos, &celula, &contagemBaralho, tamPilhas, &gameOver, numBaralhos);
     
