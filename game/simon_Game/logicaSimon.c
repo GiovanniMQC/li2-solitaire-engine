@@ -456,3 +456,168 @@ int check_gameOver(Pilhas p)
 
     return 0;
 }
+
+
+
+
+
+
+
+//
+// FUNCOES DA PARTE 3 PARA FICAR MAIS ORGANIZADO
+// METER VERIFICAÇAO DAS COORDENADAS ESCOLHIDAS NA FUNCAO PRINCIPAL (MUITO IMPORTANTE)
+//
+
+int cartaChegadaEmenor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.valor = chegada.valor+1)
+        return 0;
+    return 1;
+}
+
+int cartaChegadaEmaior (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.valor = chegada.valor-1)
+        return 0;
+    return 1;
+}
+
+int cartaMaiorOuMenor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if ((origem.valor = chegada.valor-1) || (origem.valor = chegada.valor+1))
+        return 0;
+    return 1;
+}
+
+int mesmoNaipe (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if (origem.naipe = chegada.naipe)
+        return 0;
+    return 1;
+}
+
+int mesmaCor (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]],
+    chegada = {posDest[0], 1}; // Carta placeholder caso a coluna destino esteja vazia
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        chegada = (pilhaDestino->pilha)[posDest[1]];
+    }
+
+    if ((origem.naipe == 0 || origem.naipe == 2) && (chegada.naipe == 0 || chegada.naipe == 2))
+        return 0;
+    if ((origem.naipe == 1 || origem.naipe == 3) && (chegada.naipe == 1 || chegada.naipe == 3))
+        return 0;
+    return 1;
+}
+
+int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[])
+{
+    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
+
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
+    {
+        return 0;
+    }
+    return 1;
+}
+
+// Percorre as pilhas e salva as cartas presentes nelas por linha
+void salva_pilhas(FILE *save, Pilhas p)
+{
+    Pilhas pTemp = p;
+
+    while (pTemp != NULL) {
+        for (int i = 0; i < pTemp->numCartas; i++) {
+            struct carta c = pTemp->pilha[i];
+
+            // Imprime o valor da carta (A, 2-10, J, Q, K)
+            if (c.valor == 1) fprintf(save, "A");
+            else if (c.valor == 11) fprintf(save, "J");
+            else if (c.valor == 12) fprintf(save, "Q");
+            else if (c.valor == 13) fprintf(save, "K");
+            else fprintf(save, "%d", c.valor);
+
+            // Imprime o naipe (0-Copas/H, 1-Espadas/S, 2-Diamantes/D, 3-Paus/C)
+            if (c.naipe == 0) fprintf(save, "H");
+            else if (c.naipe == 1) fprintf(save, "S");
+            else if (c.naipe == 2) fprintf(save, "D");
+            else if (c.naipe == 3) fprintf(save, "C");
+
+            // Imprime um espaco entre cartas (mas não na última carta da linha)
+            if (i < pTemp->numCartas - 1) fprintf(save, " ");
+        }
+        // Coloca o \n no final de cada pilha (inclusive deixa uma linha vazia para pilhas vazias)
+        fprintf(save, "\n");
+        pTemp = pTemp->prox;
+    }
+}
+
+int salvaJogo (EstadoJogo g, int contagemSaves)
+{
+    char nomeArquivo[30];
+
+    sprintf(nomeArquivo, "save_%d.txt", contagemSaves);
+    FILE *novoSave = fopen(nomeArquivo, "w");
+
+    if(novoSave == NULL)
+    {
+        printf("Erro ao criar arquivo %s", nomeArquivo);
+        return 1;
+    }
+
+    fprintf(novoSave, "%s.paciencia\n", g.nome_paciencia);
+    salva_pilhas(novoSave, g.pilhas);
+    
+    fclose(novoSave);
+    return 0;
+}
