@@ -34,10 +34,10 @@ typedef enum {
     CORES_ALTERNADAS,       // d        // feito* Not(mesmaCor)
     TOPO_CORES_ALTERNADAS,  // D        // feito
     PILHA_VAZIA,            // V 15     // feito
-    TOPO_AS,                // a        // 
-    FUNDO_AS,               // A        // 
-    TOPO_REI,               // k        // 
-    FUNDO_REI               // K        // 
+    TOPO_AS,                // a        // feito
+    FUNDO_AS,               // A        // feito
+    TOPO_REI,               // k        // feito
+    FUNDO_REI               // K        // feito
 } FlagsMovimento;
 
 typedef struct {

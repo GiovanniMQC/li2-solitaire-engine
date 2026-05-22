@@ -660,10 +660,9 @@ int EsoUma (Pilhas p, int posOrig[])
     return 1;
 }
 
-int crescenteVerif (Pilhas p, int posOrig[], int posDest[])
+int crescenteVerif (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
-    Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
     struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
     int n = 1;
@@ -691,4 +690,48 @@ int decrescenteVerif (Pilhas p, int posOrig[])
         n++;
     }
     return 0;
+}
+
+int AStopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+
+    if (origem.valor == 1)
+        return 0;
+    return 1;
+}
+
+int REItopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+
+    if (origem.valor == 13)
+        return 0;
+    return 1;
+}
+
+int ASfundo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    if (origem.valor == 1)
+        return 0;
+    return 1;
+}
+
+int REItopo (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    if (origem.valor == 13)
+        return 0;
+    return 1;
 }
