@@ -65,7 +65,7 @@ typedef struct {
     MovimentoDef *mov_perm;      // Array dinâmico de movimentos permitidos
     int qts_mov_perm;
     
-    WinDef win_args;
+    WinDef win_args; // Condições para usuário ganhar
 
     MovimentoDef *auto_movs;     // Array dinâmico de movimentos automáticos
     int qts_auto_movs;

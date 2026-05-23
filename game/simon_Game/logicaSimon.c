@@ -4,6 +4,7 @@
 #include <time.h>
 #include <locale.h>
 #include <dirent.h>
+#include <string.h>
 #include "cartasSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
@@ -739,4 +740,35 @@ int REItopo (Pilhas p, int posOrig[])
 int ganhou (Pilhas p)
 {
 
+}
+
+void percorrePilhas(Pilhas p, int pos)
+{
+    int posPilhas = 0;
+    while (p != NULL && posPilhas != pos)
+    {
+        p = p->prox;
+        posPilhas++;
+    }
+}
+
+void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
+{
+    Pilhas pilOrig = g.pilhas;
+    Pilhas pilTemp = g.pilhas;
+    int posPilhas = 0, tipoOrigValido = 0, tipoDestValido = 0;
+    
+    percorrePilhas(pilTemp, posOrig[0]);
+    
+    if (pilTemp != NULL && strcmp(g.mov_perm->tipo_origem, pilTemp->tipo_Pilha) == 0)
+    {
+        pilTemp = pilOrig;
+        percorrePilhas(pilTemp, posDest[0]);
+        if(pilTemp != NULL && strcmp(g.mov_perm->tipo_destino, pilTemp->tipo_Pilha) == 0)
+        {
+            mover_cartas(&pilOrig, posOrig, posDest);
+            return;
+        }
+    }
+    printf("Movimento Inválido\n");
 }
