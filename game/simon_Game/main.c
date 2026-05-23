@@ -53,19 +53,27 @@ EstadoJogo criar_estado_golf_manual() {
     jogo.mov_perm = malloc(2 * sizeof(MovimentoDef));
     
     // MOV STOCK DESCARTE *
-    jogo.mov_perm[0].tipo_origem = strdup("STOCK");
-    jogo.mov_perm[0].tipo_destino = strdup("DESCARTE");
+    jogo.mov_perm[0].tipo_origem = strdup("STOCK_");
+    jogo.mov_perm[0].tipo_destino = strdup("DESCARTE=");
     jogo.mov_perm[0].qts_flags = 1;
     jogo.mov_perm[0].flags = malloc(sizeof(FlagsMovimento));
     jogo.mov_perm[0].flags[0] = NAO_HA_RESTRICOES; 
     
     // MOV TAB DESCARTE ~
-    jogo.mov_perm[1].tipo_origem = strdup("TAB");
-    jogo.mov_perm[1].tipo_destino = strdup("DESCARTE");
+    jogo.mov_perm[1].tipo_origem = strdup("TAB=");
+    jogo.mov_perm[1].tipo_destino = strdup("DESCARTE=");
     jogo.mov_perm[1].qts_flags = 1;
     jogo.mov_perm[1].flags = malloc(sizeof(FlagsMovimento));
     jogo.mov_perm[1].flags[0] = OU; 
     
+    // Configuracao da Condicao de Vitoria (Golf: todas as 7 pilhas TAB= devem estar vazias)
+    jogo.win_args.tipo = strdup("TAB= TAB= TAB= TAB= TAB= TAB= TAB=");
+    jogo.win_args.qntsWins = 7;
+    jogo.win_args.numCartas = malloc(7 * sizeof(int));
+    for (int i = 0; i < 7; i++) {
+        jogo.win_args.numCartas[i] = 0;
+    }
+
     jogo.auto_movs = NULL;
     jogo.qts_auto_movs = 0;
     
@@ -80,11 +88,37 @@ int main(void)
     EstadoJogo jogo = criar_estado_golf_manual();
     
     printf("Nome do Jogo: %s\n", jogo.nome_paciencia);
-    printf("Cartas do Tabuleiro e Descarte (O Stock esta oculto como esperado):\n\n");
-    print_pilhas(jogo.pilhas, acharLimite(jogo.pilhas));
+
+    struct baralho b[1];
+    int contagemBaralho = 0;
+    int tamPilhas[14] = {0};
+    int gameOver = 0;
+
+    while (gameOver == 0) {
+        printf("\n");
+        print_pilhas(jogo.pilhas, acharLimite(jogo.pilhas));
+
+        if (ganhou(jogo.pilhas, jogo.win_args) == 0) {
+            printf("\nParabéns! Você ganhou o jogo %s!\n", jogo.nome_paciencia);
+            gameOver = 1;
+            break;
+        }
+
+        processar_jogada(&jogo, b, &contagemBaralho, tamPilhas, &gameOver);
+    }
 
     // Liberta a memoria da estrutura ligada das pilhas
     limpa_memoria_jogo(&(jogo.pilhas));
+    free(jogo.win_args.tipo);
+    free(jogo.win_args.numCartas);
+
+    // Libertar array de movimentos permitidos da memória
+    for (int i=0; i < jogo.qts_mov_perm; i++) {
+        free(jogo.mov_perm[i].tipo_origem);
+        free(jogo.mov_perm[i].tipo_destino);
+        free(jogo.mov_perm[i].flags);
+    }
+    free(jogo.mov_perm);
     
     return EXIT_SUCCESS;
 }

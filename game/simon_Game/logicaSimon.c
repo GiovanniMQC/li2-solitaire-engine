@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <string.h>
 #include "cartasSimon.h"
+#include "logicaSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
@@ -305,42 +306,36 @@ void iniciar_jogo(struct baralho baralhos[], Pilhas *p, int *contagemBaralho, in
 }
 
 // Atualiza os valores para compatíveis com array e verifica se a jogada é válida
-void jogar_Coluna(Pilhas *p, int posOrig[], int posDest[])
+void jogar_Coluna(EstadoJogo *g, int posOrig[], int posDest[])
 {
     posOrig[0]--;
     posOrig[1]--;
     posDest[0]--;
-    if(valida_jogada(*p, posOrig, posDest))
-    {
-        printf("Jogada Inválida\n");
-    }
-    else
-    {
-        mover_cartas(p, posOrig, posDest);
-    }
+    
+    movimentoValido(*g, posOrig, posDest);
 }
 
 // Recebe a pilha e pede ao jogador as posições de jogadas.
 // Chama ao jogar coluna com as informações
-void pedir_jogada(Pilhas *p)
+void pedir_jogada(EstadoJogo *g)
 {
     int posOrig[2] = {0,0};
     int posDest[2] = {0,0};
 
-    printf("Digite a coluna da carta que vai mover:");
+    printf("Digite a coluna da carta que vai mover: ");
     scanf("%d", &posOrig[0]);
-    printf("Digite a linha da carta que vai mover:");
+    printf("Digite a linha da carta que vai mover: ");
     scanf("%d", &posOrig[1]);
 
-    printf("Digite a coluna destino:");
+    printf("Digite a coluna destino: ");
     scanf("%d", &posDest[0]);
 
-    jogar_Coluna(p, posOrig, posDest);
+    jogar_Coluna(g, posOrig, posDest);
 }
 
 
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
-void processar_jogada(struct baralho baralhos[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver, int numBaralhos)
+void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
@@ -354,13 +349,13 @@ void processar_jogada(struct baralho baralhos[], Pilhas *p, int *contagemBaralho
     //RESTART
     else if(jogadaEscolhida == 2)
     {
-        iniciar_jogo(baralhos, p, contagemBaralho, tamPilhas, gameOver, numBaralhos);
+        iniciar_jogo(baralhos, &(g->pilhas), contagemBaralho, tamPilhas, gameOver, g->nBaralhos);
     }
 
     //Jogar
     else if(jogadaEscolhida==1)
     {
-        pedir_jogada(p);
+        pedir_jogada(g);
         return;
     }
 }
@@ -747,10 +742,46 @@ void ganhouAjuda (WinDef w, int *i, char *temp)
         num++;
     }
 }
+int tamanhoS (char *s)
+{
+    int i=0;
+    while (s[i] != '\0')
+    {
+        i++;
+    }
+    return i;
+}
 
 int ganhou (Pilhas p, WinDef w)
 {
+    int win = 0;
+    int id = 0;
     
+    // Pega numa copia da string para usar strtok sem alterar a original
+    char *copia = strdup(w.tipo);
+    char *token = strtok(copia, " ");
+    
+    Pilhas pTemp = p;
+    
+    // Compara cada palavra token (nome da pilha) com as pilhas do jogo
+    while (token != NULL && pTemp != NULL) {
+        if (pTemp->tipo_Pilha != NULL && strcmp(pTemp->tipo_Pilha, token) == 0) {
+            if (pTemp->numCartas == w.numCartas[id]) {
+                win++;
+            } else {
+                free(copia);
+                return 1; // Falhou a condicao de cartas
+            }
+            id++;
+            token = strtok(NULL, " ");
+        }
+        pTemp = pTemp->prox;
+    }
+    
+    free(copia);
+    
+    if (win == w.qntsWins) return 0; // Ganhou!
+    return 1;
 }
 
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
@@ -771,7 +802,30 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
             strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
             strcmp(g.mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
             
-            movimentoPermitido = 1;
+            int restricoes_atendidas = 1;
+
+            // Avalia cada flag (restrição) definida para este tipo de movimento
+            for (int f = 0; f < g.mov_perm[i].qts_flags; f++) {
+                FlagsMovimento regra = g.mov_perm[i].flags[f];
+                
+                if (regra == TOPO_REI && REItopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                else if (regra == FUNDO_REI && REIfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                else if (regra == TOPO_AS && AStopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                else if (regra == FUNDO_AS && ASfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                else if (regra == OU && cartaMaiorOuMenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == VALOR_INFERIOR && cartaChegadaEmenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == VALOR_SUPERIOR && cartaChegadaEmaior(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == MESMO_NAIPE && mesmoNaipe(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == MESMA_COR && mesmaCor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == PILHA_VAZIA && pilhaDestinoVazia(g.pilhas, posDest) != 0) restricoes_atendidas = 0;
+                else if (regra == ORDENADAS_DECRESCENTE && decrescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                else if (regra == ORDENADAS_CRESCENTE && crescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+                // A flag NAO_HA_RESTRICOES passa sempre
+            }
+
+            if (restricoes_atendidas == 1) {
+                movimentoPermitido = 1;
+            }
         }
         i++;
     }
