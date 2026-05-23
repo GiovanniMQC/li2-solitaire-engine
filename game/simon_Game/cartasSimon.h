@@ -10,7 +10,8 @@ struct baralho{
 
 typedef struct celula // guarda a lista ligada de pilhas
 {
-    char *tipo_Pilha;
+    char *tipo_Pilha; // Nome definido (ex. TAB)
+    char *flags; // Regras para pilha (ex. =)
     int numCartas;
     struct carta *pilha; //apontador para a primeira carta
     struct celula *prox; //apontador para a proxima celula (proxima pilha)
@@ -46,6 +47,8 @@ typedef struct {
     FlagsMovimento *flags; // Array dinâmico de enums (guarda as múltiplas regras do movimento)
     int qts_flags;         // Tamanho do array
 } MovimentoDef;
+
+
 
 // A estrutura principal que guarda toda a informação de uma Paciência lida do ficheiro
 typedef struct {
