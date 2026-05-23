@@ -13,7 +13,8 @@ struct baralho{
 
 typedef struct celula // guarda a lista ligada de pilhas
 {
-    char *tipo_Pilha;
+    char *tipo_Pilha; // Nome definido (ex. TAB)
+    char *flags; // Regras para pilha (ex. =)
     int numCartas;
     struct carta *pilha; //apontador para a primeira carta
     struct celula *prox; //apontador para a proxima celula (proxima pilha)
@@ -50,6 +51,12 @@ typedef struct {
     int qts_flags;         // Tamanho do array
 } MovimentoDef;
 
+typedef struct wins{
+    char *tipo;       // Nomes dos tipos de pilhas separado por espaço
+    int qntsWins;     // Num de condições para ganhar
+    int *numCartas;   // Array alocado dinamicamente (ex: malloc(qntsWins * sizeof(int)))
+} WinDef;
+
 // A estrutura principal que guarda toda a informação de uma Paciência lida do ficheiro
 typedef struct {
     char *nome_paciencia; // Nome retirado do ficheiro
@@ -61,6 +68,8 @@ typedef struct {
     MovimentoDef *mov_perm;      // Array dinâmico de movimentos permitidos
     int qts_mov_perm;
     
+    WinDef win_args; // Condições para usuário ganhar
+
     MovimentoDef *auto_movs;     // Array dinâmico de movimentos automáticos
     int qts_auto_movs;
 } EstadoJogo;

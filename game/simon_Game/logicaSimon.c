@@ -4,6 +4,7 @@
 #include <time.h>
 #include <locale.h>
 #include <dirent.h>
+#include <string.h>
 #include "cartasSimon.h"
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
@@ -561,7 +562,7 @@ int mesmaCor (Pilhas p, int posOrig[], int posDest[])
     return 1;
 }
 
-int pilhaDestinoVazia (Pilhas p, int posOrig[], int posDest[])
+int pilhaDestinoVazia (Pilhas p, int posDest[])
 {
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
@@ -734,4 +735,51 @@ int REItopo (Pilhas p, int posOrig[])
     if (origem.valor == 13)
         return 0;
     return 1;
+}
+
+void ganhouAjuda (WinDef w, int *i, char *temp)
+{
+    int num=0;
+    while (w.tipo[(*i)] != ' ' || w.tipo[(*i)] != '\0')
+    {
+        temp[num] = w.tipo[(*i)];
+        (*i)++;
+        num++;
+    }
+}
+
+int ganhou (Pilhas p, WinDef w)
+{
+    
+}
+
+void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
+{
+    Pilhas pilhaOrigem = procura_pilha(g.pilhas, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(g.pilhas, posDest[0]);
+
+    if (pilhaOrigem == NULL || pilhaDestino == NULL) {
+        printf("Posição inválida\n");
+        return;
+    }
+    int movimentoPermitido = 0;
+    int i = 0;
+
+    // Percorre as regras de movimento e compara com tipo da pilha
+    while (i < g.qts_mov_perm && movimentoPermitido == 0) {
+        if (pilhaOrigem->tipo_Pilha != NULL && pilhaDestino->tipo_Pilha != NULL &&
+            strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
+            strcmp(g.mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
+            
+            movimentoPermitido = 1;
+        }
+        i++;
+    }
+
+    if (movimentoPermitido == 1) {
+        Pilhas p = g.pilhas;
+        mover_cartas(&p, posOrig, posDest);
+    } else {
+        printf("Movimento Inválido\n");
+    }
 }
