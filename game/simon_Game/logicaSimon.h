@@ -1,3 +1,6 @@
+#ifndef LOGICA_SIMON_H
+#define LOGICA_SIMON_H
+
 #include "cartasSimon.h"
 #include <stdio.h>
 
@@ -35,3 +38,5 @@ int pilhaDestinoVazia (Pilhas *p, int posOrig[], int posDest[]);
 void salva_pilhas(FILE *save, Pilhas p);
 int salvaJogo (EstadoJogo g, int contagemSaves);
 void lerSaves(int numSave, EstadoJogo g);
+
+#endif

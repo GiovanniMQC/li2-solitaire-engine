@@ -60,9 +60,33 @@ int conta_pilhas_visiveis(Pilhas p)
     return contagem;
 }
 
+void print_tipos(Pilhas p)
+{
+    char nomePilha[30] = "";
+    Pilhas pTemp = p;
+    while (pTemp != NULL){
+        if (pTemp->tipo_Pilha != NULL && (strchr(pTemp->tipo_Pilha, '=') || strchr(pTemp->tipo_Pilha, '^')))
+        {
+            if(strcmp(nomePilha, pTemp->tipo_Pilha) != 0)
+            {
+                printf("%-10s ", pTemp->tipo_Pilha);
+                sprintf(nomePilha, "%s", pTemp->tipo_Pilha);
+            }
+            else
+            {
+                printf("           ");
+            }
+        }
+        pTemp = pTemp->prox;
+    }
+    printf("\n");
+}
+
 // Percorre as pilhas e dá print de todas as cartas presentes nelas
 void print_pilhas(Pilhas p, int lim){
     int linha = 0;
+    
+    print_tipos(p);
     while (linha<(lim+1)){
         Pilhas pTemp = p;
         while (pTemp != NULL){
@@ -71,7 +95,7 @@ void print_pilhas(Pilhas p, int lim){
                 if(pTemp->numCartas <= linha)
                     printf("          "); // espaco vazio
                 else if (strchr(pTemp->tipo_Pilha, '^') && linha < pTemp->numCartas - 1)
-                    printf("\033[30;47m  [****]  \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
+                    printf("\033[30;47m -      - \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
                 else
                     print_carta(pTemp->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
                     
