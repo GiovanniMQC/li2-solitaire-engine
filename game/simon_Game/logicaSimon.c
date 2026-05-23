@@ -561,7 +561,7 @@ int mesmaCor (Pilhas p, int posOrig[], int posDest[])
     return 1;
 }
 
-int pilhaDestinoVazia (Pilhas p, int posOrig[], int posDest[])
+int pilhaDestinoVazia (Pilhas p, int posDest[])
 {
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
@@ -734,4 +734,9 @@ int REItopo (Pilhas p, int posOrig[])
     if (origem.valor == 13)
         return 0;
     return 1;
+}
+
+int ganhou (Pilhas p)
+{
+
 }
