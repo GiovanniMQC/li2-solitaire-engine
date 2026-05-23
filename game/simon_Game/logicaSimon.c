@@ -748,12 +748,59 @@ void ganhouAjuda (WinDef w, int *i, char *temp)
     }
 }
 
+int tamanhoS (char *s)
+{
+    int i=0;
+    while (s[i] != '\0')
+    {
+        i++;
+    }
+    return i;
+}
+
 int ganhou (Pilhas p, WinDef w)
 {
-    int i=0, id=0, ii=0;
-    char temp[99] = {};
+    int i, j=0, id=0, win=0;
+    //p->tipo_Pilha
+    //w.tipo
+    int tamanhoString = tamanhoS(w.tipo); // "aaaa aaaa abbaa aaaaaaaaaaawasfaaa"
+                                          // "fundacao"
+    for (i=0; i<tamanhoString; i++)
+    {
+        if (w.tipo[i]== ' ')
+        {
+            id++;
+        }
+        else if (p->tipo_Pilha[j] == '\0')
+        {
+            if (not(p->numCartas==w.numCartas[id]))
+                return 1;
+            
+            win++;
 
-    
+            if (win == w.qntsWins)
+                return 0;
+            
+            p=p->prox;
+            i=0;
+            j=0;
+        }
+        else if (p->tipo_Pilha[j] == w.tipo[i])
+        {
+            j++;
+        }
+        else
+        {
+            j=0;
+        }
+
+        if (i+1 == tamanhoString && p->prox != NULL)
+        {
+            i=0;
+            p=p->prox;
+        }
+    }
+    return 1;
 }
 
 void percorrePilhas(Pilhas p, int pos)
