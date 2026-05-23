@@ -95,7 +95,7 @@ void print_pilhas(Pilhas p, int lim){
                 if(pTemp->numCartas <= linha)
                     printf("          "); // espaco vazio
                 else if (strchr(pTemp->tipo_Pilha, '^') && linha < pTemp->numCartas - 1)
-                    printf("\033[30;47m  [****]  \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
+                    printf("\033[30;47m -      - \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
                 else
                     print_carta(pTemp->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
                     
