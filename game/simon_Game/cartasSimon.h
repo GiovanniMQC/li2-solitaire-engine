@@ -1,3 +1,6 @@
+#ifndef CARTAS_SIMON_H
+#define CARTAS_SIMON_H
+
 struct carta{
     int naipe;
     // 0 - Copas, 1 - Espadas, 2 - Diamantes, 3 - Paus
@@ -34,10 +37,10 @@ typedef enum {
     CORES_ALTERNADAS,       // d        // feito* Not(mesmaCor)
     TOPO_CORES_ALTERNADAS,  // D        // feito
     PILHA_VAZIA,            // V 15     // feito
-    TOPO_AS,                // a        // feito
-    FUNDO_AS,               // A        // feito
-    TOPO_REI,               // k        // feito
-    FUNDO_REI               // K        // feito
+    TOPO_AS,                // a        // 
+    FUNDO_AS,               // A        // 
+    TOPO_REI,               // k        // 
+    FUNDO_REI               // K        // 
 } FlagsMovimento;
 
 typedef struct {
@@ -68,3 +71,5 @@ void print_carta(struct carta c);
 void print_pilhas(Pilhas p, int lim);
 void print_naipes_completos(Pilhas p);
 int opcao_inicio();
+
+#endif
