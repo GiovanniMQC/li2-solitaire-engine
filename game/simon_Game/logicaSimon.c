@@ -750,39 +750,36 @@ void ganhouAjuda (WinDef w, int *i, char *temp)
 
 int ganhou (Pilhas p, WinDef w)
 {
-    int i=0, id=0, ii=0;
-    char temp[99] = {};
-
     
-}
-
-void percorrePilhas(Pilhas p, int pos)
-{
-    int posPilhas = 0;
-    while (p != NULL && posPilhas != pos)
-    {
-        p = p->prox;
-        posPilhas++;
-    }
 }
 
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
 {
-    Pilhas pilOrig = g.pilhas;
-    Pilhas pilTemp = g.pilhas;
-    int posPilhas = 0, tipoOrigValido = 0, tipoDestValido = 0;
-    
-    percorrePilhas(pilTemp, posOrig[0]);
-    
-    if (pilTemp != NULL && strcmp(g.mov_perm->tipo_origem, pilTemp->tipo_Pilha) == 0)
-    {
-        pilTemp = pilOrig;
-        percorrePilhas(pilTemp, posDest[0]);
-        if(pilTemp != NULL && strcmp(g.mov_perm->tipo_destino, pilTemp->tipo_Pilha) == 0)
-        {
-            mover_cartas(&pilOrig, posOrig, posDest);
-            return;
-        }
+    Pilhas pilhaOrigem = procura_pilha(g.pilhas, posOrig[0]);
+    Pilhas pilhaDestino = procura_pilha(g.pilhas, posDest[0]);
+
+    if (pilhaOrigem == NULL || pilhaDestino == NULL) {
+        printf("Posição inválida\n");
+        return;
     }
-    printf("Movimento Inválido\n");
+    int movimentoPermitido = 0;
+    int i = 0;
+
+    // Percorre as regras de movimento e compara com tipo da pilha
+    while (i < g.qts_mov_perm && movimentoPermitido == 0) {
+        if (pilhaOrigem->tipo_Pilha != NULL && pilhaDestino->tipo_Pilha != NULL &&
+            strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
+            strcmp(g.mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
+            
+            movimentoPermitido = 1;
+        }
+        i++;
+    }
+
+    if (movimentoPermitido == 1) {
+        Pilhas p = g.pilhas;
+        mover_cartas(&p, posOrig, posDest);
+    } else {
+        printf("Movimento Inválido\n");
+    }
 }
