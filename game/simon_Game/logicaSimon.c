@@ -736,7 +736,21 @@ int REItopo (Pilhas p, int posOrig[])
     return 1;
 }
 
-int ganhou (Pilhas p)
+void ganhouAjuda (WinDef w, int *i, char *temp)
 {
+    int num=0;
+    while (w.tipo[(*i)] != ' ' || w.tipo[(*i)] != '\0')
+    {
+        temp[num] = w.tipo[(*i)];
+        (*i)++;
+        num++;
+    }
+}
 
+int ganhou (Pilhas p, WinDef w)
+{
+    int i=0, id=0, ii=0;
+    char temp[99] = {};
+
+    
 }
