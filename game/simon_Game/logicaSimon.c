@@ -543,6 +543,19 @@ int mesmoNaipeTopo (Pilhas p, int posOrig[], int posDest[])
     return 1;
 }
 
+int mesmoNaipe (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    for (int i = posOrig[1]; i<pilhaOrigem->numCartas;i++)
+        if (origem.naipe != pilhaOrigem->pilha[i].naipe)
+            return 1;
+    return 0;
+}
+
 int mesmaCorTopo (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
@@ -559,6 +572,18 @@ int mesmaCorTopo (Pilhas p, int posOrig[], int posDest[])
     if ((origem.naipe == chegada.naipe + 2) || (origem.naipe == chegada.naipe -2) || (origem.naipe == chegada.naipe))
         return 0;
     return 1;
+}
+
+int mesmaCor (Pilhas p, int posOrig[])
+{
+    Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+
+    for (int i = posOrig[1]; i<pilhaOrigem->numCartas;i++)
+        if (!((origem.naipe == pilhaOrigem->pilha[i].naipe + 2) || (origem.naipe == pilhaOrigem->pilha[i].naipe -2) || (origem.naipe == pilhaOrigem->pilha[i].naipe)))
+            return 1;
+    return 0;
 }
 
 int pilhaDestinoVazia (Pilhas p, int posDest[])
@@ -805,8 +830,8 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
         case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
         case VALOR_INFERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
         case VALOR_SUPERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
-        case MESMO_NAIPE:          return mesmoNaipe(p, posOrig, posDest);
-        case MESMA_COR:            return mesmaCor(p, posOrig, posDest);
+        case TOPO_MESMO_NAIPE:          return mesmoNaipeTopo(p, posOrig, posDest);
+        case TOPO_MESMA_COR:            return mesmaCorTopo(p, posOrig, posDest);
         case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
         case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
         case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);

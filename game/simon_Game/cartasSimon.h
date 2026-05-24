@@ -29,11 +29,11 @@ typedef enum {
     VALOR_INFERIOR,         // <        // feito*
     VALOR_SUPERIOR,         // > 5      // feito*
     OU,                     // ~        // feito*
-    MESMO_NAIPE,            // m        // feito*
+    MESMO_NAIPE,            // m        // feito
     TOPO_MESMO_NAIPE,       // M        // feito
     NAIPES_ALTERNADOS,      // x        // feito* Not(mesmoNaipe) mas para a pilha de cartas toda
     NAIPE_DIFERENTE,        // X 10     // feito* Not(mesmoNaipe)
-    MESMA_COR,              // c        // feito*
+    MESMA_COR,              // c        // feito
     TOPO_MESMA_COR,         // C        // feito
     CORES_ALTERNADAS,       // d        // feito* Not(mesmaCor)
     TOPO_CORES_ALTERNADAS,  // D        // feito
