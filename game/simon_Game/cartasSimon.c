@@ -51,7 +51,7 @@ int conta_pilhas_visiveis(Pilhas p)
     int contagem = 0;
     while(p != NULL)
     {
-        if(p->tipo_Pilha != NULL && (strchr(p->tipo_Pilha, '=') || strchr(p->tipo_Pilha, '^')))
+        if(p->flags != NULL && (strchr(p->flags, '=') || strchr(p->flags, '^')))
         {
             contagem++;
         }
@@ -65,7 +65,7 @@ void print_tipos(Pilhas p)
     char nomePilha[30] = "";
     Pilhas pTemp = p;
     while (pTemp != NULL){
-        if (pTemp->tipo_Pilha != NULL && (strchr(pTemp->tipo_Pilha, '=') || strchr(pTemp->tipo_Pilha, '^')))
+        if (pTemp->flags != NULL && (strchr(pTemp->flags, '=') || strchr(pTemp->flags, '^')))
         {
             if(strcmp(nomePilha, pTemp->tipo_Pilha) != 0)
             {
@@ -82,6 +82,24 @@ void print_tipos(Pilhas p)
     printf("\n");
 }
 
+void print_num_inv(Pilhas p)
+{
+    Pilhas pTemp = p;
+    int primeiro = 1;
+    
+    while (pTemp != NULL) {
+        // Se a pilha tem um nome e suas flags não indicam as visíveis '=' ou '^'
+        if (pTemp->tipo_Pilha != NULL && (pTemp->flags == NULL || (!strchr(pTemp->flags, '=') && !strchr(pTemp->flags, '^')))) {
+            if (primeiro) {
+                printf("\n--- Pilhas Ocultas ---\n");
+                primeiro = 0;
+            }
+            printf("%s: %d cartas\n", pTemp->tipo_Pilha, pTemp->numCartas);
+        }
+        pTemp = pTemp->prox;
+    }
+}
+
 // Percorre as pilhas e dá print de todas as cartas presentes nelas
 void print_pilhas(Pilhas p, int lim){
     int linha = 0;
@@ -91,10 +109,10 @@ void print_pilhas(Pilhas p, int lim){
         Pilhas pTemp = p;
         while (pTemp != NULL){
             // Renderiza a coluna apenas se ela for uma pilha visível (regras = ou ^)
-            if (pTemp->tipo_Pilha != NULL && (strchr(pTemp->tipo_Pilha, '=') || strchr(pTemp->tipo_Pilha, '^'))) {
+            if (pTemp->flags != NULL && (strchr(pTemp->flags, '=') || strchr(pTemp->flags, '^'))) {
                 if(pTemp->numCartas <= linha)
                     printf("          "); // espaco vazio
-                else if (strchr(pTemp->tipo_Pilha, '^') && linha < pTemp->numCartas - 1)
+                else if (strchr(pTemp->flags, '^') && linha < pTemp->numCartas - 1)
                     printf("\033[30;47m -      - \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
                 else
                     print_carta(pTemp->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
@@ -106,6 +124,7 @@ void print_pilhas(Pilhas p, int lim){
         linha++;
         printf("\n");
     }
+    print_num_inv(p);
 }
 
 // Mostra os naipes que o usuário já completou ou não

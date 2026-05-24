@@ -64,6 +64,10 @@ Pilhas cria_pilha(struct baralho *baralhos, int numCartas, int *contagemBaralho)
 {
     // Um apontador para o início de uma pilha.
     Pilhas p = malloc(sizeof(struct celula));
+
+    // FIX não está recebendo valores do DSL, inicia como NULL para não dar crash
+    p->tipo_Pilha = NULL;
+    p->flags = NULL;
     p->numCartas = numCartas;
     p->pilha = malloc(sizeof(struct carta) * numCartas);
     p->prox = NULL;
@@ -279,6 +283,8 @@ void limpa_memoria_jogo(Pilhas *p)
         while (atual != NULL) {
             proximo = atual->prox;
             if (atual->pilha != NULL) free(atual->pilha);
+            if (atual->tipo_Pilha != NULL) free(atual->tipo_Pilha);
+            if (atual->flags != NULL) free(atual->flags);
             free(atual);
             atual = proximo;
         }
@@ -475,7 +481,7 @@ int cartaChegadaEmenor (Pilhas p, int posOrig[], int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        chegada = (pilhaDestino->pilha)[posDest[1]];
+        chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
     if (origem.valor == chegada.valor+1)
@@ -493,7 +499,7 @@ int cartaChegadaEmaior (Pilhas p, int posOrig[], int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        chegada = (pilhaDestino->pilha)[posDest[1]];
+        chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
     if (origem.valor == chegada.valor-1)
@@ -511,7 +517,7 @@ int cartaMaiorOuMenor (Pilhas p, int posOrig[], int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        chegada = (pilhaDestino->pilha)[posDest[1]];
+        chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
     if ((origem.valor == chegada.valor-1) || (origem.valor == chegada.valor+1))
@@ -529,7 +535,7 @@ int mesmoNaipe (Pilhas p, int posOrig[], int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        chegada = (pilhaDestino->pilha)[posDest[1]];
+        chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
     if (origem.naipe == chegada.naipe)
@@ -547,7 +553,7 @@ int mesmaCor (Pilhas p, int posOrig[], int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        chegada = (pilhaDestino->pilha)[posDest[1]];
+        chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
     if ((origem.naipe == 0 || origem.naipe == 2) && (chegada.naipe == 0 || chegada.naipe == 2))

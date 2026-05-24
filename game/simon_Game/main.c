@@ -24,7 +24,8 @@ EstadoJogo criar_estado_golf_manual() {
     // Cria 7 pilhas para o Tabuleiro (TAB) com 5 cartas inicialmente
     for (int i = 0; i < 7; i++) {
         Pilhas nova = cria_pilha(b, 5, &contagem);
-        nova->tipo_Pilha = strdup("TAB="); // '=' faz com que mostre todas as cartas
+        nova->tipo_Pilha = strdup("TAB"); 
+        nova->flags = strdup("="); // '=' faz com que mostre todas as cartas
         if (inicio == NULL) {
             inicio = nova;
             atual = nova;
@@ -36,13 +37,15 @@ EstadoJogo criar_estado_golf_manual() {
     
     // Cria 1 pilha para o Descarte com 1 carta inicial
     Pilhas descarte = cria_pilha(b, 1, &contagem);
-    descarte->tipo_Pilha = strdup("DESCARTE=");
+    descarte->tipo_Pilha = strdup("DESCARTE");
+    descarte->flags = strdup("=");
     atual->prox = descarte;
     atual = descarte;
     
     // Cria 1 pilha para o Stock com 16 cartas iniciais
     Pilhas stock = cria_pilha(b, 16, &contagem);
-    stock->tipo_Pilha = strdup("STOCK_"); // O '_' garante que a pilha fique invisivel no print geral
+    stock->tipo_Pilha = strdup("STOCK"); 
+    stock->flags = strdup("_"); // O '_' garante que a pilha fique invisivel no print geral
     atual->prox = stock;
     atual = stock;
     
@@ -53,21 +56,21 @@ EstadoJogo criar_estado_golf_manual() {
     jogo.mov_perm = malloc(2 * sizeof(MovimentoDef));
     
     // MOV STOCK DESCARTE *
-    jogo.mov_perm[0].tipo_origem = strdup("STOCK_");
-    jogo.mov_perm[0].tipo_destino = strdup("DESCARTE=");
+    jogo.mov_perm[0].tipo_origem = strdup("STOCK");
+    jogo.mov_perm[0].tipo_destino = strdup("DESCARTE");
     jogo.mov_perm[0].qts_flags = 1;
     jogo.mov_perm[0].flags = malloc(sizeof(FlagsMovimento));
     jogo.mov_perm[0].flags[0] = NAO_HA_RESTRICOES; 
     
     // MOV TAB DESCARTE ~
-    jogo.mov_perm[1].tipo_origem = strdup("TAB=");
-    jogo.mov_perm[1].tipo_destino = strdup("DESCARTE=");
+    jogo.mov_perm[1].tipo_origem = strdup("TAB");
+    jogo.mov_perm[1].tipo_destino = strdup("DESCARTE");
     jogo.mov_perm[1].qts_flags = 1;
     jogo.mov_perm[1].flags = malloc(sizeof(FlagsMovimento));
     jogo.mov_perm[1].flags[0] = OU; 
     
     // Configuracao da Condicao de Vitoria (Golf: todas as 7 pilhas TAB= devem estar vazias)
-    jogo.win_args.tipo = strdup("TAB= TAB= TAB= TAB= TAB= TAB= TAB=");
+    jogo.win_args.tipo = strdup("TAB TAB TAB TAB TAB TAB TAB");
     jogo.win_args.qntsWins = 7;
     jogo.win_args.numCartas = malloc(7 * sizeof(int));
     for (int i = 0; i < 7; i++) {
@@ -101,6 +104,7 @@ int main(void)
         if (ganhou(jogo.pilhas, jogo.win_args) == 0) {
             printf("\nParabéns! Você ganhou o jogo %s!\n", jogo.nome_paciencia);
             gameOver = 1;
+            // FIX não deve ser entregue assim, não é permitido BREAK
             break;
         }
 
