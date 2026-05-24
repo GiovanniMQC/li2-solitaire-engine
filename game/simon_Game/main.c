@@ -111,12 +111,81 @@ EstadoJogo criar_estado_simplesimon_manual() {
     return jogo;
 }
 
+// Estado simplificado projetado apenas para testar a condicao de vitoria
+EstadoJogo criar_estado_simplesimon_teste_vitoria() {
+    EstadoJogo jogo;
+    jogo.nome_paciencia = strdup("Simple Simon (Teste Vitoria)");
+    jogo.nBaralhos = 1;
+    jogo.qts_pilhas = 14; 
+
+    struct baralho b[1];
+    inicializa_baralhos(b, 1);
+
+    int contagem = 0;
+    Pilhas inicio = NULL;
+    Pilhas atual = NULL;
+    
+    // 13 cartas na primeira coluna para simular uma sequência pronta a ir para a Fundação
+    int tab_sizes[10] = {13, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    
+    for (int i = 0; i < 10; i++) {
+        Pilhas nova = cria_pilha(b, tab_sizes[i], &contagem);
+        nova->tipo_Pilha = strdup("TAB"); 
+        nova->flags = strdup("="); 
+
+        // Força a primeira coluna a ser uma sequência perfeita de Copas (Rei ao Ás)
+        if (i == 0) {
+            for (int j = 0; j < 13; j++) {
+                nova->pilha[j].valor = 13 - j;
+                nova->pilha[j].naipe = 0; // Copas
+            }
+        }
+
+        if (inicio == NULL) { inicio = nova; atual = nova; } 
+        else { atual->prox = nova; atual = nova; }
+    }
+    
+    for (int i = 0; i < 4; i++) {
+        Pilhas nova = cria_pilha(b, 0, &contagem);
+        nova->tipo_Pilha = strdup("FUND");
+        nova->flags = strdup("=");
+        atual->prox = nova;
+        atual = nova;
+    }
+    
+    jogo.pilhas = inicio;
+    
+    jogo.qts_mov_perm = 0;
+    jogo.mov_perm = NULL;
+    
+    jogo.win_args.tipo = strdup("TAB TAB TAB TAB TAB TAB TAB TAB TAB TAB");
+    jogo.win_args.qntsWins = 10;
+    jogo.win_args.numCartas = malloc(10 * sizeof(int));
+    for (int i = 0; i < 10; i++) jogo.win_args.numCartas[i] = 0;
+
+    // Regra Automática: se houver uma sequência Rei ao Ás, do mesmo naipe, vai para FUND vazia
+    jogo.qts_auto_movs = 1;
+    jogo.auto_movs = malloc(1 * sizeof(MovimentoDef));
+    jogo.auto_movs[0].tipo_origem = strdup("TAB");
+    jogo.auto_movs[0].tipo_destino = strdup("FUND");
+    jogo.auto_movs[0].qts_flags = 6;
+    jogo.auto_movs[0].flags = malloc(6 * sizeof(FlagsMovimento));
+    jogo.auto_movs[0].flags[0] = PODE_SER_SEQUENCIAS;
+    jogo.auto_movs[0].flags[1] = ORDENADAS_DECRESCENTE;
+    jogo.auto_movs[0].flags[2] = MESMO_NAIPE;
+    jogo.auto_movs[0].flags[3] = FUNDO_REI;
+    jogo.auto_movs[0].flags[4] = TOPO_AS;
+    jogo.auto_movs[0].flags[5] = PILHA_VAZIA;
+    
+    return jogo;
+}
+
 int main(void)
 {
     setlocale(LC_ALL, "");
     
-    printf("--- Teste do Estado de Jogo Manual (Simple Simon) ---\n\n");
-    EstadoJogo jogo = criar_estado_simplesimon_manual();
+    printf("--- Teste do Estado de Jogo Manual (Simple Simon - Vitoria) ---\n\n");
+    EstadoJogo jogo = criar_estado_simplesimon_teste_vitoria();
     
     printf("Nome do Jogo: %s\n", jogo.nome_paciencia);
 
@@ -126,17 +195,18 @@ int main(void)
     int gameOver = 0;
 
     while (gameOver == 0) {
+        // Varre e executa os movimentos automaticos antes de renderizar o tabuleiro
+        processar_auto_movimentos(&jogo);
+
         printf("\n");
         print_pilhas(jogo.pilhas, acharLimite(jogo.pilhas));
 
         if (ganhou(jogo.pilhas, jogo.win_args) == 0) {
             printf("\nParabéns! Você ganhou o jogo %s!\n", jogo.nome_paciencia);
             gameOver = 1;
-            // FIX não deve ser entregue assim, não é permitido BREAK
-            break;
+        } else {
+            processar_jogada(&jogo, b, &contagemBaralho, tamPilhas, &gameOver);
         }
-
-        processar_jogada(&jogo, b, &contagemBaralho, tamPilhas, &gameOver);
     }
 
     // Liberta a memoria da estrutura ligada das pilhas
@@ -145,12 +215,14 @@ int main(void)
     free(jogo.win_args.numCartas);
 
     // Libertar array de movimentos permitidos da memória
-    for (int i=0; i < jogo.qts_mov_perm; i++) {
-        free(jogo.mov_perm[i].tipo_origem);
-        free(jogo.mov_perm[i].tipo_destino);
-        free(jogo.mov_perm[i].flags);
+    if (jogo.mov_perm != NULL) {
+        for (int i=0; i < jogo.qts_mov_perm; i++) {
+            free(jogo.mov_perm[i].tipo_origem);
+            free(jogo.mov_perm[i].tipo_destino);
+            free(jogo.mov_perm[i].flags);
+        }
+        free(jogo.mov_perm);
     }
-    free(jogo.mov_perm);
     
     // Libertar movimentos automáticos da memória
     if (jogo.auto_movs != NULL) {
