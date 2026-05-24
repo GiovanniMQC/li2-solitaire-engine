@@ -175,6 +175,28 @@ static void parse_win(char *linha, EstadoJogo *e) {
     e->win_args.numCartas[e->win_args.qntsWins++] = q;
 }
 
+// Função auxiliar para processar as linhas do ficheiro de configuração da paciência
+static void ler_linhas_paciencia(FILE *f, EstadoJogo *e, struct baralho **decks,
+                                 char nomes_tipo[][32], char flags_tipo[][32],
+                                 int *n_tipos, int *contagem_cartas) {
+    char linha[512];
+    while (fgets(linha, sizeof(linha), f)) {
+        remove_comentario(linha);
+        if (strlen(linha) == 0) continue;
+        
+        char cmd[32];
+        if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
+
+        if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
+        else if (strcmp(cmd, "BARALHOS") == 0) parse_baralhos(linha, e, decks);
+        else if (strcmp(cmd, "TIPO") == 0) parse_tipo(linha, nomes_tipo, flags_tipo, n_tipos);
+        else if (strcmp(cmd, "INIT") == 0) parse_init(linha, e, nomes_tipo, flags_tipo, *n_tipos, *decks, contagem_cartas);
+        else if (strcmp(cmd, "MOV") == 0) parse_movimento(linha, e, 0);
+        else if (strcmp(cmd, "AUTO") == 0) parse_movimento(linha, e, 1);
+        else if (strcmp(cmd, "WIN") == 0) parse_win(linha, e);
+    }
+}
+
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     FILE *f = fopen(caminho_ficheiro, "r");
     if (!f) return NULL;
@@ -185,23 +207,8 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     char nomes_tipo[32][32], flags_tipo[32][32];
     int n_tipos = 0, contagem_cartas = 0;
     struct baralho *decks = NULL;
-    char linha[512];
 
-    while (fgets(linha, sizeof(linha), f)) {
-        remove_comentario(linha);
-        if (strlen(linha) == 0) continue;
-        
-        char cmd[32];
-        if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
-
-        if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
-        else if (strcmp(cmd, "BARALHOS") == 0) parse_baralhos(linha, e, &decks);
-        else if (strcmp(cmd, "TIPO") == 0) parse_tipo(linha, nomes_tipo, flags_tipo, &n_tipos);
-        else if (strcmp(cmd, "INIT") == 0) parse_init(linha, e, nomes_tipo, flags_tipo, n_tipos, decks, &contagem_cartas);
-        else if (strcmp(cmd, "MOV") == 0) parse_movimento(linha, e, 0);
-        else if (strcmp(cmd, "AUTO") == 0) parse_movimento(linha, e, 1);
-        else if (strcmp(cmd, "WIN") == 0) parse_win(linha, e);
-    }
+    ler_linhas_paciencia(f, e, &decks, nomes_tipo, flags_tipo, &n_tipos, &contagem_cartas);
     
     if (decks) free(decks);
     fclose(f);
@@ -213,8 +220,10 @@ int salvar_jogo(EstadoJogo *g, const char *caminho_save) {
     FILE *f = fopen(caminho_save, "w");
     if (!f) return 0;
     
-    // Pega o caminho do ficheiro no estado do jogo
-    fprintf(f, "%s\n", g->caminho_ficheiro);
+    // Salva apenas o nome do ficheiro, ignorando a pasta
+    char *nome = strrchr(g->caminho_ficheiro, '/');
+    // verifica se é nulo e avança um char depois do /
+    fprintf(f, "%s\n", nome ? nome + 1 : g->caminho_ficheiro);
     
     // salva o conteúdo de cada pilha
     Pilhas p = g->pilhas;
@@ -239,6 +248,68 @@ int salvar_jogo(EstadoJogo *g, const char *caminho_save) {
     }
     fclose(f);
     return 1;
+}
+
+// Carrega um jogo salvo utilizando as funções de importação do estado
+EstadoJogo* carregar_save(const char *caminho_save) {
+    FILE *f = fopen(caminho_save, "r");
+    if (!f) return NULL;
+    
+    char linha[512];
+    if (!fgets(linha, sizeof(linha), f)) { fclose(f); return NULL; }
+    linha[strcspn(linha, "\r\n")] = '\0';
+    
+    char caminho[1024];
+    snprintf(caminho, sizeof(caminho), "paciencias/%s", linha);
+    
+    // Reutiliza o teu parser completo para montar as regras, vitórias e pilhas base
+    EstadoJogo *g = lerPaciencia(caminho);
+    if (!g) { fclose(f); return NULL; }
+    
+    // Substitui as cartas aleatórias iniciais pelas cartas registadas no save
+    Pilhas p = g->pilhas;
+    while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
+        linha[strcspn(linha, "\r\n")] = '\0';
+        
+        int n_cartas = 0;
+        char *copia = strdup(linha), *tok = strtok(copia, " ");
+        while (tok) { n_cartas++; tok = strtok(NULL, " "); }
+        free(copia);
+        
+        p->numCartas = n_cartas;
+        if (n_cartas > 0) {
+            p->pilha = realloc(p->pilha, n_cartas * sizeof(struct carta));
+            tok = strtok(linha, " ");
+            int i = 0;
+            while (tok && i < n_cartas) {
+                struct carta c = {0, 0};
+                int len = strlen(tok);
+                char naipe_char = tok[len-1]; // O último char é o Naipe (H, S, D, C)
+                
+                if (naipe_char == 'H') c.naipe = 0; else if (naipe_char == 'S') c.naipe = 1;
+                else if (naipe_char == 'D') c.naipe = 2; else if (naipe_char == 'C') c.naipe = 3;
+                
+                tok[len-1] = '\0'; // Remove o char do naipe para ler apenas o número
+                if (strcmp(tok, "A") == 0) c.valor = 1; else if (strcmp(tok, "J") == 0) c.valor = 11;
+                else if (strcmp(tok, "Q") == 0) c.valor = 12; else if (strcmp(tok, "K") == 0) c.valor = 13;
+                else c.valor = atoi(tok);
+                
+                p->pilha[i++] = c; tok = strtok(NULL, " ");
+            }
+        } else { free(p->pilha); p->pilha = NULL; }
+        p = p->prox;
+    }
+    
+    // Se o restante das linhas forem vazias, esvazia as pilhas seguintes
+    while (p != NULL) {
+        p->numCartas = 0;
+        free(p->pilha);
+        p->pilha = NULL;
+        p = p->prox;
+    }
+
+    fclose(f); 
+    return g;
 }
 
 // Parse uma string de cartas no formato "AH 2D 10S..." e carrega em pilha
@@ -282,35 +353,6 @@ static void carrega_cartas_pilha(char *linha, Pilhas p) {
         p->pilha[i++] = c;
         tok = strtok(NULL, " ");
     }
-}
-
-// Carrega um jogo salvo utilizando as funções de importação do estado
-EstadoJogo* carregar_save(const char *caminho_save) {
-    FILE *f = fopen(caminho_save, "r");
-    if (!f) return NULL;
-    
-    char linha[512];
-    if (!fgets(linha, sizeof(linha), f)) {
-        fclose(f);
-        return NULL;
-    }
-    linha[strcspn(linha, "\r\n")] = '\0';
-    
-    EstadoJogo *g = lerPaciencia(linha);
-    if (!g) {
-        fclose(f);
-        return NULL;
-    }
-    
-    Pilhas p = g->pilhas;
-    while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
-        linha[strcspn(linha, "\r\n")] = '\0';
-        carrega_cartas_pilha(linha, p);
-        p = p->prox;
-    }
-    
-    fclose(f);
-    return g;
 }
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
