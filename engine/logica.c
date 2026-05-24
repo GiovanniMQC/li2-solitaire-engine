@@ -175,6 +175,28 @@ static void parse_win(char *linha, EstadoJogo *e) {
     e->win_args.numCartas[e->win_args.qntsWins++] = q;
 }
 
+// Função auxiliar para processar as linhas do ficheiro de configuração da paciência
+static void ler_linhas_paciencia(FILE *f, EstadoJogo *e, struct baralho **decks,
+                                 char nomes_tipo[][32], char flags_tipo[][32],
+                                 int *n_tipos, int *contagem_cartas) {
+    char linha[512];
+    while (fgets(linha, sizeof(linha), f)) {
+        remove_comentario(linha);
+        if (strlen(linha) == 0) continue;
+        
+        char cmd[32];
+        if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
+
+        if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
+        else if (strcmp(cmd, "BARALHOS") == 0) parse_baralhos(linha, e, decks);
+        else if (strcmp(cmd, "TIPO") == 0) parse_tipo(linha, nomes_tipo, flags_tipo, n_tipos);
+        else if (strcmp(cmd, "INIT") == 0) parse_init(linha, e, nomes_tipo, flags_tipo, *n_tipos, *decks, contagem_cartas);
+        else if (strcmp(cmd, "MOV") == 0) parse_movimento(linha, e, 0);
+        else if (strcmp(cmd, "AUTO") == 0) parse_movimento(linha, e, 1);
+        else if (strcmp(cmd, "WIN") == 0) parse_win(linha, e);
+    }
+}
+
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     FILE *f = fopen(caminho_ficheiro, "r");
     if (!f) return NULL;
@@ -185,23 +207,8 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     char nomes_tipo[32][32], flags_tipo[32][32];
     int n_tipos = 0, contagem_cartas = 0;
     struct baralho *decks = NULL;
-    char linha[512];
 
-    while (fgets(linha, sizeof(linha), f)) {
-        remove_comentario(linha);
-        if (strlen(linha) == 0) continue;
-        
-        char cmd[32];
-        if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
-
-        if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
-        else if (strcmp(cmd, "BARALHOS") == 0) parse_baralhos(linha, e, &decks);
-        else if (strcmp(cmd, "TIPO") == 0) parse_tipo(linha, nomes_tipo, flags_tipo, &n_tipos);
-        else if (strcmp(cmd, "INIT") == 0) parse_init(linha, e, nomes_tipo, flags_tipo, n_tipos, decks, &contagem_cartas);
-        else if (strcmp(cmd, "MOV") == 0) parse_movimento(linha, e, 0);
-        else if (strcmp(cmd, "AUTO") == 0) parse_movimento(linha, e, 1);
-        else if (strcmp(cmd, "WIN") == 0) parse_win(linha, e);
-    }
+    ler_linhas_paciencia(f, e, &decks, nomes_tipo, flags_tipo, &n_tipos, &contagem_cartas);
     
     if (decks) free(decks);
     fclose(f);
@@ -292,7 +299,17 @@ EstadoJogo* carregar_save(const char *caminho_save) {
         } else { free(p->pilha); p->pilha = NULL; }
         p = p->prox;
     }
-    fclose(f); return g;
+    
+    // Se o restante das linhas forem vazias, esvazia as pilhas seguintes
+    while (p != NULL) {
+        p->numCartas = 0;
+        free(p->pilha);
+        p->pilha = NULL;
+        p = p->prox;
+    }
+
+    fclose(f); 
+    return g;
 }
 
 // Parse uma string de cartas no formato "AH 2D 10S..." e carrega em pilha
