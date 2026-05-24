@@ -795,24 +795,35 @@ int ganhou (Pilhas p, WinDef w)
     return 1;
 }
 
-void check_regra_mov(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[], int *result)
+int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+{
+    switch (regra) {
+        case TOPO_REI:             return REItopo(p, posOrig);
+        case FUNDO_REI:            return REIfundo(p, posOrig);
+        case TOPO_AS:              return AStopo(p, posOrig);
+        case FUNDO_AS:             return ASfundo(p, posOrig);
+        case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
+        case VALOR_INFERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
+        case VALOR_SUPERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
+        case MESMO_NAIPE:          return mesmoNaipe(p, posOrig, posDest);
+        case MESMA_COR:            return mesmaCor(p, posOrig, posDest);
+        case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
+        case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
+        case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);
+        default:                   return 0; // NAO_HA_RESTRICOES passa sempre
+    }
+}
+
+// Retorna 1 se todas as flags do movimento passarem, e 0 caso alguma falhe
+int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[])
 {
     int restricoes_atendidas = 1;
-    if (regra == TOPO_REI && REItopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    else if (regra == FUNDO_REI && REIfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    else if (regra == TOPO_AS && AStopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    else if (regra == FUNDO_AS && ASfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    else if (regra == OU && cartaMaiorOuMenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == VALOR_INFERIOR && cartaChegadaEmenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == VALOR_SUPERIOR && cartaChegadaEmaior(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == MESMO_NAIPE && mesmoNaipe(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == MESMA_COR && mesmaCor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == PILHA_VAZIA && pilhaDestinoVazia(g.pilhas, posDest) != 0) restricoes_atendidas = 0;
-    else if (regra == ORDENADAS_DECRESCENTE && decrescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    else if (regra == ORDENADAS_CRESCENTE && crescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-    // A flag NAO_HA_RESTRICOES passa sempre
-
-    (*result) = restricoes_atendidas;
+    for (int f = 0; f < mov.qts_flags && restricoes_atendidas == 1; f++) {
+        if (avalia_regra(mov.flags[f], p, posOrig, posDest) != 0) {
+            restricoes_atendidas = 0;
+        }
+    }
+    return restricoes_atendidas;
 }
 
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
@@ -820,39 +831,25 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
     Pilhas pilhaOrigem = procura_pilha(g.pilhas, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(g.pilhas, posDest[0]);
 
-    if (pilhaOrigem == NULL || pilhaDestino == NULL) {
+    // Checa se existe algo NULL
+    if (pilhaOrigem == NULL || pilhaDestino == NULL || 
+        pilhaOrigem->tipo_Pilha == NULL || pilhaDestino->tipo_Pilha == NULL) {
         printf("Posição inválida\n");
         return;
     }
-    int movimentoPermitido = 0;
-    int i = 0;
 
     // Percorre as regras de movimento e compara com tipo da pilha
-    while (i < g.qts_mov_perm && movimentoPermitido == 0) {
-        if (pilhaOrigem->tipo_Pilha != NULL && pilhaDestino->tipo_Pilha != NULL &&
-            strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
+    for (int i = 0; i < g.qts_mov_perm; i++) {
+        if (strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
             strcmp(g.mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
             
-            int restricoes_atendidas = 1;
-
-            // Avalia cada flag (restrição) definida para este tipo de movimento
-            for (int f = 0; f < g.mov_perm[i].qts_flags; f++) {
-                FlagsMovimento regra = g.mov_perm[i].flags[f];
-                // Checa se ele falha em alguma das regras e atualiza o restricoes para 0 se for o caso
-                check_regra_mov(regra, g.pilhas, posOrig, posDest, &(restricoes_atendidas));
-            }
-
-            if (restricoes_atendidas == 1) {
-                movimentoPermitido = 1;
+            if (valida_todas_regras(g.mov_perm[i], g.pilhas, posOrig, posDest) == 1) {
+                Pilhas p = g.pilhas;
+                mover_cartas(&p, posOrig, posDest);
+                return; // Movimento feito com sucesso, encerra a função
             }
         }
-        i++;
     }
 
-    if (movimentoPermitido == 1) {
-        Pilhas p = g.pilhas;
-        mover_cartas(&p, posOrig, posDest);
-    } else {
-        printf("Movimento Inválido\n");
-    }
+    printf("Movimento Inválido\n");
 }
