@@ -6,6 +6,8 @@
 
 int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]);
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro);
+int salvar_jogo(EstadoJogo *g, const char *caminho_save);
+EstadoJogo* carregar_save(const char *caminho_save);
 
 // Protótipos necessários para o main.c
 void processar_auto_movimentos(EstadoJogo *g);

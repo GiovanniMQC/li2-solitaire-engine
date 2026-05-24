@@ -10,10 +10,13 @@
 char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
 
     int escolha = 0;
-    printf("\nDigite o numero da paciencia que deseja (1 a %d): ", quantidade);
+    printf("\nDigite o numero da paciencia que deseja (1 a %d) ou 0 para Carregar um Save: ", quantidade);
     
     if (scanf("%d", &escolha) != 1) 
         return NULL;
+
+    if (escolha == 0) 
+        return "LOAD_SAVE";
 
     if (escolha >= 1 && escolha <= quantidade) 
         return lista_de_caminhos[escolha - 1]; 
@@ -153,13 +156,13 @@ int opcao_inicio()
 {
     unsigned int jogada_escolhida = 0;
     
-    printf("1 - Jogar, 2 - Reiniciar, 3 - Sair: ");
+    printf("1 - Jogar, 2 - Reiniciar, 3 - Salvar, 4 - Sair: ");
     scanf("%d", &jogada_escolhida);
     
-    while(jogada_escolhida > 3 || jogada_escolhida < 1)
+    while(jogada_escolhida > 4 || jogada_escolhida < 1)
     {
         printf("Opção inválida\n");
-        printf("1 - Jogar, 2 - Reiniciar, 3 - Sair: ");
+        printf("1 - Jogar, 2 - Reiniciar, 3 - Salvar, 4 - Sair: ");
         scanf("%d", &jogada_escolhida);
     }
 
