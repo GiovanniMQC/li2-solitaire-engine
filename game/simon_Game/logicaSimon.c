@@ -556,9 +556,7 @@ int mesmaCor (Pilhas p, int posOrig[], int posDest[])
         chegada = (pilhaDestino->pilha)[pilhaDestino->numCartas - 1];
     }
 
-    if ((origem.naipe == 0 || origem.naipe == 2) && (chegada.naipe == 0 || chegada.naipe == 2))
-        return 0;
-    if ((origem.naipe == 1 || origem.naipe == 3) && (chegada.naipe == 1 || chegada.naipe == 3))
+    if ((origem.naipe == chegada.naipe + 2) || (origem.naipe == chegada.naipe -2) || (origem.naipe == chegada.naipe))
         return 0;
     return 1;
 }
@@ -771,12 +769,10 @@ int tamanhoS (char *s)
 
 int ganhou (Pilhas p, WinDef w)
 {
-    int win = 0;
-    int id = 0;
+    int win = 0, id = 0;
     
     // Pega numa copia da string para usar strtok sem alterar a original
-    char *copia = strdup(w.tipo);
-    char *token = strtok(copia, " ");
+    char *copia = strdup(w.tipo), *token = strtok(copia, " ");
     
     Pilhas pTemp = p;
     
