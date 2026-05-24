@@ -1,3 +1,6 @@
+#ifndef ESTADO_JOGO_PROTOTIPO_H
+#define ESTADO_JOGO_PROTOTIPO_H
+
 struct carta{
     int naipe;
     // 0 - Copas, 1 - Espadas, 2 - Diamantes, 3 - Paus
@@ -70,3 +73,5 @@ typedef struct {
     MovimentoDef *auto_movs;     // Array dinâmico de movimentos automáticos
     int qts_auto_movs;
 } EstadoJogo;
+
+#endif

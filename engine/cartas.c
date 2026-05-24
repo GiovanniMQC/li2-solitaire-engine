@@ -22,8 +22,8 @@ char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
 #include <time.h>
 #include <locale.h>
 #include <string.h>
-#include "cartasSimon.h"
-#include "logicaSimon.h"
+#include "cartas.h"
+#include "logica.h"
 
 // Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
