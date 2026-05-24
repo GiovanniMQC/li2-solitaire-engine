@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <wchar.h>
+#include <time.h>
+#include <locale.h>
 #include <string.h>
+#include "cartas.h"
+#include "logica.h"
 
 char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
 
@@ -15,16 +20,6 @@ char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
 
     return NULL;
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <wchar.h>
-#include <time.h>
-#include <locale.h>
-#include <string.h>
-#include "cartas.h"
-#include "logica.h"
-
 // Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
 {
@@ -149,29 +144,6 @@ void print_pilhas(Pilhas p, int lim){
         printf("\n");
     }
     print_num_inv(p);
-}
-
-// Mostra os naipes que o usuário já completou ou não
-void print_naipes_completos(Pilhas p)
-{
-    Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
-    if(copas->numCartas > 0)
-    {
-        printf("✓♥  ");
-    } else printf(" ♥   ");
-    if(espadas->numCartas > 0)
-    {
-        printf(" ✓♠  ");
-    } else printf("  ♠   ");
-    if(ouros->numCartas > 0)
-    {
-        printf(" ✓♦  ");
-    } else printf("  ♦   ");
-    if(paus->numCartas > 0)
-    {
-        printf(" ✓♣  ");
-    } else printf("  ♣  ");
-    putchar('\n');
 }
 // Pede o numero da jogada no terminal para o player, nao para ate conseguir um numero valido de jogada
 //1 -> fazer a jogada

@@ -474,22 +474,6 @@ int acharLimite(Pilhas p){
     return maior;
 }
 
-// verifica se as as cartas são compatíveis
-int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, struct carta chegada, int origLin, int naipeSelecionado)
-{
-    
-    if ((pilhaOrigem->numCartas)<(origLin) || (!(origem.valor == (chegada.valor-1) || pilhaDestino->numCartas == 0)))
-        return 1;
-    
-    for (int i = origLin; i < pilhaOrigem->numCartas; i++)
-    {
-        struct carta cartaAverificar = (pilhaOrigem->pilha)[i];
-        if (!(cartaAverificar.naipe == naipeSelecionado) || (cartaAverificar.valor == (pilhaOrigem->pilha)[i+1].valor-1))
-            return 1;
-    }
-    return 0;
-}
-
 // verifica se as posiçoes pedidas sao validas
 int pos_valida(int posOrig[], int posDest[])
 {
@@ -498,40 +482,6 @@ int pos_valida(int posOrig[], int posDest[])
     return 0;
 }
 
-// verifica se a jogada pedida é possivel
-int valida_jogada(Pilhas p, int posOrig[], int posDest[])
-{
-    
-    int origCol = posOrig[0],
-    origLin = posOrig[1],
-    destCol = posDest[0],
-    destLin = posDest[1];
-    
-    Pilhas pilhaOrigem = procura_pilha(p, origCol),
-    pilhaDestino = procura_pilha(p, destCol);
-        
-    if (pos_valida(posOrig, posDest) || pilhaOrigem == NULL || pilhaDestino == NULL)
-        return 1;
-
-    destLin = pilhaDestino->numCartas - 1;
-
-    if (pilhaOrigem->pilha == NULL)
-    {
-        return 1;
-    }
-
-    struct carta origem = (pilhaOrigem->pilha)[origLin],
-    chegada = {destCol, 1}; // Carta placeholder caso a coluna destino esteja vazia
-
-    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) {
-        chegada = (pilhaDestino->pilha)[destLin];
-    }
-    
-    if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
-        return 1;
-
-    return 0;
-}
 
 // Liberta a memória de todas as pilhas do jogo
 void limpa_memoria_jogo(Pilhas *p)
@@ -656,105 +606,6 @@ void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBar
         return;
     }
 }
-
-// devolve o numero de cartas da mesma pinta seguidas
-int sequencias(Pilhas p)
-{
-    int seq = 1;
-    for (int i = p->numCartas-1; i>=1; i--)
-    {
-        if(!(((p->pilha)[i].naipe == (p->pilha)[i-1].naipe) && ((p->pilha)[i].valor == (p->pilha)[i-1].valor-1)))
-            return seq;
-        seq++;
-    }
-    return seq;
-}
-
-// verifica se existe uma jogada valida entre duas colunas
-int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
-{
-    if (colunaDest>=9 && coordenadaAtestar[0]>=9)
-        return 1;
-    if (colunaDest == coordenadaAtestar[0])
-        colunaDest++;
-
-    int coordenadasChegada[2] = {colunaDest, 0};
-
-    if (valida_jogada(p, coordenadaAtestar, coordenadasChegada) == 0)
-        return 0;
-    
-    return 1;
-}
-
-//subfunção do check gameover para ver se já não existem jogadas validas
-int existe_jogadaValida (Pilhas p)
-{
-    Pilhas p3 = p;
-    
-    for (int colunaOrig = 0; colunaOrig<10; colunaOrig++)
-    {
-        if (p3->numCartas > 0)
-        {
-            int coordenadaAtestar[2] = {colunaOrig, ((p3->numCartas)-(sequencias(p3)))};
-
-            for (int colunaDest = 0; colunaDest<10; colunaDest++)
-            {
-                if (verifica_colunas(p, coordenadaAtestar, colunaDest) == 0)
-                    return 0;
-            }
-        }
-        p3 = p3->prox;
-    }
-    return 1;
-}
-
-// subfunção do check gameover para ver se ganhou (as pilhas de pintas estão todas feitas)
-int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
-{
-    if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
-    {
-        int origem[2] = {i, (testeSeq->numCartas)-13};
-        int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
-        mover_cartas(&p, origem, destino);
-    }
-
-    Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
-    
-    if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
-    {
-        return 1;
-    }
-    return 0;
-}
-
-//verifica se o jogo acabou
-int check_gameOver(Pilhas p)
-{
-    Pilhas testeSeq = p;
-
-    for (int i = 0; i<10; i++)
-    {
-        if(verifica_ganhou(p, testeSeq, i))
-        {
-            printf("Ganhaste!\n");
-            return 1;
-        }
-            
-        testeSeq = testeSeq->prox;
-    }
-
-    if (existe_jogadaValida(p) == 1)
-    {
-        return 2;
-    }
-
-    return 0;
-}
-
-
-
-
-
 
 //
 // FUNCOES DA PARTE 3 PARA FICAR MAIS ORGANIZADO
@@ -1110,7 +961,7 @@ int ganhou (Pilhas p, WinDef w)
     return 1;
 }
 
-// Sub-helper: avalia as regras que dependem unicamente da pilha de origem
+// avalia as regras que dependem unicamente da pilha de origem
 int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[])
 {
     switch (regra) {
@@ -1192,7 +1043,7 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
     printf("Movimento Inválido\n");
 }
 
-// Sub-sub-helper: Testa todas as regras automáticas para um par específico de pilhas de origem e destino
+// Testa todas as regras automáticas para um par específico de pilhas de origem e destino
 int avalia_regras_auto_movimento(EstadoJogo *g, Pilhas pOrig, int colOrig, int linha, Pilhas pDest, int colDest) {
     for (int i = 0; i < g->qts_auto_movs; i++) {
         if (strcmp(g->auto_movs[i].tipo_origem, pOrig->tipo_Pilha) == 0 &&
@@ -1211,7 +1062,7 @@ int avalia_regras_auto_movimento(EstadoJogo *g, Pilhas pOrig, int colOrig, int l
     return 0;
 }
 
-// Sub-helper: Avalia todas as pilhas de destino possíveis para uma carta num movimento automático
+// Avalia todas as pilhas de destino possíveis para uma carta num movimento automático
 int tenta_destino_auto_movimento(EstadoJogo *g, Pilhas pOrig, int colOrig, int linha) {
     Pilhas pDest = g->pilhas;
     int colDest = 0;
