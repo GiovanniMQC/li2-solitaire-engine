@@ -8,87 +8,65 @@
 #include "cartas.h"
 #include "logica.h"
 
-// funcao para listar os arquivos e guardar os caminhos num array
+// Função auxiliar para ler o nome do jogo e registar na lista
+static void registar_paciencia(const char *caminho, char lista[][512], int *q) {
+    FILE *f = fopen(caminho, "r");
+    char buf[256], nome[256];
+    if (f && fgets(buf, sizeof(buf), f)) {
+        buf[strcspn(buf, "\r\n")] = '\0';
+        const char *exibir = (sscanf(buf, "JOGO %[^\n]", nome) == 1) ? nome : buf;
+        printf("%d - %s\n", *q + 1, exibir);
+        strcpy(lista[(*q)++], caminho);
+    }
+    if (f) fclose(f);
+}
+
 int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
     DIR *pasta = opendir(caminho_pasta);
     struct dirent *arquivo;
     int quantidade = 0;
-
+    if (!pasta) return 0;
     printf("=== Menu de Paciencias ===\n");
-
-    while ((arquivo = readdir(pasta)) != NULL) {
-        // ignora as pastas ocultas do sistema
-        if (strcmp(arquivo->d_name, ".") != 0 && strcmp(arquivo->d_name, "..") != 0) {        
-
-            // monta o caminho completo
-            char caminho_completo[512];
-            snprintf(caminho_completo, sizeof(caminho_completo), "%s/%s", caminho_pasta, arquivo->d_name);
-
-            // abre o arquivo em leitura
-            FILE *texto = fopen(caminho_completo, "r");
-            if (texto != NULL) {
-                char nome_do_jogo[256];
-                if (fgets(nome_do_jogo, sizeof(nome_do_jogo), texto) != NULL) {
-                    nome_do_jogo[strcspn(nome_do_jogo, "\r\n")] = '\0'; //remove o enter
-                    
-                    char nome_limpo[256];
-                    // Remove o prefixo "JOGO " para que no menu apareça apenas o nome real
-                    if (sscanf(nome_do_jogo, "JOGO %255s", nome_limpo) == 1)
-                        strcpy(nome_do_jogo, nome_limpo);
-                
-                    printf("%d - %s\n", quantidade + 1, nome_do_jogo);
-                    strcpy(lista_de_caminhos[quantidade], caminho_completo); 
-                    quantidade++;
-                }
-                fclose(texto);
-            }
+    while ((arquivo = readdir(pasta))) {
+        if (arquivo->d_name[0] != '.') {
+            char caminho[512];
+            snprintf(caminho, sizeof(caminho), "%s/%s", caminho_pasta, arquivo->d_name);
+            registar_paciencia(caminho, lista_de_caminhos, &quantidade);
         }
     }
     closedir(pasta);
-    return quantidade; 
+    return quantidade;
 }
 
 // Função auxiliar para mapear o char da flag na enumeração correta
-// Tabela de lookup: índice = char, valor = FlagsMovimento
-// Evita switch com 20 cases (CCN 21 → CCN 2)
-static const FlagsMovimento flag_lookup[128] = {
-    ['*'] = NAO_HA_RESTRICOES,
-    ['+'] = PODE_SER_SEQUENCIAS,
-    ['['] = ORDENADAS_DECRESCENTE,
-    [']'] = ORDENADAS_CRESCENTE,
-    ['<'] = VALOR_INFERIOR,
-    ['>'] = VALOR_SUPERIOR,
-    ['~'] = OU,
-    ['m'] = MESMO_NAIPE,
-    ['M'] = TOPO_MESMO_NAIPE,
-    ['x'] = NAIPES_ALTERNADOS,
-    ['X'] = NAIPE_DIFERENTE,
-    ['c'] = MESMA_COR,
-    ['C'] = TOPO_MESMA_COR,
-    ['d'] = CORES_ALTERNADAS,
-    ['D'] = TOPO_CORES_ALTERNADAS,
-    ['V'] = PILHA_VAZIA,
-    ['a'] = TOPO_AS,
-    ['A'] = FUNDO_AS,
-    ['k'] = TOPO_REI,
-    ['K'] = FUNDO_REI,
-};
-
-FlagsMovimento char_para_flag(char c)
-{
-    unsigned char uc = (unsigned char)c;
-    if (uc >= 128) return NAO_HA_RESTRICOES;
-    return flag_lookup[uc];
+FlagsMovimento char_para_flag(char c) {
+    switch(c) {
+        case '*': return NAO_HA_RESTRICOES;
+        case '+': return PODE_SER_SEQUENCIAS;
+        case '[': return ORDENADAS_DECRESCENTE;
+        case ']': return ORDENADAS_CRESCENTE;
+        case '<': return VALOR_INFERIOR;
+        case '>': return VALOR_SUPERIOR;
+        case '~': return OU;
+        case 'm': return MESMO_NAIPE;
+        case 'M': return TOPO_MESMO_NAIPE;
+        case 'x': return NAIPES_ALTERNADOS;
+        case 'X': return NAIPE_DIFERENTE;
+        case 'c': return MESMA_COR;
+        case 'C': return TOPO_MESMA_COR;
+        case 'd': return CORES_ALTERNADAS;
+        case 'D': return TOPO_CORES_ALTERNADAS;
+        case 'V': return PILHA_VAZIA;
+        case 'a': return TOPO_AS;
+        case 'A': return FUNDO_AS;
+        case 'k': return TOPO_REI;
+        case 'K': return FUNDO_REI;
+        default:  return NAO_HA_RESTRICOES;
+    }
 }
 
-typedef struct {
-    char nome[64];
-    char flags[64];
-} TipoDef;
-
 // Remove comentário (#...)
-static void remove_comentario(char *linha)
-{
+static void remove_comentario(char *linha) {
     char *hash = strchr(linha, '#');
     if (hash) *hash = '\0';
     int len = (int)strlen(linha);
@@ -97,203 +75,103 @@ static void remove_comentario(char *linha)
         linha[--len] = '\0';
 }
 
-// Procura o flags string para um dado nome de tipo no array de tipos
-static const char* flags_do_tipo(TipoDef tipos[], int nTipos, const char *nome)
-{
-    for (int i = 0; i < nTipos; i++)
-        if (strcmp(tipos[i].nome, nome) == 0)
-            return tipos[i].flags;
-    return "";
-}
+EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
+    FILE *f = fopen(caminho_ficheiro, "r");
+    if (!f) return NULL;
 
-// Parseia uma string de flags (ex: "+[m<") e devolve array alocado de FlagsMovimento
-static FlagsMovimento* parseia_flags(const char *flags_str, int *qts)
-{
-    int n = (int)strlen(flags_str);
-    *qts = 0;
-    if (n == 0) return NULL;
+    EstadoJogo *e = calloc(1, sizeof(EstadoJogo));
+    e->caminho_ficheiro = strdup(caminho_ficheiro);
 
-    FlagsMovimento *arr = malloc(n * sizeof(FlagsMovimento));
-    if (!arr) return NULL;
-
-    for (int i = 0; i < n; i++) {
-        if (flags_str[i] == ' ' || flags_str[i] == '\t') continue;
-        arr[(*qts)++] = char_para_flag(flags_str[i]);
-    }
-    return arr;
-}
-
-// Adiciona um MovimentoDef ao array dinâmico apontado por arr/qts
-static void adiciona_mov(MovimentoDef **arr, int *qts,
-                         const char *orig, const char *dest, const char *flags_str)
-{
-    *arr = realloc(*arr, (*qts + 1) * sizeof(MovimentoDef));
-    MovimentoDef *m = &(*arr)[*qts];
-    m->tipo_origem  = strdup(orig);
-    m->tipo_destino = strdup(dest);
-    m->flags        = parseia_flags(flags_str, &m->qts_flags);
-    (*qts)++;
-}
-
-// Adiciona uma condição WIN ao WinDef
-static void adiciona_win(WinDef *w, const char *tipo_pilha, int n_cartas)
-{
-    // Acrescenta o nome ao string de tipos (separados por espaço)
-    if (w->tipo == NULL) {
-        w->tipo = strdup(tipo_pilha);
-    } else {
-        int novo_len = (int)strlen(w->tipo) + 1 + (int)strlen(tipo_pilha) + 1;
-        w->tipo = realloc(w->tipo, novo_len);
-        strcat(w->tipo, " ");
-        strcat(w->tipo, tipo_pilha);
-    }
-    w->numCartas = realloc(w->numCartas, (w->qntsWins + 1) * sizeof(int));
-    w->numCartas[w->qntsWins] = n_cartas;
-    w->qntsWins++;
-}
-
-// Cria e encadeia uma nova célula de pilha sem cartas (usada em INIT)
-static Pilhas nova_celula_pilha(const char *tipo, const char *flags)
-{
-    Pilhas p = calloc(1, sizeof(struct celula));
-    p->tipo_Pilha = strdup(tipo);
-    p->flags      = strdup(flags);
-    p->numCartas  = 0;
-    p->pilha      = NULL;
-    p->prox       = NULL;
-    return p;
-}
-
-// Distribui n_cartas do baralho para a pilha p
-static void distribui_cartas(Pilhas p, struct baralho *baralhos, int n_cartas, int *contagem)
-{
-    if (n_cartas <= 0) return;
-    p->pilha    = malloc(n_cartas * sizeof(struct carta));
-    p->numCartas = n_cartas;
-    for (int i = 0; i < n_cartas; i++, (*contagem)++) {
-        int nb  = (*contagem) / 52;
-        int idx = (*contagem) % 52;
-        p->pilha[i] = baralhos[nb].cartas[idx];
-    }
-}
-
-// Contexto partilhado entre os handlers de lerPaciencia
-typedef struct {
-    TipoDef tipos[64];
-    int nTipos;
-    struct baralho *baralhos;
-    int contagem_cartas;
-    int baralhos_prontos;
-    Pilhas cauda;
-} ContextoLer;
-
-static void ler_cmd_jogo(EstadoJogo *e, char *linha)
-{
-    char *inicio = linha + 4;
-    while (*inicio == ' ' || *inicio == '\t') inicio++;
-    if (*inicio != '\0')
-        e->nome_paciencia = strdup(inicio);
-}
-
-static void ler_cmd_baralhos(EstadoJogo *e, char *linha)
-{
-    sscanf(linha, "BARALHOS %d", &e->nBaralhos);
-}
-
-static void ler_cmd_tipo(ContextoLer *ctx, char *linha)
-{
-    char tnome[64] = "", tflags[64] = "";
-    if (sscanf(linha, "TIPO %63s %63s", tnome, tflags) >= 1 && ctx->nTipos < 64) {
-        strncpy(ctx->tipos[ctx->nTipos].nome,  tnome,  63);
-        strncpy(ctx->tipos[ctx->nTipos].flags, tflags, 63);
-        ctx->nTipos++;
-    }
-}
-
-static void garante_baralhos(EstadoJogo *e, ContextoLer *ctx)
-{
-    if (ctx->baralhos_prontos || e->nBaralhos <= 0) return;
-    ctx->baralhos = malloc(e->nBaralhos * sizeof(struct baralho));
-    inicializa_baralhos(ctx->baralhos, e->nBaralhos);
-    ctx->baralhos_prontos = 1;
-}
-
-static void encadeia_pilha(EstadoJogo *e, ContextoLer *ctx, Pilhas nova)
-{
-    if (e->pilhas == NULL) { e->pilhas = nova; ctx->cauda = nova; }
-    else { ctx->cauda->prox = nova; ctx->cauda = nova; }
-    e->qts_pilhas++;
-}
-
-static void ler_cmd_init(EstadoJogo *e, ContextoLer *ctx, char *linha)
-{
-    char tnome[64] = "";
-    int n_cartas = 0;
-    if (sscanf(linha, "INIT %63s %d", tnome, &n_cartas) != 2) return;
-    garante_baralhos(e, ctx);
-    const char *fl = flags_do_tipo(ctx->tipos, ctx->nTipos, tnome);
-    Pilhas nova = nova_celula_pilha(tnome, fl);
-    distribui_cartas(nova, ctx->baralhos, n_cartas, &ctx->contagem_cartas);
-    encadeia_pilha(e, ctx, nova);
-}
-
-static void ler_cmd_mov(EstadoJogo *e, char *linha)
-{
-    char orig[64] = "", dest[64] = "", fl[64] = "";
-    if (sscanf(linha, "MOV %63s %63s %63s", orig, dest, fl) == 3)
-        adiciona_mov(&e->mov_perm, &e->qts_mov_perm, orig, dest, fl);
-}
-
-static void ler_cmd_auto(EstadoJogo *e, char *linha)
-{
-    char orig[64] = "", dest[64] = "", fl[64] = "";
-    if (sscanf(linha, "AUTO %63s %63s %63s", orig, dest, fl) == 3)
-        adiciona_mov(&e->auto_movs, &e->qts_auto_movs, orig, dest, fl);
-}
-
-static void ler_cmd_win(EstadoJogo *e, char *linha)
-{
-    char tnome[64] = "";
-    int n_cartas = 0;
-    if (sscanf(linha, "WIN %63s %d", tnome, &n_cartas) == 2)
-        adiciona_win(&e->win_args, tnome, n_cartas);
-}
-
-static void despacha_cmd(EstadoJogo *e, ContextoLer *ctx, char *linha, char *cmd)
-{
-    if      (strcmp(cmd, "JOGO")     == 0) ler_cmd_jogo(e, linha);
-    else if (strcmp(cmd, "BARALHOS") == 0) ler_cmd_baralhos(e, linha);
-    else if (strcmp(cmd, "TIPO")     == 0) ler_cmd_tipo(ctx, linha);
-    else if (strcmp(cmd, "INIT")     == 0) ler_cmd_init(e, ctx, linha);
-    else if (strcmp(cmd, "MOV")      == 0) ler_cmd_mov(e, linha);
-    else if (strcmp(cmd, "AUTO")     == 0) ler_cmd_auto(e, linha);
-    else if (strcmp(cmd, "WIN")      == 0) ler_cmd_win(e, linha);
-}
-
-EstadoJogo* lerPaciencia(const char *caminho_ficheiro)
-{
-    FILE *ficheiro = fopen(caminho_ficheiro, "r");
-    if (ficheiro == NULL) { printf("Nao foi possivel abrir\n"); return NULL; }
-
-    EstadoJogo *estado = calloc(1, sizeof(EstadoJogo));
-    if (!estado) { fclose(ficheiro); return NULL; }
-
-    estado->caminho_ficheiro = strdup(caminho_ficheiro);
-
-    ContextoLer ctx = {0};
+    char nomes_tipo[32][32], flags_tipo[32][32];
+    int n_tipos = 0, contagem_cartas = 0;
+    struct baralho *decks = NULL;
     char linha[512];
 
-    while (fgets(linha, sizeof(linha), ficheiro) != NULL) {
+    while (fgets(linha, sizeof(linha), f)) {
         remove_comentario(linha);
         if (strlen(linha) == 0) continue;
-        char cmd[32] = "";
-        if (sscanf(linha, "%31s", cmd) != 1) continue;
-        despacha_cmd(estado, &ctx, linha, cmd);
-    }
+        
+        char cmd[32];
+        if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
 
-    free(ctx.baralhos);
-    fclose(ficheiro);
-    return estado;
+        if (strcmp(cmd, "JOGO") == 0) {
+            char buffer[256];
+            if(sscanf(linha, "JOGO %[^\n]", buffer) == 1)
+                e->nome_paciencia = strdup(buffer);
+        } 
+        else if (strcmp(cmd, "BARALHOS") == 0) {
+            sscanf(linha, "BARALHOS %d", &e->nBaralhos);
+            if (e->nBaralhos > 0) {
+                decks = malloc(sizeof(struct baralho) * e->nBaralhos);
+                inicializa_baralhos(decks, e->nBaralhos);
+            }
+        } 
+        else if (strcmp(cmd, "TIPO") == 0) {
+            if(n_tipos < 32 && sscanf(linha, "TIPO %s %s", nomes_tipo[n_tipos], flags_tipo[n_tipos]) == 2)
+                n_tipos++;
+        } 
+        else if (strcmp(cmd, "INIT") == 0) {
+            char t_nome[32]; int q_cartas;
+            if(sscanf(linha, "INIT %s %d", t_nome, &q_cartas) == 2) {
+                Pilhas nova = calloc(1, sizeof(struct celula));
+                nova->tipo_Pilha = strdup(t_nome);
+                nova->numCartas = q_cartas;
+                for(int i=0; i<n_tipos; i++) 
+                    if(strcmp(nomes_tipo[i], t_nome) == 0) {
+                        nova->flags = strdup(flags_tipo[i]);
+                        break;
+                    }
+
+                if (q_cartas > 0 && decks != NULL) {
+                nova->pilha = malloc(sizeof(struct carta) * q_cartas);
+                for(int i=0; i<q_cartas; i++) 
+                    nova->pilha[i] = decks[contagem_cartas / 52].cartas[contagem_cartas++ % 52];
+            }
+            if (!e->pilhas) e->pilhas = nova;
+            else {
+                Pilhas aux = e->pilhas;
+                while (aux->prox) aux = aux->prox;
+                aux->prox = nova;
+            }
+            e->qts_pilhas++;
+            }
+        } 
+        else if (strcmp(cmd, "MOV") == 0 || strcmp(cmd, "AUTO") == 0) {
+            char o[32], d[32], fl[64]; 
+            if(sscanf(linha, "%*s %s %s %s", o, d, fl) == 3) {
+                int is_auto = (strcmp(cmd, "AUTO") == 0);
+                MovimentoDef **arr = is_auto ? &e->auto_movs : &e->mov_perm;
+                int *q = is_auto ? &e->qts_auto_movs : &e->qts_mov_perm;
+                
+                *arr = realloc(*arr, (*q + 1) * sizeof(MovimentoDef));
+                MovimentoDef *m = &(*arr)[*q];
+                m->tipo_origem = strdup(o); 
+                m->tipo_destino = strdup(d);
+                m->qts_flags = strlen(fl); 
+                m->flags = malloc(sizeof(FlagsMovimento) * m->qts_flags);
+                for(int i=0; i<m->qts_flags; i++) 
+                    m->flags[i] = char_para_flag(fl[i]);
+                (*q)++;
+            }
+        } 
+        else if (strcmp(cmd, "WIN") == 0) {
+            char t[32]; int q; 
+            if(sscanf(linha, "WIN %s %d", t, &q) == 2) {
+                if (!e->win_args.tipo) e->win_args.tipo = strdup(t);
+                else {
+                    char *tmp = malloc(strlen(e->win_args.tipo) + strlen(t) + 2);
+                    sprintf(tmp, "%s %s", e->win_args.tipo, t);
+                    free(e->win_args.tipo); 
+                    e->win_args.tipo = tmp;
+                }
+                e->win_args.numCartas = realloc(e->win_args.numCartas, (e->win_args.qntsWins + 1) * sizeof(int));
+                e->win_args.numCartas[e->win_args.qntsWins++] = q;
+            }
+        }
+    }
+    if (decks) free(decks); 
+    fclose(f);
+    return e;
 }
 
 // Salva o estado atual do jogo num arquivo .txt dentro da pasta 'saves'
