@@ -4,27 +4,32 @@
 #include "logica.h"
 #include "cartas.h"
 
+// Função auxiliar para tratar interativamente do carregamento do save
+EstadoJogo* carrega_save_interativo(void) {
+    listar_saves();
+    
+    int id_save;
+    printf("\nDigite o numero do save que deseja carregar: ");
+    if (scanf("%d", &id_save) != 1) {
+        printf("Entrada invalida.\n");
+        return NULL;
+    }
+    
+    char caminho_save[512];
+    sprintf(caminho_save, "saves/save_%d.txt", id_save);
+    EstadoJogo *jogo = carregar_save(caminho_save);
+    if (jogo == NULL) {
+        printf("Erro ao carregar o save. Verifique se o numero esta correto.\n");
+        return NULL;
+    }
+    printf("\nSave carregado com sucesso!\n");
+    return jogo;
+}
+
 // Função auxiliar para carregar um save do disco
-static EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
+EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
     if (strcmp(escolhido, "LOAD_SAVE") == 0) {
-        listar_saves();
-        
-        int id_save;
-        printf("\nDigite o numero do save que deseja carregar: ");
-        if (scanf("%d", &id_save) != 1) {
-            printf("Entrada invalida.\n");
-            return NULL;
-        }
-        
-        char caminho_save[512];
-        sprintf(caminho_save, "saves/save_%d.txt", id_save);
-        EstadoJogo *jogo = carregar_save(caminho_save);
-        if (jogo == NULL) {
-            printf("Erro ao carregar o save. Verifique se o numero esta correto.\n");
-            return NULL;
-        }
-        printf("\nSave carregado com sucesso!\n");
-        return jogo;
+        return carrega_save_interativo();
     }
     
     printf("\nVoce selecionou: %s\n", escolhido);
@@ -37,36 +42,21 @@ static EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
 }
 
 // Função para liberar toda a memória da estrutura de jogo
-static void libera_memoria_final(EstadoJogo *jogo) {
+void libera_memoria_final(EstadoJogo *jogo) {
     limpa_memoria_jogo(&(jogo->pilhas));
     free(jogo->nome_paciencia);
     free(jogo->caminho_ficheiro);
     free(jogo->win_args.tipo);
     free(jogo->win_args.numCartas);
     
-    if (jogo->mov_perm != NULL) {
-        for (int i = 0; i < jogo->qts_mov_perm; i++) {
-            free(jogo->mov_perm[i].tipo_origem);
-            free(jogo->mov_perm[i].tipo_destino);
-            free(jogo->mov_perm[i].flags);
-        }
-        free(jogo->mov_perm);
-    }
-    
-    if (jogo->auto_movs != NULL) {
-        for (int i = 0; i < jogo->qts_auto_movs; i++) {
-            free(jogo->auto_movs[i].tipo_origem);
-            free(jogo->auto_movs[i].tipo_destino);
-            free(jogo->auto_movs[i].flags);
-        }
-        free(jogo->auto_movs);
-    }
+    libera_movimentos_array(jogo->mov_perm, jogo->qts_mov_perm);
+    libera_movimentos_array(jogo->auto_movs, jogo->qts_auto_movs);
     
     free(jogo);
 }
 
 // Loop principal do jogo
-static void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBaralho, int tamPilhas[], int *gameOver) {
+void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBaralho, int tamPilhas[], int *gameOver) {
     while (*gameOver == 0) {
         processar_auto_movimentos(jogo);
         printf("\n");
@@ -81,7 +71,8 @@ static void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBa
     }
 }
 
-int main() {
+// Função auxiliar para tratar do menu inicial e carregamento do jogo
+EstadoJogo* inicializar_paciencia() {
     char lista[50][512];
     const char *pasta = "paciencias";
 
@@ -90,10 +81,14 @@ int main() {
 
     if (escolhido == NULL) {
         printf("\nSelecao invalida ou nenhum arquivo encontrado.\n");
-        return 1;
+        return NULL;
     }
 
-    EstadoJogo *jogo = carrega_save_ou_paciencia(escolhido);
+    return carrega_save_ou_paciencia(escolhido);
+}
+
+int main() {
+    EstadoJogo *jogo = inicializar_paciencia();
     if (jogo == NULL) return 1;
 
     printf("Nome do Jogo: %s\n", jogo->nome_paciencia);
