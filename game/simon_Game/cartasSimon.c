@@ -126,7 +126,7 @@ void print_pilhas(Pilhas p, int lim){
     print_tipos(p);
     while (linha<(lim+1)){
         Pilhas pTemp = p;
-        print_linhas(p, linha);
+        print_linhas(pTemp, linha);
         linha++;
         printf("\n");
     }

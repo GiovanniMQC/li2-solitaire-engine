@@ -525,7 +525,7 @@ int cartaMaiorOuMenor (Pilhas p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmoNaipe (Pilhas p, int posOrig[], int posDest[])
+int mesmoNaipeTopo (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -543,7 +543,7 @@ int mesmoNaipe (Pilhas p, int posOrig[], int posDest[])
     return 1;
 }
 
-int mesmaCor (Pilhas p, int posOrig[], int posDest[])
+int mesmaCorTopo (Pilhas p, int posOrig[], int posDest[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
@@ -674,13 +674,13 @@ int EsoUma (Pilhas p, int posOrig[])
 int crescenteVerif (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    if (pilhaOrigem == NULL || posOrig[1] < 0 || posOrig[1] >= pilhaOrigem->numCartas) return 1;
 
     struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
     int n = 1;
-    for (int i = posOrig[1]; i < (pilhaOrigem->numCartas);i++)
+    for (int i = posOrig[1] + 1; i < pilhaOrigem->numCartas; i++)
     {
-        
-        if (!(origem.valor == (pilhaOrigem->pilha[i]).valor-n))
+        if ((origem.valor + n) != (pilhaOrigem->pilha[i]).valor)
             return 1;
         n++;
     }
@@ -690,13 +690,13 @@ int crescenteVerif (Pilhas p, int posOrig[])
 int decrescenteVerif (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
+    if (pilhaOrigem == NULL || posOrig[1] < 0 || posOrig[1] >= pilhaOrigem->numCartas) return 1;
 
     struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
     int n = 1;
-    for (int i = posOrig[1]; i < (pilhaOrigem->numCartas);i++)
+    for (int i = posOrig[1] + 1; i < pilhaOrigem->numCartas; i++)
     {
-        
-        if (!((origem.valor)-n == (pilhaOrigem->pilha[i]).valor))
+        if ((origem.valor - n) != (pilhaOrigem->pilha[i]).valor)
             return 1;
         n++;
     }
@@ -769,7 +769,7 @@ int tamanhoS (char *s)
 
 int ganhou (Pilhas p, WinDef w)
 {
-    int win = 0, id = 0;
+    int id = 0;
     
     // Pega numa copia da string para usar strtok sem alterar a original
     char *copia = strdup(w.tipo), *token = strtok(copia, " ");
@@ -803,8 +803,8 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
         case TOPO_AS:              return AStopo(p, posOrig);
         case FUNDO_AS:             return ASfundo(p, posOrig);
         case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
-        case VALOR_INFERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
-        case VALOR_SUPERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
+        case VALOR_INFERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
+        case VALOR_SUPERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
         case MESMO_NAIPE:          return mesmoNaipe(p, posOrig, posDest);
         case MESMA_COR:            return mesmaCor(p, posOrig, posDest);
         case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
@@ -818,11 +818,21 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
 int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[])
 {
     int restricoes_atendidas = 1;
+    int permite_seq = 0;
+
     for (int f = 0; f < mov.qts_flags && restricoes_atendidas == 1; f++) {
-        if (avalia_regra(mov.flags[f], p, posOrig, posDest) != 0) {
+        if (mov.flags[f] == PODE_SER_SEQUENCIAS) {
+            permite_seq = 1;
+        } else if (avalia_regra(mov.flags[f], p, posOrig, posDest) != 0) {
             restricoes_atendidas = 0;
         }
     }
+
+    // Se não tiver a flag '+' (PODE_SER_SEQUENCIAS), só pode mover 1 carta!
+    if (permite_seq == 0 && EsoUma(p, posOrig) != 0) {
+        restricoes_atendidas = 0;
+    }
+
     return restricoes_atendidas;
 }
 

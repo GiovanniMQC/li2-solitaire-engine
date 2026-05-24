@@ -8,11 +8,11 @@
 #include "cartasSimon.h"
 #include "logicaSimon.h"
 
-EstadoJogo criar_estado_golf_manual() {
+EstadoJogo criar_estado_simplesimon_manual() {
     EstadoJogo jogo;
-    jogo.nome_paciencia = strdup("Golf");
+    jogo.nome_paciencia = strdup("Simple Simon");
     jogo.nBaralhos = 1;
-    jogo.qts_pilhas = 9; // 7(TAB) + 1(DESCARTE) + 1(STOCK)
+    jogo.qts_pilhas = 14; // 10(TAB) + 4(FUND)
 
     struct baralho b[1];
     inicializa_baralhos(b, 1);
@@ -21,9 +21,11 @@ EstadoJogo criar_estado_golf_manual() {
     Pilhas inicio = NULL;
     Pilhas atual = NULL;
     
-    // Cria 7 pilhas para o Tabuleiro (TAB) com 5 cartas inicialmente
-    for (int i = 0; i < 7; i++) {
-        Pilhas nova = cria_pilha(b, 5, &contagem);
+    int tab_sizes[10] = {8, 8, 8, 7, 6, 5, 4, 3, 2, 1};
+    
+    // Cria 10 pilhas para o Tabuleiro (TAB) com a distribuição do Simple Simon
+    for (int i = 0; i < 10; i++) {
+        Pilhas nova = cria_pilha(b, tab_sizes[i], &contagem);
         nova->tipo_Pilha = strdup("TAB"); 
         nova->flags = strdup("="); // '=' faz com que mostre todas as cartas
         if (inicio == NULL) {
@@ -35,50 +37,76 @@ EstadoJogo criar_estado_golf_manual() {
         }
     }
     
-    // Cria 1 pilha para o Descarte com 1 carta inicial
-    Pilhas descarte = cria_pilha(b, 1, &contagem);
-    descarte->tipo_Pilha = strdup("DESCARTE");
-    descarte->flags = strdup("=");
-    atual->prox = descarte;
-    atual = descarte;
-    
-    // Cria 1 pilha para o Stock com 16 cartas iniciais
-    Pilhas stock = cria_pilha(b, 16, &contagem);
-    stock->tipo_Pilha = strdup("STOCK"); 
-    stock->flags = strdup("_"); // O '_' garante que a pilha fique invisivel no print geral
-    atual->prox = stock;
-    atual = stock;
+    // Cria 4 pilhas para a Fundação (FUND) inicialmente vazias
+    for (int i = 0; i < 4; i++) {
+        Pilhas nova = cria_pilha(b, 0, &contagem);
+        nova->tipo_Pilha = strdup("FUND");
+        nova->flags = strdup("=");
+        atual->prox = nova;
+        atual = nova;
+    }
     
     jogo.pilhas = inicio;
     
     // Configuracao dos Movimentos
-    jogo.qts_mov_perm = 2;
-    jogo.mov_perm = malloc(2 * sizeof(MovimentoDef));
+    jogo.qts_mov_perm = 4;
+    jogo.mov_perm = malloc(4 * sizeof(MovimentoDef));
     
-    // MOV STOCK DESCARTE *
-    jogo.mov_perm[0].tipo_origem = strdup("STOCK");
-    jogo.mov_perm[0].tipo_destino = strdup("DESCARTE");
+    // MOV TAB TAB <
+    jogo.mov_perm[0].tipo_origem = strdup("TAB");
+    jogo.mov_perm[0].tipo_destino = strdup("TAB");
     jogo.mov_perm[0].qts_flags = 1;
     jogo.mov_perm[0].flags = malloc(sizeof(FlagsMovimento));
-    jogo.mov_perm[0].flags[0] = NAO_HA_RESTRICOES; 
+    jogo.mov_perm[0].flags[0] = VALOR_INFERIOR; 
     
-    // MOV TAB DESCARTE ~
+    // MOV TAB TAB +[m<
     jogo.mov_perm[1].tipo_origem = strdup("TAB");
-    jogo.mov_perm[1].tipo_destino = strdup("DESCARTE");
-    jogo.mov_perm[1].qts_flags = 1;
-    jogo.mov_perm[1].flags = malloc(sizeof(FlagsMovimento));
-    jogo.mov_perm[1].flags[0] = OU; 
+    jogo.mov_perm[1].tipo_destino = strdup("TAB");
+    jogo.mov_perm[1].qts_flags = 4;
+    jogo.mov_perm[1].flags = malloc(4 * sizeof(FlagsMovimento));
+    jogo.mov_perm[1].flags[0] = PODE_SER_SEQUENCIAS; 
+    jogo.mov_perm[1].flags[1] = ORDENADAS_DECRESCENTE;
+    jogo.mov_perm[1].flags[2] = MESMO_NAIPE;
+    jogo.mov_perm[1].flags[3] = VALOR_INFERIOR; 
     
-    // Configuracao da Condicao de Vitoria (Golf: todas as 7 pilhas TAB= devem estar vazias)
-    jogo.win_args.tipo = strdup("TAB TAB TAB TAB TAB TAB TAB");
-    jogo.win_args.qntsWins = 7;
-    jogo.win_args.numCartas = malloc(7 * sizeof(int));
-    for (int i = 0; i < 7; i++) {
+    // MOV TAB TAB V
+    jogo.mov_perm[2].tipo_origem = strdup("TAB");
+    jogo.mov_perm[2].tipo_destino = strdup("TAB");
+    jogo.mov_perm[2].qts_flags = 1;
+    jogo.mov_perm[2].flags = malloc(sizeof(FlagsMovimento));
+    jogo.mov_perm[2].flags[0] = PILHA_VAZIA; 
+    
+    // MOV TAB TAB +[mV
+    jogo.mov_perm[3].tipo_origem = strdup("TAB");
+    jogo.mov_perm[3].tipo_destino = strdup("TAB");
+    jogo.mov_perm[3].qts_flags = 4;
+    jogo.mov_perm[3].flags = malloc(4 * sizeof(FlagsMovimento));
+    jogo.mov_perm[3].flags[0] = PODE_SER_SEQUENCIAS; 
+    jogo.mov_perm[3].flags[1] = ORDENADAS_DECRESCENTE;
+    jogo.mov_perm[3].flags[2] = MESMO_NAIPE;
+    jogo.mov_perm[3].flags[3] = PILHA_VAZIA; 
+    
+    // Configuracao da Condicao de Vitoria (Simple Simon: todas as 10 pilhas TAB devem estar vazias)
+    jogo.win_args.tipo = strdup("TAB TAB TAB TAB TAB TAB TAB TAB TAB TAB");
+    jogo.win_args.qntsWins = 10;
+    jogo.win_args.numCartas = malloc(10 * sizeof(int));
+    for (int i = 0; i < 10; i++) {
         jogo.win_args.numCartas[i] = 0;
     }
 
-    jogo.auto_movs = NULL;
-    jogo.qts_auto_movs = 0;
+    // Movimentos Automaticos (AUTO TAB FUND +[mKaV)
+    jogo.qts_auto_movs = 1;
+    jogo.auto_movs = malloc(1 * sizeof(MovimentoDef));
+    jogo.auto_movs[0].tipo_origem = strdup("TAB");
+    jogo.auto_movs[0].tipo_destino = strdup("FUND");
+    jogo.auto_movs[0].qts_flags = 6;
+    jogo.auto_movs[0].flags = malloc(6 * sizeof(FlagsMovimento));
+    jogo.auto_movs[0].flags[0] = PODE_SER_SEQUENCIAS;
+    jogo.auto_movs[0].flags[1] = ORDENADAS_DECRESCENTE;
+    jogo.auto_movs[0].flags[2] = MESMO_NAIPE;
+    jogo.auto_movs[0].flags[3] = FUNDO_REI;
+    jogo.auto_movs[0].flags[4] = TOPO_AS;
+    jogo.auto_movs[0].flags[5] = PILHA_VAZIA;
     
     return jogo;
 }
@@ -87,8 +115,8 @@ int main(void)
 {
     setlocale(LC_ALL, "");
     
-    printf("--- Teste do Estado de Jogo Manual (Golf) ---\n\n");
-    EstadoJogo jogo = criar_estado_golf_manual();
+    printf("--- Teste do Estado de Jogo Manual (Simple Simon) ---\n\n");
+    EstadoJogo jogo = criar_estado_simplesimon_manual();
     
     printf("Nome do Jogo: %s\n", jogo.nome_paciencia);
 
@@ -123,6 +151,16 @@ int main(void)
         free(jogo.mov_perm[i].flags);
     }
     free(jogo.mov_perm);
+    
+    // Libertar movimentos automáticos da memória
+    if (jogo.auto_movs != NULL) {
+        for (int i=0; i < jogo.qts_auto_movs; i++) {
+            free(jogo.auto_movs[i].tipo_origem);
+            free(jogo.auto_movs[i].tipo_destino);
+            free(jogo.auto_movs[i].flags);
+        }
+        free(jogo.auto_movs);
+    }
     
     return EXIT_SUCCESS;
 }
