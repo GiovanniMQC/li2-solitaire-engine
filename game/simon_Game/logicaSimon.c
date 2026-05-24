@@ -832,6 +832,8 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
         case VALOR_SUPERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
         case TOPO_MESMO_NAIPE:          return mesmoNaipeTopo(p, posOrig, posDest);
         case TOPO_MESMA_COR:            return mesmaCorTopo(p, posOrig, posDest);
+        case MESMO_NAIPE:          return mesmoNaipeTopo(p, posOrig, posDest);
+        case MESMA_COR:            return mesmaCorTopo(p, posOrig, posDest);
         case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
         case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
         case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);
@@ -853,7 +855,7 @@ int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[]
         }
     }
 
-    // Se não tiver a flag '+' (PODE_SER_SEQUENCIAS), só pode mover 1 carta!
+    // Se não tiver a flag '+' (PODE_SER_SEQUENCIAS), só pode mover 1 carta
     if (permite_seq == 0 && EsoUma(p, posOrig) != 0) {
         restricoes_atendidas = 0;
     }
