@@ -179,8 +179,10 @@ int salvar_jogo(EstadoJogo *g, const char *caminho_save) {
     FILE *f = fopen(caminho_save, "w");
     if (!f) return 0;
     
-    // Pega o caminho do ficheiro no estado do jogo
-    fprintf(f, "%s\n", g->caminho_ficheiro);
+    // Salva apenas o nome do ficheiro, ignorando a pasta
+    char *nome = strrchr(g->caminho_ficheiro, '/');
+    // verifica se é nulo e avança um char depois do /
+    fprintf(f, "%s\n", nome ? nome + 1 : g->caminho_ficheiro);
     
     // salva o conteúdo de cada pilha
     Pilhas p = g->pilhas;
@@ -216,8 +218,11 @@ EstadoJogo* carregar_save(const char *caminho_save) {
     if (!fgets(linha, sizeof(linha), f)) { fclose(f); return NULL; }
     linha[strcspn(linha, "\r\n")] = '\0';
     
+    char caminho[1024];
+    snprintf(caminho, sizeof(caminho), "paciencias/%s", linha);
+    
     // Reutiliza o teu parser completo para montar as regras, vitórias e pilhas base
-    EstadoJogo *g = lerPaciencia(linha);
+    EstadoJogo *g = lerPaciencia(caminho);
     if (!g) { fclose(f); return NULL; }
     
     // Substitui as cartas aleatórias iniciais pelas cartas registadas no save
