@@ -771,21 +771,17 @@ int tamanhoS (char *s)
 
 int ganhou (Pilhas p, WinDef w)
 {
-    int win = 0;
     int id = 0;
     
     // Pega numa copia da string para usar strtok sem alterar a original
-    char *copia = strdup(w.tipo);
-    char *token = strtok(copia, " ");
+    char *copia = strdup(w.tipo), token = strtok(copia, " ");
     
     Pilhas pTemp = p;
     
     // Compara cada palavra token (nome da pilha) com as pilhas do jogo
     while (token != NULL && pTemp != NULL) {
         if (pTemp->tipo_Pilha != NULL && strcmp(pTemp->tipo_Pilha, token) == 0) {
-            if (pTemp->numCartas == w.numCartas[id]) {
-                win++;
-            } else {
+            if (pTemp->numCartas != w.numCartas[id]) {
                 free(copia);
                 return 1; // Falhou a condicao de cartas
             }
@@ -797,8 +793,28 @@ int ganhou (Pilhas p, WinDef w)
     
     free(copia);
     
-    if (win == w.qntsWins) return 0; // Ganhou!
+    if (id == w.qntsWins) return 0; // Ganhou!
     return 1;
+}
+
+void check_regra_mov(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[], int *result)
+{
+    int restricoes_atendidas = 1;
+    if (regra == TOPO_REI && REItopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    else if (regra == FUNDO_REI && REIfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    else if (regra == TOPO_AS && AStopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    else if (regra == FUNDO_AS && ASfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    else if (regra == OU && cartaMaiorOuMenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == VALOR_INFERIOR && cartaChegadaEmenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == VALOR_SUPERIOR && cartaChegadaEmaior(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == MESMO_NAIPE && mesmoNaipe(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == MESMA_COR && mesmaCor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == PILHA_VAZIA && pilhaDestinoVazia(g.pilhas, posDest) != 0) restricoes_atendidas = 0;
+    else if (regra == ORDENADAS_DECRESCENTE && decrescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    else if (regra == ORDENADAS_CRESCENTE && crescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
+    // A flag NAO_HA_RESTRICOES passa sempre
+
+    (*result) = restricoes_atendidas;
 }
 
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
@@ -824,20 +840,8 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
             // Avalia cada flag (restrição) definida para este tipo de movimento
             for (int f = 0; f < g.mov_perm[i].qts_flags; f++) {
                 FlagsMovimento regra = g.mov_perm[i].flags[f];
-                
-                if (regra == TOPO_REI && REItopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                else if (regra == FUNDO_REI && REIfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                else if (regra == TOPO_AS && AStopo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                else if (regra == FUNDO_AS && ASfundo(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                else if (regra == OU && cartaMaiorOuMenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == VALOR_INFERIOR && cartaChegadaEmenor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == VALOR_SUPERIOR && cartaChegadaEmaior(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == MESMO_NAIPE && mesmoNaipe(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == MESMA_COR && mesmaCor(g.pilhas, posOrig, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == PILHA_VAZIA && pilhaDestinoVazia(g.pilhas, posDest) != 0) restricoes_atendidas = 0;
-                else if (regra == ORDENADAS_DECRESCENTE && decrescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                else if (regra == ORDENADAS_CRESCENTE && crescenteVerif(g.pilhas, posOrig) != 0) restricoes_atendidas = 0;
-                // A flag NAO_HA_RESTRICOES passa sempre
+                // Checa se ele falha em alguma das regras e atualiza o restricoes para 0 se for o caso
+                check_regra_mov(regra, g.pilhas, posOrig, posDest, &(restricoes_atendidas));
             }
 
             if (restricoes_atendidas == 1) {
