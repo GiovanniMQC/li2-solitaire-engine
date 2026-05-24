@@ -38,31 +38,26 @@ int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
     return quantidade;
 }
 
-// Função auxiliar para mapear o char da flag na enumeração correta
 FlagsMovimento char_para_flag(char c) {
-    switch(c) {
-        case '*': return NAO_HA_RESTRICOES;
-        case '+': return PODE_SER_SEQUENCIAS;
-        case '[': return ORDENADAS_DECRESCENTE;
-        case ']': return ORDENADAS_CRESCENTE;
-        case '<': return VALOR_INFERIOR;
-        case '>': return VALOR_SUPERIOR;
-        case '~': return OU;
-        case 'm': return MESMO_NAIPE;
-        case 'M': return TOPO_MESMO_NAIPE;
-        case 'x': return NAIPES_ALTERNADOS;
-        case 'X': return NAIPE_DIFERENTE;
-        case 'c': return MESMA_COR;
-        case 'C': return TOPO_MESMA_COR;
-        case 'd': return CORES_ALTERNADAS;
-        case 'D': return TOPO_CORES_ALTERNADAS;
-        case 'V': return PILHA_VAZIA;
-        case 'a': return TOPO_AS;
-        case 'A': return FUNDO_AS;
-        case 'k': return TOPO_REI;
-        case 'K': return FUNDO_REI;
-        default:  return NAO_HA_RESTRICOES;
+    static const struct {
+        char c;
+        FlagsMovimento flag;
+    } FLAG_MAP[] = {
+        {'*', NAO_HA_RESTRICOES}, {'+', PODE_SER_SEQUENCIAS},
+        {'[', ORDENADAS_DECRESCENTE}, {']', ORDENADAS_CRESCENTE},
+        {'<', VALOR_INFERIOR}, {'>', VALOR_SUPERIOR}, {'~', OU},
+        {'m', MESMO_NAIPE}, {'M', TOPO_MESMO_NAIPE}, {'x', NAIPES_ALTERNADOS},
+        {'X', NAIPE_DIFERENTE}, {'c', MESMA_COR}, {'C', TOPO_MESMA_COR},
+        {'d', CORES_ALTERNADAS}, {'D', TOPO_CORES_ALTERNADAS},
+        {'V', PILHA_VAZIA}, {'a', TOPO_AS}, {'A', FUNDO_AS},
+        {'k', TOPO_REI}, {'K', FUNDO_REI}
+    };
+    int FLAG_MAP_SIZE = sizeof(FLAG_MAP) / sizeof(FLAG_MAP[0]);
+    
+    for (int i = 0; i < FLAG_MAP_SIZE; i++) {
+        if (FLAG_MAP[i].c == c) return FLAG_MAP[i].flag;
     }
+    return NAO_HA_RESTRICOES;
 }
 
 // Remove comentário (#...)
@@ -73,6 +68,111 @@ static void remove_comentario(char *linha) {
     while (len > 0 && (linha[len-1] == ' ' || linha[len-1] == '\t' ||
                        linha[len-1] == '\r' || linha[len-1] == '\n'))
         linha[--len] = '\0';
+}
+
+// Parseia comando JOGO
+static void parse_jogo(char *linha, EstadoJogo *e) {
+    char buffer[256];
+    if (sscanf(linha, "JOGO %[^\n]", buffer) == 1)
+        e->nome_paciencia = strdup(buffer);
+}
+
+// Parseia comando BARALHOS
+static void parse_baralhos(char *linha, EstadoJogo *e, struct baralho **decks) {
+    sscanf(linha, "BARALHOS %d", &e->nBaralhos);
+    if (e->nBaralhos > 0) {
+        *decks = malloc(sizeof(struct baralho) * e->nBaralhos);
+        inicializa_baralhos(*decks, e->nBaralhos);
+    }
+}
+
+// Parseia comando TIPO e armazena em arrays
+static void parse_tipo(char *linha, char nomes_tipo[][32], char flags_tipo[][32], int *n_tipos) {
+    if (*n_tipos < 32 && sscanf(linha, "TIPO %s %s", nomes_tipo[*n_tipos], flags_tipo[*n_tipos]) == 2)
+        (*n_tipos)++;
+}
+
+// Carrega cartas na pilha INIT durante parsing
+static void parse_init_carrega_cartas(Pilhas nova, int q_cartas, struct baralho *decks, int *contagem_cartas) {
+    if (q_cartas <= 0 || decks == NULL) return;
+    
+    nova->pilha = malloc(sizeof(struct carta) * q_cartas);
+    for (int i = 0; i < q_cartas; i++) {
+        nova->pilha[i] = decks[*contagem_cartas / 52].cartas[*contagem_cartas % 52];
+        (*contagem_cartas)++;
+    }
+}
+
+// Encontra tipo na lista e copia flags
+static void parse_init_copia_flags(Pilhas nova, const char *t_nome, char nomes_tipo[][32], 
+                                   char flags_tipo[][32], int n_tipos) {
+    for (int i = 0; i < n_tipos; i++) {
+        if (strcmp(nomes_tipo[i], t_nome) == 0) {
+            nova->flags = strdup(flags_tipo[i]);
+            break;
+        }
+    }
+}
+
+// Parseia comando INIT
+static void parse_init(char *linha, EstadoJogo *e, char nomes_tipo[][32], 
+                       char flags_tipo[][32], int n_tipos, struct baralho *decks, int *contagem_cartas) {
+    char t_nome[32];
+    int q_cartas;
+    
+    if (sscanf(linha, "INIT %s %d", t_nome, &q_cartas) != 2) return;
+    
+    Pilhas nova = calloc(1, sizeof(struct celula));
+    nova->tipo_Pilha = strdup(t_nome);
+    nova->numCartas = q_cartas;
+    parse_init_copia_flags(nova, t_nome, nomes_tipo, flags_tipo, n_tipos);
+    parse_init_carrega_cartas(nova, q_cartas, decks, contagem_cartas);
+    
+    if (!e->pilhas) e->pilhas = nova;
+    else {
+        Pilhas aux = e->pilhas;
+        while (aux->prox) aux = aux->prox;
+        aux->prox = nova;
+    }
+    e->qts_pilhas++;
+}
+
+// Parseia comando MOV ou AUTO
+static void parse_movimento(char *linha, EstadoJogo *e, int is_auto) {
+    char o[32], d[32], fl[64];
+    if (sscanf(linha, "%*s %s %s %s", o, d, fl) != 3) return;
+    
+    MovimentoDef **arr = is_auto ? &e->auto_movs : &e->mov_perm;
+    int *q = is_auto ? &e->qts_auto_movs : &e->qts_mov_perm;
+    
+    *arr = realloc(*arr, (*q + 1) * sizeof(MovimentoDef));
+    MovimentoDef *m = &(*arr)[*q];
+    m->tipo_origem = strdup(o);
+    m->tipo_destino = strdup(d);
+    m->qts_flags = strlen(fl);
+    m->flags = malloc(sizeof(FlagsMovimento) * m->qts_flags);
+    for (int i = 0; i < m->qts_flags; i++)
+        m->flags[i] = char_para_flag(fl[i]);
+    (*q)++;
+}
+
+// Parseia comando WIN
+static void parse_win(char *linha, EstadoJogo *e) {
+    char t[32];
+    int q;
+    
+    if (sscanf(linha, "WIN %s %d", t, &q) != 2) return;
+    
+    if (!e->win_args.tipo) e->win_args.tipo = strdup(t);
+    else {
+        char *tmp = malloc(strlen(e->win_args.tipo) + strlen(t) + 2);
+        sprintf(tmp, "%s %s", e->win_args.tipo, t);
+        free(e->win_args.tipo);
+        e->win_args.tipo = tmp;
+    }
+    e->win_args.numCartas = realloc(e->win_args.numCartas, 
+                                      (e->win_args.qntsWins + 1) * sizeof(int));
+    e->win_args.numCartas[e->win_args.qntsWins++] = q;
 }
 
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
@@ -94,82 +194,16 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
         char cmd[32];
         if (sscanf(linha, "%s", cmd) != 1 || linha[0] == '#') continue;
 
-        if (strcmp(cmd, "JOGO") == 0) {
-            char buffer[256];
-            if(sscanf(linha, "JOGO %[^\n]", buffer) == 1)
-                e->nome_paciencia = strdup(buffer);
-        } 
-        else if (strcmp(cmd, "BARALHOS") == 0) {
-            sscanf(linha, "BARALHOS %d", &e->nBaralhos);
-            if (e->nBaralhos > 0) {
-                decks = malloc(sizeof(struct baralho) * e->nBaralhos);
-                inicializa_baralhos(decks, e->nBaralhos);
-            }
-        } 
-        else if (strcmp(cmd, "TIPO") == 0) {
-            if(n_tipos < 32 && sscanf(linha, "TIPO %s %s", nomes_tipo[n_tipos], flags_tipo[n_tipos]) == 2)
-                n_tipos++;
-        } 
-        else if (strcmp(cmd, "INIT") == 0) {
-            char t_nome[32]; int q_cartas;
-            if(sscanf(linha, "INIT %s %d", t_nome, &q_cartas) == 2) {
-                Pilhas nova = calloc(1, sizeof(struct celula));
-                nova->tipo_Pilha = strdup(t_nome);
-                nova->numCartas = q_cartas;
-                for(int i=0; i<n_tipos; i++) 
-                    if(strcmp(nomes_tipo[i], t_nome) == 0) {
-                        nova->flags = strdup(flags_tipo[i]);
-                        break;
-                    }
-
-                if (q_cartas > 0 && decks != NULL) {
-                nova->pilha = malloc(sizeof(struct carta) * q_cartas);
-                for(int i=0; i<q_cartas; i++) 
-                    nova->pilha[i] = decks[contagem_cartas / 52].cartas[contagem_cartas++ % 52];
-            }
-            if (!e->pilhas) e->pilhas = nova;
-            else {
-                Pilhas aux = e->pilhas;
-                while (aux->prox) aux = aux->prox;
-                aux->prox = nova;
-            }
-            e->qts_pilhas++;
-            }
-        } 
-        else if (strcmp(cmd, "MOV") == 0 || strcmp(cmd, "AUTO") == 0) {
-            char o[32], d[32], fl[64]; 
-            if(sscanf(linha, "%*s %s %s %s", o, d, fl) == 3) {
-                int is_auto = (strcmp(cmd, "AUTO") == 0);
-                MovimentoDef **arr = is_auto ? &e->auto_movs : &e->mov_perm;
-                int *q = is_auto ? &e->qts_auto_movs : &e->qts_mov_perm;
-                
-                *arr = realloc(*arr, (*q + 1) * sizeof(MovimentoDef));
-                MovimentoDef *m = &(*arr)[*q];
-                m->tipo_origem = strdup(o); 
-                m->tipo_destino = strdup(d);
-                m->qts_flags = strlen(fl); 
-                m->flags = malloc(sizeof(FlagsMovimento) * m->qts_flags);
-                for(int i=0; i<m->qts_flags; i++) 
-                    m->flags[i] = char_para_flag(fl[i]);
-                (*q)++;
-            }
-        } 
-        else if (strcmp(cmd, "WIN") == 0) {
-            char t[32]; int q; 
-            if(sscanf(linha, "WIN %s %d", t, &q) == 2) {
-                if (!e->win_args.tipo) e->win_args.tipo = strdup(t);
-                else {
-                    char *tmp = malloc(strlen(e->win_args.tipo) + strlen(t) + 2);
-                    sprintf(tmp, "%s %s", e->win_args.tipo, t);
-                    free(e->win_args.tipo); 
-                    e->win_args.tipo = tmp;
-                }
-                e->win_args.numCartas = realloc(e->win_args.numCartas, (e->win_args.qntsWins + 1) * sizeof(int));
-                e->win_args.numCartas[e->win_args.qntsWins++] = q;
-            }
-        }
+        if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
+        else if (strcmp(cmd, "BARALHOS") == 0) parse_baralhos(linha, e, &decks);
+        else if (strcmp(cmd, "TIPO") == 0) parse_tipo(linha, nomes_tipo, flags_tipo, &n_tipos);
+        else if (strcmp(cmd, "INIT") == 0) parse_init(linha, e, nomes_tipo, flags_tipo, n_tipos, decks, &contagem_cartas);
+        else if (strcmp(cmd, "MOV") == 0) parse_movimento(linha, e, 0);
+        else if (strcmp(cmd, "AUTO") == 0) parse_movimento(linha, e, 1);
+        else if (strcmp(cmd, "WIN") == 0) parse_win(linha, e);
     }
-    if (decks) free(decks); 
+    
+    if (decks) free(decks);
     fclose(f);
     return e;
 }
@@ -256,9 +290,76 @@ EstadoJogo* carregar_save(const char *caminho_save) {
                 p->pilha[i++] = c; tok = strtok(NULL, " ");
             }
         } else { free(p->pilha); p->pilha = NULL; }
+// Parse uma string de cartas no formato "AH 2D 10S..." e carrega em pilha
+static void carrega_cartas_pilha(char *linha, Pilhas p) {
+    int n_cartas = 0;
+    char *copia = strdup(linha), *tok = strtok(copia, " ");
+    
+    while (tok) {
+        n_cartas++;
+        tok = strtok(NULL, " ");
+    }
+    free(copia);
+    
+    p->numCartas = n_cartas;
+    if (n_cartas == 0) {
+        p->pilha = NULL;
+        return;
+    }
+    
+    p->pilha = realloc(p->pilha, n_cartas * sizeof(struct carta));
+    tok = strtok(linha, " ");
+    int i = 0;
+    
+    while (tok && i < n_cartas) {
+        struct carta c = {0, 0};
+        int len = strlen(tok);
+        char naipe_char = tok[len - 1];
+        
+        if (naipe_char == 'H') c.naipe = 0;
+        else if (naipe_char == 'S') c.naipe = 1;
+        else if (naipe_char == 'D') c.naipe = 2;
+        else if (naipe_char == 'C') c.naipe = 3;
+        
+        tok[len - 1] = '\0';
+        if (strcmp(tok, "A") == 0) c.valor = 1;
+        else if (strcmp(tok, "J") == 0) c.valor = 11;
+        else if (strcmp(tok, "Q") == 0) c.valor = 12;
+        else if (strcmp(tok, "K") == 0) c.valor = 13;
+        else c.valor = atoi(tok);
+        
+        p->pilha[i++] = c;
+        tok = strtok(NULL, " ");
+    }
+}
+
+// Carrega um jogo salvo utilizando as funções de importação do estado
+EstadoJogo* carregar_save(const char *caminho_save) {
+    FILE *f = fopen(caminho_save, "r");
+    if (!f) return NULL;
+    
+    char linha[512];
+    if (!fgets(linha, sizeof(linha), f)) {
+        fclose(f);
+        return NULL;
+    }
+    linha[strcspn(linha, "\r\n")] = '\0';
+    
+    EstadoJogo *g = lerPaciencia(linha);
+    if (!g) {
+        fclose(f);
+        return NULL;
+    }
+    
+    Pilhas p = g->pilhas;
+    while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
+        linha[strcspn(linha, "\r\n")] = '\0';
+        carrega_cartas_pilha(linha, p);
         p = p->prox;
     }
-    fclose(f); return g;
+    
+    fclose(f);
+    return g;
 }
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
@@ -484,42 +585,40 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
     return 0;
 }
 
+// Valida se posição está fora dos limites
+static int pos_fora_limites(int col, int lin) {
+    return col >= 10 || col < 0 || lin < 0;
+}
+
 // verifica se as posiçoes pedidas sao validas
 int pos_valida(int posOrig[], int posDest[])
 {
-    if (posOrig[0]>=10 || posDest[0]>=10 || posDest[0]<0 || posOrig[0]<0 || posDest[1]<0 || posOrig[1]<0 || posOrig[0] == posDest[0])
-        return 1;
+    if (pos_fora_limites(posOrig[0], posOrig[1])) return 1;
+    if (pos_fora_limites(posDest[0], posDest[1])) return 1;
+    if (posOrig[0] == posDest[0]) return 1;
     return 0;
 }
 
 // verifica se a jogada pedida é possivel
 int valida_jogada(Pilhas p, int posOrig[], int posDest[])
 {
+    int origCol = posOrig[0], origLin = posOrig[1];
+    int destCol = posDest[0];
     
-    int origCol = posOrig[0],
-    origLin = posOrig[1],
-    destCol = posDest[0],
-    destLin = posDest[1];
-    
-    Pilhas pilhaOrigem = procura_pilha(p, origCol),
-    pilhaDestino = procura_pilha(p, destCol);
+    Pilhas pilhaOrigem = procura_pilha(p, origCol);
+    Pilhas pilhaDestino = procura_pilha(p, destCol);
         
     if (pos_valida(posOrig, posDest) || pilhaOrigem == NULL || pilhaDestino == NULL)
         return 1;
 
-    destLin = pilhaDestino->numCartas - 1;
-
     if (pilhaOrigem->pilha == NULL)
-    {
         return 1;
-    }
 
-    struct carta origem = (pilhaOrigem->pilha)[origLin],
-    chegada = {destCol, 1}; // Carta placeholder caso a coluna destino esteja vazia
-
-    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) {
-        chegada = (pilhaDestino->pilha)[destLin];
-    }
+    struct carta origem = pilhaOrigem->pilha[origLin];
+    struct carta chegada = {0, 1};
+    
+    if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0)
+        chegada = pilhaDestino->pilha[pilhaDestino->numCartas - 1];
     
     if (carta_check(pilhaOrigem, pilhaDestino, origem, chegada, origLin, origem.naipe) == 1)
         return 1;
@@ -591,74 +690,80 @@ int obter_proximo_save_id() {
     return max_id + 1;
 }
 
+// Função auxiliar para processar comando SAIR
+static void comando_sair(int *gameOver) {
+    printf("Saindo do jogo...\n");
+    *gameOver = 2;
+}
+
+// Função auxiliar para processar comando SALVAR
+static void comando_salvar(EstadoJogo *g) {
+    int prox_id = obter_proximo_save_id();
+    char nome_save[128];
+    sprintf(nome_save, "saves/save_%d.txt", prox_id);
+    
+    if (salvar_jogo(g, nome_save)) {
+        printf("Jogo salvo com sucesso no slot [%d]!\n", prox_id);
+    } else {
+        printf("Erro ao salvar o jogo.\n");
+    }
+}
+
+// Função auxiliar para liberar memória do estado
+static void libera_estado_jogo(EstadoJogo *g) {
+    limpa_memoria_jogo(&(g->pilhas));
+    free(g->nome_paciencia);
+    free(g->caminho_ficheiro);
+    free(g->win_args.tipo);
+    free(g->win_args.numCartas);
+    
+    if (g->mov_perm != NULL) {
+        for (int i = 0; i < g->qts_mov_perm; i++) {
+            free(g->mov_perm[i].tipo_origem);
+            free(g->mov_perm[i].tipo_destino);
+            free(g->mov_perm[i].flags);
+        }
+        free(g->mov_perm);
+    }
+    
+    if (g->auto_movs != NULL) {
+        for (int i = 0; i < g->qts_auto_movs; i++) {
+            free(g->auto_movs[i].tipo_origem);
+            free(g->auto_movs[i].tipo_destino);
+            free(g->auto_movs[i].flags);
+        }
+        free(g->auto_movs);
+    }
+}
+
+// Função auxiliar para processar comando RESTART
+static void comando_restart(EstadoJogo *g, int *gameOver) {
+    char *caminho = strdup(g->caminho_ficheiro);
+    libera_estado_jogo(g);
+    
+    EstadoJogo *novo = lerPaciencia(caminho);
+    free(caminho);
+    
+    if (novo != NULL) {
+        *g = *novo;
+        free(novo);
+    }
+    *gameOver = 0;
+}
+
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
-    // Sair do jogo
-    if(jogadaEscolhida == 4)
-    {
-        printf("Saindo do jogo...\n");
-        *gameOver = 2;
-    }
-    // SALVAR
-    else if (jogadaEscolhida == 3)
-    {
-        int prox_id = obter_proximo_save_id();
-        char nome_save[128];
-        sprintf(nome_save, "saves/save_%d.txt", prox_id);
-        
-        if (salvar_jogo(g, nome_save)) {
-            printf("Jogo salvo com sucesso no slot [%d]!\n", prox_id);
-        } else {
-            printf("Erro ao salvar o jogo.\n");
-        }
-    }
-
-    //RESTART: relê o ficheiro da paciência para reiniciar com novo baralho
-    else if(jogadaEscolhida == 2)
-    {
-        char *caminho = strdup(g->caminho_ficheiro);
-
-        // Liberta a memória do estado atual
-        limpa_memoria_jogo(&(g->pilhas));
-        free(g->nome_paciencia);
-        free(g->caminho_ficheiro);
-        free(g->win_args.tipo);
-        free(g->win_args.numCartas);
-        if (g->mov_perm != NULL) {
-            for (int i = 0; i < g->qts_mov_perm; i++) {
-                free(g->mov_perm[i].tipo_origem);
-                free(g->mov_perm[i].tipo_destino);
-                free(g->mov_perm[i].flags);
-            }
-            free(g->mov_perm);
-        }
-        if (g->auto_movs != NULL) {
-            for (int i = 0; i < g->qts_auto_movs; i++) {
-                free(g->auto_movs[i].tipo_origem);
-                free(g->auto_movs[i].tipo_destino);
-                free(g->auto_movs[i].flags);
-            }
-            free(g->auto_movs);
-        }
-
-        // Relê a paciência e copia o novo estado para g
-        EstadoJogo *novo = lerPaciencia(caminho);
-        free(caminho);
-        if (novo != NULL) {
-            *g = *novo;
-            free(novo); // liberta só o wrapper, o conteúdo foi copiado para g
-        }
-        *gameOver = 0;
-    }
-
-    //Jogar
-    else if(jogadaEscolhida==1)
-    {
+    if (jogadaEscolhida == 4) {
+        comando_sair(gameOver);
+    } else if (jogadaEscolhida == 3) {
+        comando_salvar(g);
+    } else if (jogadaEscolhida == 2) {
+        comando_restart(g, gameOver);
+    } else if (jogadaEscolhida == 1) {
         pedir_jogada(g);
-        return;
     }
 }
 
@@ -895,19 +1000,18 @@ int pilhaDestinoVazia (Pilhas p, int posDest[])
 // Imprime o valor da carta em um arquivo de save (A, 2-10, J, Q, K)
 void salva_valor(FILE *save, int valor)
 {
-    if (valor == 1) fprintf(save, "A");
+    if (valor >= 2 && valor <= 9) fprintf(save, "%d", valor);
+    else if (valor == 10) fprintf(save, "10");
+    else if (valor == 1) fprintf(save, "A");
     else if (valor == 11) fprintf(save, "J");
     else if (valor == 12) fprintf(save, "Q");
     else if (valor == 13) fprintf(save, "K");
-    else fprintf(save, "%d", valor);
 }
 
 void salva_naipe(FILE *save, int naipe)
 {
-    if (naipe == 0) fprintf(save, "H");
-    else if (naipe == 1) fprintf(save, "S");
-    else if (naipe == 2) fprintf(save, "D");
-    else if (naipe == 3) fprintf(save, "C");
+    const char NAIPES[] = {'H', 'S', 'D', 'C'};
+    if (naipe >= 0 && naipe <= 3) fprintf(save, "%c", NAIPES[naipe]);
 }
 
 // Percorre as pilhas e salva as cartas presentes nelas por linha
@@ -1118,15 +1222,13 @@ int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[])
         case MESMA_COR:            return mesmaCor(p, posOrig);
         case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
         case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);
-        default:                   return -1; // Regra não é deste grupo
+        default:                   return -1;
     }
 }
 
-int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+// avalia regras de destino e bidirecionais
+static int avalia_regra_destino(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
 {
-    int resultado = avalia_regra_origem(regra, p, posOrig);
-    if (resultado != -1) return resultado;
-
     switch (regra) {
         case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
         case VALOR_INFERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
@@ -1134,8 +1236,15 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
         case TOPO_MESMO_NAIPE:     return mesmoNaipeTopo(p, posOrig, posDest);
         case TOPO_MESMA_COR:       return mesmaCorTopo(p, posOrig, posDest);
         case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
-        default:                   return 0; // NAO_HA_RESTRICOES passa sempre
+        default:                   return 0;
     }
+}
+
+int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+{
+    int resultado = avalia_regra_origem(regra, p, posOrig);
+    if (resultado != -1) return resultado;
+    return avalia_regra_destino(regra, p, posOrig, posDest);
 }
 
 // Retorna 1 se todas as flags do movimento passarem, e 0 caso alguma falhe
