@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <CUnit/Basic.h>
-#include "logicaSimon.h"
+#include "logica.h"
+#include "cartas.h"
 
 int conta_pilhas_visiveis(Pilhas p);
+int tamanhoS(char *s);
+int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[]);
+int tenta_auto_movimentos(EstadoJogo *g);
 
 void teste_criaBaralho() {
 
