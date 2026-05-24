@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "logica.h"
 #include "cartas.h"
@@ -20,12 +21,33 @@ int main() {
         return 1;
     }
 
-    printf("\nVoce selecionou: %s\n", escolhido);
+    EstadoJogo *jogo = NULL;
 
-    EstadoJogo *jogo = lerPaciencia(escolhido);
-    if (jogo == NULL) {
-        printf("Erro ao carregar a paciencia.\n");
-        return 1;
+    if (strcmp(escolhido, "LOAD_SAVE") == 0) {
+        listar_saves();
+        
+        int id_save;
+        printf("\nDigite o numero do save que deseja carregar: ");
+        if (scanf("%d", &id_save) != 1) {
+            printf("Entrada invalida.\n");
+            return 1;
+        }
+        
+        char caminho_save[512];
+        sprintf(caminho_save, "saves/save_%d.txt", id_save);
+        jogo = carregar_save(caminho_save);
+        if (jogo == NULL) {
+            printf("Erro ao carregar o save. Verifique se o numero esta correto.\n");
+            return 1;
+        }
+        printf("\nSave carregado com sucesso!\n");
+    } else {
+        printf("\nVoce selecionou: %s\n", escolhido);
+        jogo = lerPaciencia(escolhido);
+        if (jogo == NULL) {
+            printf("Erro ao carregar a paciencia.\n");
+            return 1;
+        }
     }
 
     printf("Nome do Jogo: %s\n", jogo->nome_paciencia);
@@ -80,7 +102,6 @@ int main() {
         free(jogo->auto_movs);
     }
 
-    free(jogo->nome_paciencia);
     free(jogo);
 
     return 0;

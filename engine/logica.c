@@ -174,6 +174,88 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     return e;
 }
 
+// Salva o estado atual do jogo num arquivo .txt dentro da pasta 'saves'
+int salvar_jogo(EstadoJogo *g, const char *caminho_save) {
+    FILE *f = fopen(caminho_save, "w");
+    if (!f) return 0;
+    
+    // Pega o caminho do ficheiro no estado do jogo
+    fprintf(f, "%s\n", g->caminho_ficheiro);
+    
+    // salva o conteúdo de cada pilha
+    Pilhas p = g->pilhas;
+    while (p != NULL) {
+        for (int i = 0; i < p->numCartas; i++) {
+            struct carta c = p->pilha[i];
+            if (c.valor == 1) fprintf(f, "A");
+            else if (c.valor == 11) fprintf(f, "J");
+            else if (c.valor == 12) fprintf(f, "Q");
+            else if (c.valor == 13) fprintf(f, "K");
+            else fprintf(f, "%d", c.valor);
+            
+            if (c.naipe == 0) fprintf(f, "H");
+            else if (c.naipe == 1) fprintf(f, "S");
+            else if (c.naipe == 2) fprintf(f, "D");
+            else if (c.naipe == 3) fprintf(f, "C");
+            
+            if (i < p->numCartas - 1) fprintf(f, " ");
+        }
+        fprintf(f, "\n"); // Quebra de linha define o fim da pilha (pilhas vazias ficam em branco)
+        p = p->prox;
+    }
+    fclose(f);
+    return 1;
+}
+
+// Carrega um jogo salvo utilizando as funções de importação do estado
+EstadoJogo* carregar_save(const char *caminho_save) {
+    FILE *f = fopen(caminho_save, "r");
+    if (!f) return NULL;
+    
+    char linha[512];
+    if (!fgets(linha, sizeof(linha), f)) { fclose(f); return NULL; }
+    linha[strcspn(linha, "\r\n")] = '\0';
+    
+    // Reutiliza o teu parser completo para montar as regras, vitórias e pilhas base
+    EstadoJogo *g = lerPaciencia(linha);
+    if (!g) { fclose(f); return NULL; }
+    
+    // Substitui as cartas aleatórias iniciais pelas cartas registadas no save
+    Pilhas p = g->pilhas;
+    while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
+        linha[strcspn(linha, "\r\n")] = '\0';
+        
+        int n_cartas = 0;
+        char *copia = strdup(linha), *tok = strtok(copia, " ");
+        while (tok) { n_cartas++; tok = strtok(NULL, " "); }
+        free(copia);
+        
+        p->numCartas = n_cartas;
+        if (n_cartas > 0) {
+            p->pilha = realloc(p->pilha, n_cartas * sizeof(struct carta));
+            tok = strtok(linha, " ");
+            int i = 0;
+            while (tok && i < n_cartas) {
+                struct carta c = {0, 0};
+                int len = strlen(tok);
+                char naipe_char = tok[len-1]; // O último char é o Naipe (H, S, D, C)
+                
+                if (naipe_char == 'H') c.naipe = 0; else if (naipe_char == 'S') c.naipe = 1;
+                else if (naipe_char == 'D') c.naipe = 2; else if (naipe_char == 'C') c.naipe = 3;
+                
+                tok[len-1] = '\0'; // Remove o char do naipe para ler apenas o número
+                if (strcmp(tok, "A") == 0) c.valor = 1; else if (strcmp(tok, "J") == 0) c.valor = 11;
+                else if (strcmp(tok, "Q") == 0) c.valor = 12; else if (strcmp(tok, "K") == 0) c.valor = 13;
+                else c.valor = atoi(tok);
+                
+                p->pilha[i++] = c; tok = strtok(NULL, " ");
+            }
+        } else { free(p->pilha); p->pilha = NULL; }
+        p = p->prox;
+    }
+    fclose(f); return g;
+}
+
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
 {
@@ -458,25 +540,6 @@ void limpa_memoria_jogo(Pilhas *p)
     }
 }
 
-// Inicializa o jogo, atribuindo valor as variaveis iniciais, gerando e dando shuffle em um baralho
-void iniciar_jogo(struct baralho baralhos[], Pilhas *p, int *contagemBaralho, int tamPilhas[], int *gameOver, int numBaralhos) 
-{
-    // Liberta a memória do jogo anterior caso estejamos a reiniciar
-    limpa_memoria_jogo(p);
-    inicializa_baralhos(baralhos, numBaralhos);
-    *contagemBaralho = 0;
-    // Define os tamanhos iniciais para cada uma das 10 pilhas 
-    int valoresIniciais[] = {8,8,8,7,6,5,4,3,2,1,0,0,0,0};
-    int tamanhoArray = sizeof(valoresIniciais) / sizeof(valoresIniciais[0]);
-    for (int i = 0; i < tamanhoArray; i++)
-    {
-        tamPilhas[i] = valoresIniciais[i];
-    }
-
-    *p = cria_pilhas(baralhos, tamPilhas, tamanhoArray);
-    *gameOver = 0;
-}
-
 // Atualiza os valores para compatíveis com array e verifica se a jogada é válida
 void jogar_Coluna(EstadoJogo *g, int posOrig[], int posDest[])
 {
@@ -511,11 +574,23 @@ void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBar
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
-    //Sair do jogo
-    if(jogadaEscolhida == 3)
+    // Sair do jogo
+    if(jogadaEscolhida == 4)
     {
         printf("Saindo do jogo...\n");
         *gameOver = 2;
+    }
+    // SALVAR
+    else if (jogadaEscolhida == 3)
+    {
+        char nome_save[50];
+        printf("Digite o nome do arquivo para salvar (ex: saves/save_1.txt): ");
+        scanf("saves/%49s", nome_save);
+        if (salvar_jogo(g, nome_save)) {
+            printf("Jogo salvo com sucesso!\n");
+        } else {
+            printf("Erro ao salvar o jogo.\n");
+        }
     }
 
     //RESTART: relê o ficheiro da paciência para reiniciar com novo baralho
@@ -969,16 +1044,6 @@ int REItopo (Pilhas p, int posOrig[])
     return 1;
 }
 
-void ganhouAjuda (WinDef w, int *i, char *temp)
-{
-    int num=0;
-    while (w.tipo[(*i)] != ' ' || w.tipo[(*i)] != '\0')
-    {
-        temp[num] = w.tipo[(*i)];
-        (*i)++;
-        num++;
-    }
-}
 int tamanhoS (char *s)
 {
     int i=0;
