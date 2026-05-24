@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <CUnit/Basic.h>
 #include "logicaSimon.h"
+
+int conta_pilhas_visiveis(Pilhas p);
 
 void teste_criaBaralho() {
 
@@ -302,6 +305,222 @@ void teste_gameOver(void) {
     CU_ASSERT_EQUAL(check_gameOver(&t[0]), 1);
 }
 
+void teste_AS_REI(void) {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 3; p->prox = NULL; p->pilha = malloc(sizeof(struct carta) * 3);
+    
+    p->pilha[0].valor = 13; p->pilha[0].naipe = 0; // Fundo REI
+    p->pilha[1].valor = 5;  p->pilha[1].naipe = 0; // Meio
+    p->pilha[2].valor = 1;  p->pilha[2].naipe = 0; // Topo AS
+
+    int posOrig[2] = {0, 0}; // Começa na base (REI)
+    CU_ASSERT_EQUAL(REIfundo(p, posOrig), 0); // 0 = true
+    CU_ASSERT_EQUAL(ASfundo(p, posOrig), 1);  // 1 = false
+
+    int posOrigTopo[2] = {0, 2}; // Topo avalia sempre a ultima carta, indiferente da linha escolhida
+    CU_ASSERT_EQUAL(AStopo(p, posOrigTopo), 0); // 0 = true
+    CU_ASSERT_EQUAL(REItopo(p, posOrigTopo), 1); // 1 = false
+
+    free(p->pilha), free(p);
+}
+
+void teste_sequencias_ordem(void) {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 3; p->prox = NULL; p->pilha = malloc(sizeof(struct carta) * 3);
+    
+    // 5, 4, 3 (decrescente)
+    p->pilha[0].valor = 5;
+    p->pilha[1].valor = 4;
+    p->pilha[2].valor = 3;
+    
+    int posOrig[2] = {0, 0};
+    CU_ASSERT_EQUAL(decrescenteVerif(p, posOrig), 0); // Sucesso (0)
+    CU_ASSERT_EQUAL(crescenteVerif(p, posOrig), 1);   // Falha (1)
+
+    // 3, 4, 5 (crescente)
+    p->pilha[0].valor = 3;
+    p->pilha[1].valor = 4;
+    p->pilha[2].valor = 5;
+    CU_ASSERT_EQUAL(crescenteVerif(p, posOrig), 0); // Sucesso
+    CU_ASSERT_EQUAL(decrescenteVerif(p, posOrig), 1);   // Falha
+
+    free(p->pilha), free(p);
+}
+
+void teste_naipe_cor(void) {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 3; p->prox = NULL; p->pilha = malloc(sizeof(struct carta) * 3);
+    
+    // Mesmo naipe (Copas = 0)
+    p->pilha[0].naipe = 0; p->pilha[1].naipe = 0; p->pilha[2].naipe = 0;
+    int posOrig[2] = {0, 0};
+    CU_ASSERT_EQUAL(mesmoNaipe(p, posOrig), 0);
+    CU_ASSERT_EQUAL(mesmaCor(p, posOrig), 0);
+
+    // Mesma cor (Copas = 0, Ouros = 2) - Vermelhos
+    p->pilha[0].naipe = 0; p->pilha[1].naipe = 2; p->pilha[2].naipe = 0;
+    CU_ASSERT_EQUAL(mesmoNaipe(p, posOrig), 1); // Falha naipe
+    CU_ASSERT_EQUAL(mesmaCor(p, posOrig), 0);   // Passa cor
+
+    free(p->pilha), free(p);
+}
+
+void teste_pilhaDestinoVazia(void) {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 0; p->prox = NULL; p->pilha = NULL;
+    int posDest[2] = {0, 0};
+    
+    CU_ASSERT_EQUAL(pilhaDestinoVazia(p, posDest), 0); // Vazia = Sucesso
+    
+    p->numCartas = 1;
+    p->pilha = malloc(sizeof(struct carta));
+    CU_ASSERT_EQUAL(pilhaDestinoVazia(p, posDest), 1); // Não Vazia = Falha
+    
+    free(p->pilha), free(p);
+}
+
+void teste_EsoUma(void) {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->numCartas = 3; p->prox = NULL; p->pilha = malloc(sizeof(struct carta) * 3);
+
+    int posOrigVarias[2] = {0, 0}; // Tenta arrastar a partir da base (3 cartas juntas)
+    CU_ASSERT_EQUAL(EsoUma(p, posOrigVarias), 1); // Falha, porque sao varias
+    
+    int posOrigUma[2] = {0, 2}; // Tenta arrastar a ultima carta do topo
+    CU_ASSERT_EQUAL(EsoUma(p, posOrigUma), 0); // Sucesso, porque é só 1
+
+    free(p->pilha), free(p);
+}
+
+void teste_pos_valida() {
+    int p1[2] = {0, 0}, p2[2] = {1, 0};
+    CU_ASSERT_EQUAL(pos_valida(p1, p2), 0); // Valido
+    
+    int p3[2] = {15, 0};
+    CU_ASSERT_EQUAL(pos_valida(p3, p2), 1); // Invalido (fora do limite)
+    
+    int p4[2] = {1, 0};
+    CU_ASSERT_EQUAL(pos_valida(p2, p4), 1); // Invalido (colunas iguais)
+}
+
+void teste_cartaChegada_Relacoes() {
+    Pilhas orig = malloc(sizeof(struct celula));
+    Pilhas dest = malloc(sizeof(struct celula));
+    orig->numCartas = 1; orig->prox = dest; orig->pilha = malloc(sizeof(struct carta));
+    dest->numCartas = 1; dest->prox = NULL; dest->pilha = malloc(sizeof(struct carta));
+
+    orig->pilha[0].valor = 5;
+    dest->pilha[0].valor = 6;
+    int posOrig[2] = {0,0}, posDest[2] = {1,0};
+    
+    CU_ASSERT_EQUAL(cartaChegadaEmaior(orig, posOrig, posDest), 0); // 6 é maior que 5
+    CU_ASSERT_EQUAL(cartaChegadaEmenor(orig, posOrig, posDest), 1);
+    CU_ASSERT_EQUAL(cartaMaiorOuMenor(orig, posOrig, posDest), 0);
+
+    dest->pilha[0].valor = 4;
+    CU_ASSERT_EQUAL(cartaChegadaEmaior(orig, posOrig, posDest), 1);
+    CU_ASSERT_EQUAL(cartaChegadaEmenor(orig, posOrig, posDest), 0); // 4 é menor que 5
+    CU_ASSERT_EQUAL(cartaMaiorOuMenor(orig, posOrig, posDest), 0);
+
+    free(orig->pilha); free(dest->pilha); free(orig); free(dest);
+}
+
+void teste_mesmoNaipeTopo_mesmaCorTopo() {
+    Pilhas orig = malloc(sizeof(struct celula));
+    Pilhas dest = malloc(sizeof(struct celula));
+    orig->numCartas = 1; orig->prox = dest; orig->pilha = malloc(sizeof(struct carta));
+    dest->numCartas = 1; dest->prox = NULL; dest->pilha = malloc(sizeof(struct carta));
+
+    orig->pilha[0].naipe = 0; // Copas
+    dest->pilha[0].naipe = 0; // Copas
+    int posOrig[2] = {0,0}, posDest[2] = {1,0};
+
+    CU_ASSERT_EQUAL(mesmoNaipeTopo(orig, posOrig, posDest), 0);
+    CU_ASSERT_EQUAL(mesmaCorTopo(orig, posOrig, posDest), 0);
+
+    dest->pilha[0].naipe = 2; // Ouros (mesma cor, naipe dif)
+    CU_ASSERT_EQUAL(mesmoNaipeTopo(orig, posOrig, posDest), 1);
+    CU_ASSERT_EQUAL(mesmaCorTopo(orig, posOrig, posDest), 0);
+
+    free(orig->pilha); free(dest->pilha); free(orig); free(dest);
+}
+
+void teste_ganhou() {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->tipo_Pilha = strdup("TAB"); p->numCartas = 0; p->prox = NULL; p->pilha = NULL;
+
+    WinDef w;
+    w.tipo = strdup("TAB");
+    w.qntsWins = 1;
+    w.numCartas = malloc(sizeof(int));
+    w.numCartas[0] = 0;
+
+    CU_ASSERT_EQUAL(ganhou(p, w), 0); // 0 = sucesso (pilha está vazia como requisitado)
+
+    p->numCartas = 1;
+    CU_ASSERT_EQUAL(ganhou(p, w), 1); // 1 = falha (tem 1 carta)
+
+    free(p->tipo_Pilha); free(p); free(w.tipo); free(w.numCartas);
+}
+
+void teste_avalia_regras() {
+    Pilhas orig = malloc(sizeof(struct celula));
+    Pilhas dest = malloc(sizeof(struct celula));
+    orig->numCartas = 1; orig->prox = dest; orig->pilha = malloc(sizeof(struct carta));
+    dest->numCartas = 0; dest->prox = NULL; dest->pilha = NULL;
+
+    orig->pilha[0].valor = 1; // AS
+    int posOrig[2] = {0,0}, posDest[2] = {1,0};
+
+    CU_ASSERT_EQUAL(avalia_regra_origem(TOPO_AS, orig, posOrig), 0); // Sucesso
+    CU_ASSERT_EQUAL(avalia_regra_origem(TOPO_REI, orig, posOrig), 1); // Falha
+    CU_ASSERT_EQUAL(avalia_regra(PILHA_VAZIA, orig, posOrig, posDest), 0); // Sucesso
+
+    free(orig->pilha); free(orig); free(dest);
+}
+
+void teste_auto_movimentos() {
+    EstadoJogo g;
+    g.pilhas = malloc(sizeof(struct celula));
+    g.pilhas->tipo_Pilha = strdup("TAB"); g.pilhas->numCartas = 1; 
+    g.pilhas->pilha = malloc(sizeof(struct carta)); g.pilhas->pilha[0].valor = 13;
+    
+    g.pilhas->prox = malloc(sizeof(struct celula));
+    g.pilhas->prox->tipo_Pilha = strdup("FUND"); g.pilhas->prox->numCartas = 0;
+    g.pilhas->prox->pilha = NULL; g.pilhas->prox->prox = NULL;
+
+    g.qts_auto_movs = 1;
+    g.auto_movs = malloc(sizeof(MovimentoDef));
+    g.auto_movs[0].tipo_origem = strdup("TAB");
+    g.auto_movs[0].tipo_destino = strdup("FUND");
+    g.auto_movs[0].qts_flags = 1;
+    g.auto_movs[0].flags = malloc(sizeof(FlagsMovimento));
+    g.auto_movs[0].flags[0] = PILHA_VAZIA;
+
+    // Testa a cadeia toda (tenta_auto, tenta_destino, avalia_regras, mover)
+    CU_ASSERT_EQUAL(tenta_auto_movimentos(&g), 1);
+    CU_ASSERT_EQUAL(g.pilhas->numCartas, 0); // Saiu do TAB
+    CU_ASSERT_EQUAL(g.pilhas->prox->numCartas, 1); // Chegou no FUND
+
+    free(g.pilhas->prox->tipo_Pilha); free(g.pilhas->prox->pilha); free(g.pilhas->prox);
+    free(g.pilhas->tipo_Pilha); free(g.pilhas->pilha); free(g.pilhas);
+    free(g.auto_movs[0].tipo_origem); free(g.auto_movs[0].tipo_destino); free(g.auto_movs[0].flags); free(g.auto_movs);
+}
+
+void teste_secundarias_tamanho_visiveis() {
+    CU_ASSERT_EQUAL(tamanhoS("teste"), 5);
+
+    Pilhas p1 = malloc(sizeof(struct celula));
+    Pilhas p2 = malloc(sizeof(struct celula));
+    p1->flags = strdup("="); p1->prox = p2;
+    p2->flags = strdup("_"); p2->prox = NULL;
+
+    CU_ASSERT_EQUAL(conta_pilhas_visiveis(p1), 1); // Apenas a '=' é contada
+
+    free(p1->flags); free(p1);
+    free(p2->flags); free(p2);
+}
+
 int main() {
     
     // inicializa
@@ -328,11 +547,23 @@ int main() {
     CU_add_test(pSuite, "teste_moverCartas", teste_moverCartas),
     CU_add_test(pSuite, "teste_acharLimite", teste_acharLimite),
     CU_add_test(pSuite, "teste_cartaCheck", teste_cartaCheck),
-    CU_add_test(pSuite, "teste_validaJogada", teste_validaJogada);
-    CU_add_test(pSuite, "teste_iniciarJogo", teste_iniciarJogo);
-    CU_add_test(pSuite, "teste_sequencias", teste_sequencias);
-    CU_add_test(pSuite, "teste_existe_jogadaValida", teste_existe_jogadaValida);
-    CU_add_test(pSuite, "teste_gameOver", teste_gameOver);
+    CU_add_test(pSuite, "teste_validaJogada", teste_validaJogada),
+    CU_add_test(pSuite, "teste_iniciarJogo", teste_iniciarJogo),
+    CU_add_test(pSuite, "teste_sequencias", teste_sequencias),
+    CU_add_test(pSuite, "teste_existe_jogadaValida", teste_existe_jogadaValida),
+    CU_add_test(pSuite, "teste_gameOver", teste_gameOver),
+    CU_add_test(pSuite, "teste_AS_REI", teste_AS_REI),
+    CU_add_test(pSuite, "teste_sequencias_ordem", teste_sequencias_ordem),
+    CU_add_test(pSuite, "teste_naipe_cor", teste_naipe_cor),
+    CU_add_test(pSuite, "teste_pilhaDestinoVazia", teste_pilhaDestinoVazia),
+    CU_add_test(pSuite, "teste_EsoUma", teste_EsoUma),
+    CU_add_test(pSuite, "teste_pos_valida", teste_pos_valida),
+    CU_add_test(pSuite, "teste_cartaChegada_Relacoes", teste_cartaChegada_Relacoes),
+    CU_add_test(pSuite, "teste_mesmoNaipeTopo_mesmaCorTopo", teste_mesmoNaipeTopo_mesmaCorTopo),
+    CU_add_test(pSuite, "teste_ganhou", teste_ganhou),
+    CU_add_test(pSuite, "teste_avalia_regras", teste_avalia_regras),
+    CU_add_test(pSuite, "teste_auto_movimentos", teste_auto_movimentos),
+    CU_add_test(pSuite, "teste_secundarias_tamanho_visiveis", teste_secundarias_tamanho_visiveis);
 
     // corre tudo e limpa a memoria
     CU_basic_set_mode(CU_BRM_VERBOSE);

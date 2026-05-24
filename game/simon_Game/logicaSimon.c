@@ -592,9 +592,9 @@ int pilhaDestinoVazia (Pilhas p, int posDest[])
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        return 0;
+        return 1; // Falha a restrição porque a pilha NÃO está vazia
     }
-    return 1;
+    return 0; // Passa a restrição porque a pilha está vazia!
 }
 
 // Imprime o valor da carta em um arquivo de save (A, 2-10, J, Q, K)
@@ -743,7 +743,7 @@ int REIfundo (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
 
-    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
+    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
 
     if (origem.valor == 13)
         return 0;
@@ -765,7 +765,7 @@ int REItopo (Pilhas p, int posOrig[])
 {
     Pilhas pilhaOrigem = procura_pilha(p, posOrig[0]);
 
-    struct carta origem = (pilhaOrigem->pilha)[posOrig[1]];
+    struct carta origem = (pilhaOrigem->pilha)[(pilhaOrigem->numCartas)-1];
 
     if (origem.valor == 13)
         return 0;
@@ -820,23 +820,34 @@ int ganhou (Pilhas p, WinDef w)
     return 1;
 }
 
-int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+// Sub-helper: avalia as regras que dependem unicamente da pilha de origem
+int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[])
 {
     switch (regra) {
         case TOPO_REI:             return REItopo(p, posOrig);
         case FUNDO_REI:            return REIfundo(p, posOrig);
         case TOPO_AS:              return AStopo(p, posOrig);
         case FUNDO_AS:             return ASfundo(p, posOrig);
+        case MESMO_NAIPE:          return mesmoNaipe(p, posOrig);
+        case MESMA_COR:            return mesmaCor(p, posOrig);
+        case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
+        case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);
+        default:                   return -1; // Regra não é deste grupo
+    }
+}
+
+int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+{
+    int resultado = avalia_regra_origem(regra, p, posOrig);
+    if (resultado != -1) return resultado;
+
+    switch (regra) {
         case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
         case VALOR_INFERIOR:       return cartaChegadaEmaior(p, posOrig, posDest);
         case VALOR_SUPERIOR:       return cartaChegadaEmenor(p, posOrig, posDest);
-        case TOPO_MESMO_NAIPE:          return mesmoNaipeTopo(p, posOrig, posDest);
-        case TOPO_MESMA_COR:            return mesmaCorTopo(p, posOrig, posDest);
-        case MESMO_NAIPE:          return mesmoNaipeTopo(p, posOrig, posDest);
-        case MESMA_COR:            return mesmaCorTopo(p, posOrig, posDest);
+        case TOPO_MESMO_NAIPE:     return mesmoNaipeTopo(p, posOrig, posDest);
+        case TOPO_MESMA_COR:       return mesmaCorTopo(p, posOrig, posDest);
         case PILHA_VAZIA:          return pilhaDestinoVazia(p, posDest);
-        case ORDENADAS_DECRESCENTE:return decrescenteVerif(p, posOrig);
-        case ORDENADAS_CRESCENTE:  return crescenteVerif(p, posOrig);
         default:                   return 0; // NAO_HA_RESTRICOES passa sempre
     }
 }
@@ -889,4 +900,66 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
     }
 
     printf("Movimento Inválido\n");
+}
+
+// Sub-sub-helper: Testa todas as regras automáticas para um par específico de pilhas de origem e destino
+int avalia_regras_auto_movimento(EstadoJogo *g, Pilhas pOrig, int colOrig, int linha, Pilhas pDest, int colDest) {
+    for (int i = 0; i < g->qts_auto_movs; i++) {
+        if (strcmp(g->auto_movs[i].tipo_origem, pOrig->tipo_Pilha) == 0 &&
+            strcmp(g->auto_movs[i].tipo_destino, pDest->tipo_Pilha) == 0) {
+
+            int posOrig[2] = {colOrig, linha};
+            int posDest[2] = {colDest, 0}; // A linha de destino nao importa
+
+            if (valida_todas_regras(g->auto_movs[i], g->pilhas, posOrig, posDest) == 1) {
+                Pilhas p = g->pilhas;
+                mover_cartas(&p, posOrig, posDest);
+                return 1; // Movimento bem sucedido!
+            }
+        }
+    }
+    return 0;
+}
+
+// Sub-helper: Avalia todas as pilhas de destino possíveis para uma carta num movimento automático
+int tenta_destino_auto_movimento(EstadoJogo *g, Pilhas pOrig, int colOrig, int linha) {
+    Pilhas pDest = g->pilhas;
+    int colDest = 0;
+
+    while (pDest != NULL) {
+        if (colOrig != colDest && pDest->tipo_Pilha != NULL) {
+            if (avalia_regras_auto_movimento(g, pOrig, colOrig, linha, pDest, colDest) == 1) {
+                return 1;
+            }
+        }
+        pDest = pDest->prox;
+        colDest++;
+    }
+    return 0;
+}
+
+// Helper: Tenta aplicar as regras de auto_movs uma única vez no tabuleiro.
+// Retorna 1 se fez algum movimento, ou 0 se nada aconteceu.
+int tenta_auto_movimentos(EstadoJogo *g) {
+    Pilhas pOrig = g->pilhas;
+    int colOrig = 0;
+
+    while (pOrig != NULL) {
+        if (pOrig->tipo_Pilha != NULL && pOrig->numCartas > 0) {
+            // Testa todas as linhas da pilha origem
+            for (int linha = 0; linha < pOrig->numCartas; linha++) {
+                if (tenta_destino_auto_movimento(g, pOrig, colOrig, linha) == 1) {
+                    return 1; // Encontrou e executou um auto movimento
+                }
+            }
+        }
+        pOrig = pOrig->prox;
+        colOrig++;
+    }
+    return 0; // Nenhum movimento automático encontrado
+}
+
+void processar_auto_movimentos(EstadoJogo *g) {
+    // Fica a executar movimentos consecutivamente até que o tabuleiro não mude mais
+    while (tenta_auto_movimentos(g) == 1) { }
 }
