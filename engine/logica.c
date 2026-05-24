@@ -568,6 +568,23 @@ void pedir_jogada(EstadoJogo *g)
     jogar_Coluna(g, posOrig, posDest);
 }
 
+// Retorna o próximo ID numérico disponível na pasta saves
+int obter_proximo_save_id() {
+    DIR *dir = opendir("saves");
+    if (!dir) return 1; // Se a pasta não existir, começa no 1
+    
+    struct dirent *entrada;
+    int max_id = 0;
+    
+    while ((entrada = readdir(dir)) != NULL) {
+        int id;
+        if (sscanf(entrada->d_name, "save_%d.txt", &id) == 1) {
+            if (id > max_id) max_id = id;
+        }
+    }
+    closedir(dir);
+    return max_id + 1;
+}
 
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBaralho, int tamPilhas[], int *gameOver)
@@ -583,11 +600,12 @@ void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBar
     // SALVAR
     else if (jogadaEscolhida == 3)
     {
-        char nome_save[50];
-        printf("Digite o nome do arquivo para salvar (ex: saves/save_1.txt): ");
-        scanf("saves/%49s", nome_save);
+        int prox_id = obter_proximo_save_id();
+        char nome_save[128];
+        sprintf(nome_save, "saves/save_%d.txt", prox_id);
+        
         if (salvar_jogo(g, nome_save)) {
-            printf("Jogo salvo com sucesso!\n");
+            printf("Jogo salvo com sucesso no slot [%d]!\n", prox_id);
         } else {
             printf("Erro ao salvar o jogo.\n");
         }
@@ -931,30 +949,31 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
     return 0;
 }
 
-void lerSaves(int numSave, EstadoJogo g)
+void listar_saves(void)
 {
     DIR *dir;
     struct dirent *entrada;
     int saveEncontrado = 0;
 
-    dir = opendir("./saves");
+    dir = opendir("saves");
     if (dir == NULL) {
-        printf("Erro ao abrir a pasta de saves.\n");
+        printf("Nenhum save encontrado ou pasta 'saves' inexistente.\n");
         return;
     }
 
+    printf("\n=== Saves Disponiveis ===\n");
     while((entrada = readdir(dir)) != NULL)
     {
         int numero_save;
         
         if (sscanf(entrada->d_name, "save_%d.txt", &numero_save) == 1) {
-            printf("Slot [%d] -> Arquivo: %s\n", numero_save, entrada->d_name);
+            printf(" [%d] -> %s\n", numero_save, entrada->d_name);
             saveEncontrado = 1;
         }
     }
 
     if (!saveEncontrado) {
-        printf("Nenhum arquivo de save encontrado na pasta.\n");
+        printf(" Nenhum arquivo de save encontrado na pasta.\n");
     }
     closedir(dir);
 }
