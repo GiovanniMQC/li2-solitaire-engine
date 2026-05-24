@@ -47,5 +47,6 @@ int ASfundo (Pilhas p, int posOrig[]);
 int REItopo (Pilhas p, int posOrig[]);
 int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[]);
 int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[]);
+void libera_movimentos_array(MovimentoDef *movs, int qts);
 
 #endif

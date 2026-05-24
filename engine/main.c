@@ -5,7 +5,7 @@
 #include "cartas.h"
 
 // Função auxiliar para tratar interativamente do carregamento do save
-static EstadoJogo* carrega_save_interativo(void) {
+EstadoJogo* carrega_save_interativo(void) {
     listar_saves();
     
     int id_save;
@@ -27,7 +27,7 @@ static EstadoJogo* carrega_save_interativo(void) {
 }
 
 // Função auxiliar para carregar um save do disco
-static EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
+EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
     if (strcmp(escolhido, "LOAD_SAVE") == 0) {
         return carrega_save_interativo();
     }
@@ -41,20 +41,8 @@ static EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
     return jogo;
 }
 
-// Função auxiliar para liberar os arrays dinâmicos de movimentos
-static void libera_movimentos_array(MovimentoDef *movs, int qts) {
-    if (movs != NULL) {
-        for (int i = 0; i < qts; i++) {
-            free(movs[i].tipo_origem);
-            free(movs[i].tipo_destino);
-            free(movs[i].flags);
-        }
-        free(movs);
-    }
-}
-
 // Função para liberar toda a memória da estrutura de jogo
-static void libera_memoria_final(EstadoJogo *jogo) {
+void libera_memoria_final(EstadoJogo *jogo) {
     limpa_memoria_jogo(&(jogo->pilhas));
     free(jogo->nome_paciencia);
     free(jogo->caminho_ficheiro);
@@ -68,7 +56,7 @@ static void libera_memoria_final(EstadoJogo *jogo) {
 }
 
 // Loop principal do jogo
-static void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBaralho, int tamPilhas[], int *gameOver) {
+void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBaralho, int tamPilhas[], int *gameOver) {
     while (*gameOver == 0) {
         processar_auto_movimentos(jogo);
         printf("\n");
@@ -84,7 +72,7 @@ static void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBa
 }
 
 // Função auxiliar para tratar do menu inicial e carregamento do jogo
-static EstadoJogo* inicializar_paciencia() {
+EstadoJogo* inicializar_paciencia() {
     char lista[50][512];
     const char *pasta = "paciencias";
 

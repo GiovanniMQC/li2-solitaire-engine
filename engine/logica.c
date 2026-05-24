@@ -9,7 +9,7 @@
 #include "logica.h"
 
 // Função auxiliar para ler o nome do jogo e registar na lista
-static void registar_paciencia(const char *caminho, char lista[][512], int *q) {
+void registar_paciencia(const char *caminho, char lista[][512], int *q) {
     FILE *f = fopen(caminho, "r");
     char buf[256], nome[256];
     if (f && fgets(buf, sizeof(buf), f)) {
@@ -61,7 +61,7 @@ FlagsMovimento char_para_flag(char c) {
 }
 
 // Remove comentário (#...)
-static void remove_comentario(char *linha) {
+void remove_comentario(char *linha) {
     char *hash = strchr(linha, '#');
     if (hash) *hash = '\0';
     int len = (int)strlen(linha);
@@ -71,14 +71,14 @@ static void remove_comentario(char *linha) {
 }
 
 // Parseia comando JOGO
-static void parse_jogo(char *linha, EstadoJogo *e) {
+void parse_jogo(char *linha, EstadoJogo *e) {
     char buffer[256];
     if (sscanf(linha, "JOGO %[^\n]", buffer) == 1)
         e->nome_paciencia = strdup(buffer);
 }
 
 // Parseia comando BARALHOS
-static void parse_baralhos(char *linha, EstadoJogo *e, struct baralho **decks) {
+void parse_baralhos(char *linha, EstadoJogo *e, struct baralho **decks) {
     sscanf(linha, "BARALHOS %d", &e->nBaralhos);
     if (e->nBaralhos > 0) {
         *decks = malloc(sizeof(struct baralho) * e->nBaralhos);
@@ -87,13 +87,13 @@ static void parse_baralhos(char *linha, EstadoJogo *e, struct baralho **decks) {
 }
 
 // Parseia comando TIPO e armazena em arrays
-static void parse_tipo(char *linha, char nomes_tipo[][32], char flags_tipo[][32], int *n_tipos) {
+void parse_tipo(char *linha, char nomes_tipo[][32], char flags_tipo[][32], int *n_tipos) {
     if (*n_tipos < 32 && sscanf(linha, "TIPO %s %s", nomes_tipo[*n_tipos], flags_tipo[*n_tipos]) == 2)
         (*n_tipos)++;
 }
 
 // Carrega cartas na pilha INIT durante parsing
-static void parse_init_carrega_cartas(Pilhas nova, int q_cartas, struct baralho *decks, int *contagem_cartas) {
+void parse_init_carrega_cartas(Pilhas nova, int q_cartas, struct baralho *decks, int *contagem_cartas) {
     if (q_cartas <= 0 || decks == NULL) return;
     
     nova->pilha = malloc(sizeof(struct carta) * q_cartas);
@@ -104,7 +104,7 @@ static void parse_init_carrega_cartas(Pilhas nova, int q_cartas, struct baralho 
 }
 
 // Encontra tipo na lista e copia flags
-static void parse_init_copia_flags(Pilhas nova, const char *t_nome, char nomes_tipo[][32], 
+void parse_init_copia_flags(Pilhas nova, const char *t_nome, char nomes_tipo[][32], 
                                    char flags_tipo[][32], int n_tipos) {
     int encontrado = 0;
     for (int i = 0; i < n_tipos && !encontrado; i++) {
@@ -116,7 +116,7 @@ static void parse_init_copia_flags(Pilhas nova, const char *t_nome, char nomes_t
 }
 
 // Função auxiliar para adicionar pilha ao estado do jogo
-static void insere_pilha_estado(EstadoJogo *e, Pilhas nova) {
+void insere_pilha_estado(EstadoJogo *e, Pilhas nova) {
     if (!e->pilhas) e->pilhas = nova;
     else {
         Pilhas aux = e->pilhas;
@@ -127,7 +127,7 @@ static void insere_pilha_estado(EstadoJogo *e, Pilhas nova) {
 }
 
 // Parseia comando INIT
-static void parse_init(char *linha, EstadoJogo *e, char nomes_tipo[][32], 
+void parse_init(char *linha, EstadoJogo *e, char nomes_tipo[][32], 
                        char flags_tipo[][32], int n_tipos, struct baralho *decks, int *contagem_cartas) {
     char t_nome[32];
     int q_cartas;
@@ -144,7 +144,7 @@ static void parse_init(char *linha, EstadoJogo *e, char nomes_tipo[][32],
 }
 
 // Função auxiliar para alocar regras de movimento
-static void aloca_movimento(MovimentoDef **arr, int *q, char *o, char *d, char *fl) {
+void aloca_movimento(MovimentoDef **arr, int *q, char *o, char *d, char *fl) {
     *arr = realloc(*arr, (*q + 1) * sizeof(MovimentoDef));
     MovimentoDef *m = &(*arr)[*q];
     m->tipo_origem = strdup(o);
@@ -157,7 +157,7 @@ static void aloca_movimento(MovimentoDef **arr, int *q, char *o, char *d, char *
 }
 
 // Parseia comando MOV ou AUTO
-static void parse_movimento(char *linha, EstadoJogo *e, int is_auto) {
+void parse_movimento(char *linha, EstadoJogo *e, int is_auto) {
     char o[32], d[32], fl[64];
     if (sscanf(linha, "%*s %s %s %s", o, d, fl) != 3) return;
     
@@ -166,7 +166,7 @@ static void parse_movimento(char *linha, EstadoJogo *e, int is_auto) {
 }
 
 // Parseia comando WIN
-static void parse_win(char *linha, EstadoJogo *e) {
+void parse_win(char *linha, EstadoJogo *e) {
     char t[32];
     int q;
     
@@ -185,7 +185,7 @@ static void parse_win(char *linha, EstadoJogo *e) {
 }
 
 // Função auxiliar para rotear comandos da paciência
-static void processa_comando_paciencia(char *cmd, char *linha, EstadoJogo *e, struct baralho **decks,
+void processa_comando_paciencia(char *cmd, char *linha, EstadoJogo *e, struct baralho **decks,
                                        char nomes_tipo[][32], char flags_tipo[][32],
                                        int *n_tipos, int *contagem_cartas) {
     if (strcmp(cmd, "JOGO") == 0) parse_jogo(linha, e);
@@ -198,7 +198,7 @@ static void processa_comando_paciencia(char *cmd, char *linha, EstadoJogo *e, st
 }
 
 // Função auxiliar para processar as linhas do ficheiro de configuração da paciência
-static void ler_linhas_paciencia(FILE *f, EstadoJogo *e, struct baralho **decks,
+void ler_linhas_paciencia(FILE *f, EstadoJogo *e, struct baralho **decks,
     char nomes_tipo[][32], char flags_tipo[][32],
     int *n_tipos, int *contagem_cartas) {
     char linha[512];
@@ -232,7 +232,7 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
 }
 
 // Função auxiliar para escrever uma carta num ficheiro de save
-static void escrever_carta_save(FILE *f, struct carta c) {
+void escrever_carta_save(FILE *f, struct carta c) {
     if (c.valor == 1) fprintf(f, "A");
     else if (c.valor == 11) fprintf(f, "J");
     else if (c.valor == 12) fprintf(f, "Q");
@@ -244,7 +244,7 @@ static void escrever_carta_save(FILE *f, struct carta c) {
 }
 
 // Função auxiliar para escrever o estado das pilhas num ficheiro de save
-static void escrever_pilhas_save(FILE *f, Pilhas p) {
+void escrever_pilhas_save(FILE *f, Pilhas p) {
     while (p != NULL) {
         for (int i = 0; i < p->numCartas; i++) {
             escrever_carta_save(f, p->pilha[i]);
@@ -273,7 +273,7 @@ int salvar_jogo(EstadoJogo *g, const char *caminho_save) {
 }
 
 // Transforma char em número de naipe
-static int char_para_naipe(char naipe_char) {
+int char_para_naipe(char naipe_char) {
     if (naipe_char == 'H') return 0;
     if (naipe_char == 'S') return 1;
     if (naipe_char == 'D') return 2;
@@ -282,7 +282,7 @@ static int char_para_naipe(char naipe_char) {
 }
 
 // Transforma string em número de carta
-static int str_para_valor(char *tok) {
+int str_para_valor(char *tok) {
     if (strcmp(tok, "A") == 0) return 1;
     if (strcmp(tok, "J") == 0) return 11;
     if (strcmp(tok, "Q") == 0) return 12;
@@ -291,7 +291,7 @@ static int str_para_valor(char *tok) {
 }
 
 // Função auxiliar para extrair uma carta de uma string como "AH" ou "10S"
-static struct carta parse_carta_string(char *tok) {
+struct carta parse_carta_string(char *tok) {
     struct carta c = {0, 0};
     int len = strlen(tok);
     if (len == 0) return c;
@@ -304,7 +304,7 @@ static struct carta parse_carta_string(char *tok) {
 }
 
 // Conta número de tokens de espaço na linha
-static int conta_tokens_espaco(const char *linha) {
+int conta_tokens_espaco(const char *linha) {
     int n = 0;
     char *copia = strdup(linha), *tok = strtok(copia, " ");
     while (tok) { n++; tok = strtok(NULL, " "); }
@@ -313,7 +313,7 @@ static int conta_tokens_espaco(const char *linha) {
 }
 
 // Parse uma string de cartas no formato "AH 2D 10S..." e carrega em pilha
-static void carrega_cartas_pilha(char *linha, Pilhas p) {
+void carrega_cartas_pilha(char *linha, Pilhas p) {
     p->numCartas = conta_tokens_espaco(linha);
     if (p->numCartas == 0) { free(p->pilha); p->pilha = NULL; return; } // Esvazia corretamente
     
@@ -327,7 +327,7 @@ static void carrega_cartas_pilha(char *linha, Pilhas p) {
 }
 
 // Função auxiliar para ler as cartas do save e substituir nas pilhas
-static void processar_pilhas_save(FILE *f, Pilhas p) {
+void processar_pilhas_save(FILE *f, Pilhas p) {
     char linha[512];
     while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
         linha[strcspn(linha, "\r\n")] = '\0';
@@ -345,7 +345,7 @@ static void processar_pilhas_save(FILE *f, Pilhas p) {
 }
 
 // Função auxiliar para ler a primeira linha do save e inicializar o estado base
-static EstadoJogo* inicializa_estado_save(FILE *f) {
+EstadoJogo* inicializa_estado_save(FILE *f) {
     char linha[512], caminho[1024];
     if (!fgets(linha, sizeof(linha), f)) return NULL;
     linha[strcspn(linha, "\r\n")] = '\0';
@@ -594,7 +594,7 @@ int carta_check (Pilhas pilhaOrigem, Pilhas pilhaDestino, struct carta origem, s
 }
 
 // Valida se posição está fora dos limites
-static int pos_fora_limites(int col, int lin) {
+int pos_fora_limites(int col, int lin) {
     return col >= 10 || col < 0 || lin < 0;
 }
 
@@ -699,13 +699,13 @@ int obter_proximo_save_id() {
 }
 
 // Função auxiliar para processar comando SAIR
-static void comando_sair(int *gameOver) {
+void comando_sair(int *gameOver) {
     printf("Saindo do jogo...\n");
     *gameOver = 2;
 }
 
 // Função auxiliar para processar comando SALVAR
-static void comando_salvar(EstadoJogo *g) {
+void comando_salvar(EstadoJogo *g) {
     int prox_id = obter_proximo_save_id();
     char nome_save[128];
     sprintf(nome_save, "saves/save_%d.txt", prox_id);
@@ -718,7 +718,7 @@ static void comando_salvar(EstadoJogo *g) {
 }
 
 // Função auxiliar para liberar os arrays dinâmicos de movimentos
-static void libera_movimentos_array(MovimentoDef *movs, int qts) {
+void libera_movimentos_array(MovimentoDef *movs, int qts) {
     if (movs != NULL) {
         for (int i = 0; i < qts; i++) {
             free(movs[i].tipo_origem);
@@ -730,7 +730,7 @@ static void libera_movimentos_array(MovimentoDef *movs, int qts) {
 }
 
 // Função auxiliar para liberar memória do estado
-static void libera_estado_jogo(EstadoJogo *g) {
+void libera_estado_jogo(EstadoJogo *g) {
     limpa_memoria_jogo(&(g->pilhas));
     free(g->nome_paciencia);
     free(g->caminho_ficheiro);
@@ -742,7 +742,7 @@ static void libera_estado_jogo(EstadoJogo *g) {
 }
 
 // Função auxiliar para processar comando RESTART
-static void comando_restart(EstadoJogo *g, int *gameOver) {
+void comando_restart(EstadoJogo *g, int *gameOver) {
     char *caminho = strdup(g->caminho_ficheiro);
     libera_estado_jogo(g);
     
@@ -1064,7 +1064,7 @@ int salvaJogo (EstadoJogo g, int contagemSaves)
 }
 
 // Função auxiliar para processar as entradas da pasta de saves
-static int processar_entrada_save(struct dirent *entrada) {
+int processar_entrada_save(struct dirent *entrada) {
     int numero_save;
     if (sscanf(entrada->d_name, "save_%d.txt", &numero_save) == 1) {
         printf(" [%d] -> %s\n", numero_save, entrada->d_name);
@@ -1238,7 +1238,7 @@ int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[])
 }
 
 // avalia regras de destino e bidirecionais
-static int avalia_regra_destino(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
+int avalia_regra_destino(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
 {
     switch (regra) {
         case OU:                   return cartaMaiorOuMenor(p, posOrig, posDest);
