@@ -1,12 +1,11 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> ee743b85fd1ae88490c63193d269b430ade0740a
-#include "estadoJogoPrototipo.h"
+#ifndef LOGICA_SIMON_H
+#define LOGICA_SIMON_H
+
+#include <stdio.h>
+#include "cartas.h"
 
 int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]);
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro);
-<<<<<<< HEAD
 
 // Protótipos necessários para o main.c
 void processar_auto_movimentos(EstadoJogo *g);
@@ -15,15 +14,6 @@ int ganhou(Pilhas p, WinDef w);
 void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBaralho, int tamPilhas[], int *gameOver);
 void limpa_memoria_jogo(Pilhas *p);
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[]);
-=======
-=======
-#ifndef LOGICA_SIMON_H
-#define LOGICA_SIMON_H
-
-#include "cartasSimon.h"
-#include <stdio.h>
-
-int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]);
 void cria_baralho(struct carta * baralho);
 void shuffle_baralho(struct carta *baralho);
 void inicializa_baralhos (struct baralho *baralhos, int numBaralhos);
@@ -78,5 +68,3 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[]);
 void processar_auto_movimentos(EstadoJogo *g);
 
 #endif
->>>>>>> e158f55fbb9d6b2cb0efc3308ea6f16955a0b8f1
->>>>>>> ee743b85fd1ae88490c63193d269b430ade0740a

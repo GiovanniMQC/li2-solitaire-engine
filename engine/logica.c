@@ -5,16 +5,8 @@
 #include <locale.h>
 #include <dirent.h>
 #include <string.h>
-<<<<<<< HEAD
 #include "cartas.h"
 #include "logica.h"
-=======
-<<<<<<< HEAD
-#include "logica.h"
-=======
-#include "cartasSimon.h"
-#include "logicaSimon.h"
->>>>>>> e158f55fbb9d6b2cb0efc3308ea6f16955a0b8f1
 
 // funcao para listar os arquivos e guardar os caminhos num array
 int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
@@ -52,7 +44,6 @@ int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
     return quantidade; 
 }
 
-<<<<<<< HEAD
 EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     FILE *ficheiro = fopen(caminho_ficheiro, "r");
     if (ficheiro == NULL) {
@@ -80,8 +71,6 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
     fclose(ficheiro);
     return estado;
 }
-=======
->>>>>>> ee743b85fd1ae88490c63193d269b430ade0740a
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
 void cria_baralho(struct carta *baralho)
@@ -1037,43 +1026,3 @@ void processar_auto_movimentos(EstadoJogo *g) {
     // Fica a executar movimentos consecutivamente até que o tabuleiro não mude mais
     while (tenta_auto_movimentos(g) == 1) { }
 }
-<<<<<<< HEAD
-
-// funcao para listar os arquivos e guardar os caminhos num array
-int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
-    DIR *pasta = opendir(caminho_pasta);
-    struct dirent *arquivo;
-    int quantidade = 0;
-
-    printf("=== Menu de Paciencias ===\n");
-
-    while ((arquivo = readdir(pasta)) != NULL) {
-        // ignora as pastas ocultas do sistema
-        if (strcmp(arquivo->d_name, ".") != 0 && strcmp(arquivo->d_name, "..") != 0) {        
-
-            // monta o caminho completo
-            char caminho_completo[512];
-            snprintf(caminho_completo, sizeof(caminho_completo), "%s/%s", caminho_pasta, arquivo->d_name);
-
-            // abre o arquivo em leitura
-            FILE *texto = fopen(caminho_completo, "r");
-            if (texto != NULL) {
-                char nome_do_jogo[256];
-                if (fgets(nome_do_jogo, sizeof(nome_do_jogo), texto) != NULL) {
-
-                    nome_do_jogo[strcspn(nome_do_jogo, "\r\n")] = '\0'; //remove o enter
-                
-                    printf("%d - %s\n", quantidade + 1, nome_do_jogo);
-                    strcpy(lista_de_caminhos[quantidade], caminho_completo); 
-                    quantidade++;
-                }
-                fclose(texto);
-            }
-        }
-    }
-    closedir(pasta);
-    return quantidade; 
-}
-=======
->>>>>>> e158f55fbb9d6b2cb0efc3308ea6f16955a0b8f1
->>>>>>> ee743b85fd1ae88490c63193d269b430ade0740a
