@@ -180,21 +180,21 @@ int main() {
         return CU_get_error();
     }
 
-    CU_add_test(pSuite, "teste_char_para_flag", teste_char_para_flag);
-    CU_add_test(pSuite, "teste_cria_baralho", teste_cria_baralho);
-    CU_add_test(pSuite, "teste_procura_pilha", teste_procura_pilha);
-    CU_add_test(pSuite, "teste_achar_limite", teste_achar_limite);
-    CU_add_test(pSuite, "teste_pos_valida", teste_pos_valida);
-    CU_add_test(pSuite, "teste_pilha_vazia", teste_pilha_vazia);
-    CU_add_test(pSuite, "teste_libera_memoria", teste_libera_memoria);
-    CU_add_test(pSuite, "teste_sequencias", teste_sequencias);
-    CU_add_test(pSuite, "teste_shuffle_baralho", teste_shuffle_baralho);
-    CU_add_test(pSuite, "teste_cria_pilha", teste_cria_pilha);
-    CU_add_test(pSuite, "teste_insere_cartas", teste_insere_cartas);
-    CU_add_test(pSuite, "teste_corrige_seq", teste_corrige_seq);
-    CU_add_test(pSuite, "teste_as_topo", teste_as_topo);
-    CU_add_test(pSuite, "teste_eso_uma", teste_eso_uma);
-    CU_add_test(pSuite, "teste_mesmo_naipe", teste_mesmo_naipe);
+    CU_add_test(pSuite, "teste_char_para_flag", teste_char_para_flag),
+    CU_add_test(pSuite, "teste_cria_baralho", teste_cria_baralho),
+    CU_add_test(pSuite, "teste_procura_pilha", teste_procura_pilha),
+    CU_add_test(pSuite, "teste_achar_limite", teste_achar_limite),
+    CU_add_test(pSuite, "teste_pos_valida", teste_pos_valida),
+    CU_add_test(pSuite, "teste_pilha_vazia", teste_pilha_vazia),
+    CU_add_test(pSuite, "teste_libera_memoria", teste_libera_memoria),
+    CU_add_test(pSuite, "teste_sequencias", teste_sequencias),
+    CU_add_test(pSuite, "teste_shuffle_baralho", teste_shuffle_baralho),
+    CU_add_test(pSuite, "teste_cria_pilha", teste_cria_pilha),
+    CU_add_test(pSuite, "teste_insere_cartas", teste_insere_cartas),
+    CU_add_test(pSuite, "teste_corrige_seq", teste_corrige_seq),
+    CU_add_test(pSuite, "teste_as_topo", teste_as_topo),
+    CU_add_test(pSuite, "teste_eso_uma", teste_eso_uma),
+    CU_add_test(pSuite, "teste_mesmo_naipe", teste_mesmo_naipe),
     CU_add_test(pSuite, "teste_limpa_memoria", teste_limpa_memoria);
 
     CU_basic_set_mode(CU_BRM_VERBOSE);
