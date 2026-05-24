@@ -26,31 +26,25 @@ char* escolherPaciencia(char lista_de_caminhos[][512], int quantidade) {
 // Recebe uma carta e le o seu valor, printa o valor correspondente no terminal
 void print_valor(struct carta c) 
 {
-    if (c.valor == 1) 
-        printf(" A   ");
-    else if (c.valor == 10) 
-        printf(" 10  ");
-    else if (c.valor == 11) 
-        printf(" J   ");
-    else if (c.valor == 12) 
-        printf(" Q   ");
-    else if (c.valor == 13) 
-        printf(" K   ");
-    else 
-        printf(" %d   ", c.valor);  
+    static const char* VALORES_STR[] = {"", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    
+    if (c.valor >= 1 && c.valor <= 13) {
+        printf(" %-3s ", VALORES_STR[c.valor]);
+    } else {
+        printf(" ?   ");
+    }
 }
 
 // Recebe uma carta e le o seu naipe, printa o naipe correspondente no terminal
 void print_naipe(struct carta c)
 {
-    if (c.naipe == 0) 
-        printf("  ♥  ");
-    else if (c.naipe == 1) 
-        printf("  ♠  ");
-    else if (c.naipe == 2) 
-        printf("  ♦  ");
-    else if (c.naipe == 3) 
-        printf("  ♣  ");
+    static const char* NAIPES_SIMBOLO[] = {"♥", "♠", "♦", "♣"};
+    
+    if (c.naipe >= 0 && c.naipe <= 3) {
+        printf("  %s  ", NAIPES_SIMBOLO[c.naipe]);
+    } else {
+        printf("  ?  ");
+    }
 }
 
 // Recebe uma carta e da print a ela com formato apropriado (valor e naipe com fundo branco)
