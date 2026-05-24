@@ -60,6 +60,7 @@ typedef struct wins{
 // A estrutura principal que guarda toda a informação de uma Paciência lida do ficheiro
 typedef struct {
     char *nome_paciencia; // Nome retirado do ficheiro
+    char *caminho_ficheiro; // Caminho do ficheiro da paciencia (para restart)
     int nBaralhos;        // Quantidade de baralhos
     
     Pilhas pilhas;        // Lista ligada com todas as pilhas do jogo

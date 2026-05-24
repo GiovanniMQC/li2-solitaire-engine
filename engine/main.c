@@ -6,74 +6,82 @@
 int main() {
     
     char lista[50][512];
-    EstadoJogo jogo;
     
     const char *pasta = "paciencias"; 
 
-    // lista os jogos e guarda os caminhos
+    // Lista os jogos e guarda os caminhos
     int total = listarPaciencias(pasta, lista);
 
-    // requer a escolha, retorna o caminho da paciencia escolhida
+    // Requer a escolha, retorna o caminho da paciencia escolhida
     char *escolhido = escolherPaciencia(lista, total);
 
-    if (escolhido != NULL) {
-        printf("\nVoce selecionou o arquivo: %s\n", escolhido);
-        
-        EstadoJogo *estado = lerPaciencia(escolhido);
-        if (estado != NULL) {
-            printf("[INFO] Estado do jogo inicializado com sucesso (Baralhos: %d)\n", estado->nBaralhos);
-        }
-    } 
-    else {
+    if (escolhido == NULL) {
         printf("\nSelecao invalida ou nenhum arquivo encontrado.\n");
+        return 1;
     }
 
-    printf("Nome do Jogo: %s\n", jogo.nome_paciencia);
+    printf("\nVoce selecionou: %s\n", escolhido);
 
-    struct baralho b[1];
+    EstadoJogo *jogo = lerPaciencia(escolhido);
+    if (jogo == NULL) {
+        printf("Erro ao carregar a paciencia.\n");
+        return 1;
+    }
+
+    printf("Nome do Jogo: %s\n", jogo->nome_paciencia);
+    printf("Baralhos: %d | Pilhas: %d | Movimentos: %d\n",
+           jogo->nBaralhos, jogo->qts_pilhas, jogo->qts_mov_perm);
+
+    struct baralho b[jogo->nBaralhos];
     int contagemBaralho = 0;
-    int tamPilhas[14] = {0};
+    int tamPilhas[jogo->qts_pilhas];
     int gameOver = 0;
 
     while (gameOver == 0) {
-        // Varre e executa os movimentos automaticos antes de renderizar o tabuleiro
-        processar_auto_movimentos(&jogo);
+        // Executa movimentos automaticos antes de renderizar
+        processar_auto_movimentos(jogo);
 
         printf("\n");
-        print_pilhas(jogo.pilhas, acharLimite(jogo.pilhas));
+        print_pilhas(jogo->pilhas, acharLimite(jogo->pilhas));
 
-        if (ganhou(jogo.pilhas, jogo.win_args) == 0) {
-            printf("\nParabéns! Você ganhou o jogo %s!\n", jogo.nome_paciencia);
+        // ganhou() retorna 0 quando venceu, 1 caso contrario
+        if (ganhou(jogo->pilhas, jogo->win_args) == 0) {
+            printf("\nParabens! Voce ganhou %s!\n", jogo->nome_paciencia);
             gameOver = 1;
         } else {
-            processar_jogada(&jogo, b, &contagemBaralho, tamPilhas, &gameOver);
+            processar_jogada(jogo, b, &contagemBaralho, tamPilhas, &gameOver);
         }
     }
 
-    // Liberta a memoria da estrutura ligada das pilhas
-    limpa_memoria_jogo(&(jogo.pilhas));
-    free(jogo.win_args.tipo);
-    free(jogo.win_args.numCartas);
+    // Liberta memoria das pilhas
+    limpa_memoria_jogo(&(jogo->pilhas));
+    free(jogo->nome_paciencia);
+    free(jogo->caminho_ficheiro);
+    free(jogo->win_args.tipo);
+    free(jogo->win_args.numCartas);
 
-    // Libertar array de movimentos permitidos da memória
-    if (jogo.mov_perm != NULL) {
-        for (int i=0; i < jogo.qts_mov_perm; i++) {
-            free(jogo.mov_perm[i].tipo_origem);
-            free(jogo.mov_perm[i].tipo_destino);
-            free(jogo.mov_perm[i].flags);
+    // Liberta movimentos permitidos
+    if (jogo->mov_perm != NULL) {
+        for (int i = 0; i < jogo->qts_mov_perm; i++) {
+            free(jogo->mov_perm[i].tipo_origem);
+            free(jogo->mov_perm[i].tipo_destino);
+            free(jogo->mov_perm[i].flags);
         }
-        free(jogo.mov_perm);
+        free(jogo->mov_perm);
     }
     
-    // Libertar movimentos automáticos da memória
-    if (jogo.auto_movs != NULL) {
-        for (int i=0; i < jogo.qts_auto_movs; i++) {
-            free(jogo.auto_movs[i].tipo_origem);
-            free(jogo.auto_movs[i].tipo_destino);
-            free(jogo.auto_movs[i].flags);
+    // Liberta movimentos automaticos
+    if (jogo->auto_movs != NULL) {
+        for (int i = 0; i < jogo->qts_auto_movs; i++) {
+            free(jogo->auto_movs[i].tipo_origem);
+            free(jogo->auto_movs[i].tipo_destino);
+            free(jogo->auto_movs[i].flags);
         }
-        free(jogo.auto_movs);
+        free(jogo->auto_movs);
     }
-    
+
+    free(jogo->nome_paciencia);
+    free(jogo);
+
     return 0;
 }
