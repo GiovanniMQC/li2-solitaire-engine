@@ -290,6 +290,11 @@ EstadoJogo* carregar_save(const char *caminho_save) {
                 p->pilha[i++] = c; tok = strtok(NULL, " ");
             }
         } else { free(p->pilha); p->pilha = NULL; }
+        p = p->prox;
+    }
+    fclose(f); return g;
+}
+
 // Parse uma string de cartas no formato "AH 2D 10S..." e carrega em pilha
 static void carrega_cartas_pilha(char *linha, Pilhas p) {
     int n_cartas = 0;
@@ -331,35 +336,6 @@ static void carrega_cartas_pilha(char *linha, Pilhas p) {
         p->pilha[i++] = c;
         tok = strtok(NULL, " ");
     }
-}
-
-// Carrega um jogo salvo utilizando as funções de importação do estado
-EstadoJogo* carregar_save(const char *caminho_save) {
-    FILE *f = fopen(caminho_save, "r");
-    if (!f) return NULL;
-    
-    char linha[512];
-    if (!fgets(linha, sizeof(linha), f)) {
-        fclose(f);
-        return NULL;
-    }
-    linha[strcspn(linha, "\r\n")] = '\0';
-    
-    EstadoJogo *g = lerPaciencia(linha);
-    if (!g) {
-        fclose(f);
-        return NULL;
-    }
-    
-    Pilhas p = g->pilhas;
-    while (p != NULL && fgets(linha, sizeof(linha), f) != NULL) {
-        linha[strcspn(linha, "\r\n")] = '\0';
-        carrega_cartas_pilha(linha, p);
-        p = p->prox;
-    }
-    
-    fclose(f);
-    return g;
 }
 
 // Recebe um array de struct carta, e para cada slot (52 cartas), atribui o valor e naipe de forma consecutiva
