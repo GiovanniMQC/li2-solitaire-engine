@@ -1,8 +1,11 @@
 #include <CUnit/Basic.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "cartas.h"
 #include "logica.h"
+
+void corrige_seq_cartas(Pilhas p, int linha);
 
 void teste_char_para_flag() {
     CU_ASSERT_EQUAL(char_para_flag('*'), NAO_HA_RESTRICOES);
@@ -78,6 +81,94 @@ void teste_sequencias() {
     CU_ASSERT_EQUAL(sequencias(&p), 1);
 }
 
+void teste_shuffle_baralho() {
+    struct carta b1[52], b2[52];
+    cria_baralho(b1);
+    cria_baralho(b2);
+    shuffle_baralho(b2);
+    
+    int iguais = 0;
+    for(int i = 0; i < 52; i++) 
+        if(b1[i].valor == b2[i].valor && b1[i].naipe == b2[i].naipe) iguais++;
+        
+    CU_ASSERT_NOT_EQUAL(iguais, 52);
+}
+
+void teste_cria_pilha() {
+    struct baralho b[1];
+    inicializa_baralhos(b, 1);
+    int cont = 0;
+    Pilhas p = cria_pilha(b, 5, &cont);
+    
+    CU_ASSERT_PTR_NOT_NULL(p);
+    CU_ASSERT_EQUAL(p->numCartas, 5);
+    CU_ASSERT_EQUAL(cont, 5);
+    limpa_memoria_jogo(&p);
+}
+
+void teste_insere_cartas() {
+    struct celula orig = {0}, dest = {0};
+    orig.numCartas = 2; orig.pilha = malloc(2 * sizeof(struct carta));
+    dest.numCartas = 1; dest.pilha = calloc(1, sizeof(struct carta));
+    orig.pilha[1].valor = 5; 
+    
+    insere_cartas(&orig, &dest, 2, 1);
+    
+    CU_ASSERT_EQUAL(orig.numCartas, 1);
+    CU_ASSERT_EQUAL(dest.numCartas, 2);
+    CU_ASSERT_EQUAL(dest.pilha[1].valor, 5);
+    
+    free(orig.pilha); free(dest.pilha);
+}
+
+void teste_corrige_seq() {
+    struct carta c[3] = {{0,1}, {0,2}, {0,3}};
+    struct celula p = {.numCartas = 3, .pilha = c};
+    
+    corrige_seq_cartas(&p, 2); 
+    CU_ASSERT_EQUAL(p.numCartas, 2);
+    CU_ASSERT_EQUAL(p.pilha[1].valor, 3);
+}
+
+void teste_as_topo() {
+    struct carta c[1] = {{0, 1}};
+    struct celula p = {.numCartas = 1, .pilha = c};
+    int pos[2] = {0, 0};
+    
+    CU_ASSERT_EQUAL(AStopo(&p, pos), 0);
+    c[0].valor = 2;
+    CU_ASSERT_EQUAL(AStopo(&p, pos), 1);
+}
+
+void teste_eso_uma() {
+    struct celula p = {.numCartas = 3};
+    int pos_topo[2] = {0, 2}, pos_meio[2] = {0, 1};
+    
+    CU_ASSERT_EQUAL(EsoUma(&p, pos_topo), 0);
+    CU_ASSERT_EQUAL(EsoUma(&p, pos_meio), 1);
+}
+
+void teste_mesmo_naipe() {
+    struct carta c[2] = {{0, 5}, {0, 6}};
+    struct celula p = {.numCartas = 2, .pilha = c};
+    int pos[2] = {0, 0};
+    
+    CU_ASSERT_EQUAL(mesmoNaipe(&p, pos), 0);
+    c[1].naipe = 1;
+    CU_ASSERT_EQUAL(mesmoNaipe(&p, pos), 1);
+}
+
+void teste_limpa_memoria() {
+    Pilhas p = malloc(sizeof(struct celula));
+    p->tipo_Pilha = strdup("TAB");
+    p->flags = NULL;
+    p->pilha = malloc(sizeof(struct carta));
+    p->prox = NULL;
+    
+    limpa_memoria_jogo(&p);
+    CU_ASSERT_PTR_NULL(p); // A estrutura principal foi liberta corretamente?
+}
+
 int main() {
     if (CUE_SUCCESS != CU_initialize_registry()) 
         return CU_get_error();
@@ -97,6 +188,14 @@ int main() {
     CU_add_test(pSuite, "teste_pilha_vazia", teste_pilha_vazia);
     CU_add_test(pSuite, "teste_libera_memoria", teste_libera_memoria);
     CU_add_test(pSuite, "teste_sequencias", teste_sequencias);
+    CU_add_test(pSuite, "teste_shuffle_baralho", teste_shuffle_baralho);
+    CU_add_test(pSuite, "teste_cria_pilha", teste_cria_pilha);
+    CU_add_test(pSuite, "teste_insere_cartas", teste_insere_cartas);
+    CU_add_test(pSuite, "teste_corrige_seq", teste_corrige_seq);
+    CU_add_test(pSuite, "teste_as_topo", teste_as_topo);
+    CU_add_test(pSuite, "teste_eso_uma", teste_eso_uma);
+    CU_add_test(pSuite, "teste_mesmo_naipe", teste_mesmo_naipe);
+    CU_add_test(pSuite, "teste_limpa_memoria", teste_limpa_memoria);
 
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
