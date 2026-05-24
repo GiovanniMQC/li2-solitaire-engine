@@ -100,6 +100,25 @@ void print_num_inv(Pilhas p)
     }
 }
 
+// Imprime uma linha de todas as pilhas
+void print_linhas(Pilhas p, int linha)
+{
+    while (p != NULL){
+            // Renderiza a coluna apenas se ela for uma pilha visível (regras = ou ^)
+            if (p->flags != NULL && (strchr(p->flags, '=') || strchr(p->flags, '^'))) {
+                if(p->numCartas <= linha)
+                    printf("          "); // espaco vazio
+                else if (strchr(p->flags, '^') && linha < p->numCartas - 1)
+                    printf("\033[30;47m -      - \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
+                else
+                    print_carta(p->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
+                    
+                printf(" ");
+            }
+            p = p->prox;
+        }
+}
+
 // Percorre as pilhas e dá print de todas as cartas presentes nelas
 void print_pilhas(Pilhas p, int lim){
     int linha = 0;
@@ -107,20 +126,7 @@ void print_pilhas(Pilhas p, int lim){
     print_tipos(p);
     while (linha<(lim+1)){
         Pilhas pTemp = p;
-        while (pTemp != NULL){
-            // Renderiza a coluna apenas se ela for uma pilha visível (regras = ou ^)
-            if (pTemp->flags != NULL && (strchr(pTemp->flags, '=') || strchr(pTemp->flags, '^'))) {
-                if(pTemp->numCartas <= linha)
-                    printf("          "); // espaco vazio
-                else if (strchr(pTemp->flags, '^') && linha < pTemp->numCartas - 1)
-                    printf("\033[30;47m -      - \033[0m"); // Desenha a carta oculta se for regra '^' e não for o topo
-                else
-                    print_carta(pTemp->pilha[linha]); // Desenha a carta se for regra '=' ou for o topo do '^'
-                    
-                printf(" ");
-            }
-            pTemp = pTemp->prox;
-        }
+        print_linhas(p, linha);
         linha++;
         printf("\n");
     }

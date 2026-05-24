@@ -574,6 +574,24 @@ int pilhaDestinoVazia (Pilhas p, int posDest[])
     return 1;
 }
 
+// Imprime o valor da carta em um arquivo de save (A, 2-10, J, Q, K)
+void salva_valor(FILE *save, int valor)
+{
+    if (valor == 1) fprintf(save, "A");
+    else if (valor == 11) fprintf(save, "J");
+    else if (valor == 12) fprintf(save, "Q");
+    else if (valor == 13) fprintf(save, "K");
+    else fprintf(save, "%d", valor);
+}
+
+void salva_naipe(FILE *save, int naipe)
+{
+    if (naipe == 0) fprintf(save, "H");
+    else if (naipe == 1) fprintf(save, "S");
+    else if (naipe == 2) fprintf(save, "D");
+    else if (naipe == 3) fprintf(save, "C");
+}
+
 // Percorre as pilhas e salva as cartas presentes nelas por linha
 void salva_pilhas(FILE *save, Pilhas p)
 {
@@ -584,17 +602,10 @@ void salva_pilhas(FILE *save, Pilhas p)
             struct carta c = pTemp->pilha[i];
 
             // Imprime o valor da carta (A, 2-10, J, Q, K)
-            if (c.valor == 1) fprintf(save, "A");
-            else if (c.valor == 11) fprintf(save, "J");
-            else if (c.valor == 12) fprintf(save, "Q");
-            else if (c.valor == 13) fprintf(save, "K");
-            else fprintf(save, "%d", c.valor);
+            salva_valor(save, c.valor);
 
             // Imprime o naipe (0-Copas/H, 1-Espadas/S, 2-Diamantes/D, 3-Paus/C)
-            if (c.naipe == 0) fprintf(save, "H");
-            else if (c.naipe == 1) fprintf(save, "S");
-            else if (c.naipe == 2) fprintf(save, "D");
-            else if (c.naipe == 3) fprintf(save, "C");
+            salva_naipe(save, c.naipe);
 
             // Imprime um espaco entre cartas (mas não na última carta da linha)
             if (i < pTemp->numCartas - 1) fprintf(save, " ");
