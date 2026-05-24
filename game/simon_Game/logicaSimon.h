@@ -53,8 +53,10 @@ void ganhouAjuda (WinDef w, int *i, char *temp);
 int tamanhoS (char *s);
 int ganhou (Pilhas p, WinDef w);
 int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[]);
+int avalia_regra_origem(FlagsMovimento regra, Pilhas p, int posOrig[]);
 int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[]);
 void movimentoValido(EstadoJogo g, int posOrig[], int posDest[]);
 void processar_auto_movimentos(EstadoJogo *g);
+int tenta_auto_movimentos(EstadoJogo *g);
 
 #endif

@@ -4,6 +4,17 @@
 #include "cartas.h"
 #include "logica.h"
 
+#ifndef COPAS
+#define COPAS 0
+#define ESPADAS 1
+#define DIAMANTES 2
+#define PAUS 3
+#endif
+
+void cria_baralho(struct carta *baralho);
+void puxar_Stock(struct carta baralho[], int *stock, struct carta *ultima);
+int valores_Check(struct carta baralho[], struct carta *ultima, int jogadaEscolhida);
+
 int init_suite(void) 
 {
     return 0;
