@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
+#include "logica.h"
 
 // funcao para listar os arquivos e guardar os caminhos num array
 int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
@@ -37,4 +38,32 @@ int listarPaciencias(const char *caminho_pasta, char lista_de_caminhos[][512]) {
     }
     closedir(pasta);
     return quantidade; 
+}
+
+EstadoJogo* lerPaciencia(const char *caminho_ficheiro) {
+    FILE *ficheiro = fopen(caminho_ficheiro, "r");
+    if (ficheiro == NULL) {
+        printf("Nao foi possivel abrir o arquivo da paciencia");
+        return NULL;
+    }
+
+    EstadoJogo *estado = (EstadoJogo*)malloc(sizeof(EstadoJogo));
+    if (estado == NULL) {
+        printf("Falha de alocacao de memoria \n");
+        fclose(ficheiro);
+        return NULL;
+    }
+
+    char linha[512];
+
+    while (fgets(linha, sizeof(linha), ficheiro) != NULL) {
+        linha[strcspn(linha, "\r\n")] = '\0';
+
+        if (strncmp(linha, "BARALHOS:", 9) == 0) {
+            sscanf(linha, "BARALHOS: %d", &estado->nBaralhos);
+        }
+    }
+
+    fclose(ficheiro);
+    return estado;
 }

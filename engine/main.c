@@ -15,11 +15,16 @@ int main() {
     // requer a escolha, retorna o caminho da paciencia escolhida
     char *escolhido = escolherPaciencia(lista, total);
 
-    //debug foda do big g
     if (escolhido != NULL) {
-        printf("\n[SUCESSO] Voce selecionou o arquivo: %s\n", escolhido);
-    } else {
-        printf("\n[ERRO] Selecao invalida ou nenhum arquivo encontrado.\n");
+        printf("\nVoce selecionou o arquivo: %s\n", escolhido);
+        
+        EstadoJogo *estado = lerPaciencia(escolhido);
+        if (estado != NULL) {
+            printf("[INFO] Estado do jogo inicializado com sucesso (Baralhos: %d)\n", estado->nBaralhos);
+        }
+    } 
+    else {
+        printf("\nSelecao invalida ou nenhum arquivo encontrado.\n");
     }
 
     return 0;
