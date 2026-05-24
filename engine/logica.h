@@ -9,8 +9,8 @@ EstadoJogo* lerPaciencia(const char *caminho_ficheiro);
 int salvar_jogo(EstadoJogo *g, const char *caminho_save);
 EstadoJogo* carregar_save(const char *caminho_save);
 void listar_saves(void);
-
-// Protótipos necessários para o main.c
+FlagsMovimento char_para_flag(char c);
+int sequencias(Pilhas p);
 void processar_auto_movimentos(EstadoJogo *g);
 int acharLimite(Pilhas p);
 int ganhou(Pilhas p, WinDef w);
