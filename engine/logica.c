@@ -1226,21 +1226,17 @@ int ganhou (Pilhas p, WinDef w)
 
 int numeroDePilhasParaGanhar (Pilhas p, WinDef w, int tamanhoString)
 {
-    int j=0, id=0, contador = 0;
+    int j=0, contador = 0;
     
     for (int i=0; i<tamanhoString; i++)
     {
-        if (w.tipo[i]== ' ')
-        {
-            id++;
-        }
-        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
+        if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
         {
             contador++;
-            if (p->prox != NULL)
+            if (p->prox == NULL)
                 return contador;
             
-            i=0;
+            i=-1;
             j=0;
             p=p->prox;
         }
@@ -1271,22 +1267,22 @@ int ganhou (Pilhas p, WinDef w)
         
     for (int i=0; i<tamanhoString; i++)
     {
-        if (w.tipo[i]== ' ')
-        {
-            id++;
-        }
-        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
+        if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
         {
             if (!(p->numCartas==w.numCartas[id]))
-                return 1;
+            return 1;
             
             win++;
             if (win == numeroDeWins)
-                return 0;
+            return 0;
             
             p=p->prox;
-            i=0;
+            i=-1;
             j=0;
+        }
+        else if (w.tipo[i]== ' ')
+        {
+            id++;
         }
         else if (p->tipo_Pilha[j] == w.tipo[i])
         {
@@ -1299,7 +1295,7 @@ int ganhou (Pilhas p, WinDef w)
 
         if (i+1 == tamanhoString && p->prox != NULL)
         {
-            i=0;
+            i=-1;
             j=0;
             p=p->prox;
         }
