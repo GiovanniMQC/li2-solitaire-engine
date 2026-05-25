@@ -1190,6 +1190,7 @@ int tamanhoS (char *s)
     {
         i++;
     }
+    i++;
     return i;
 }
 
@@ -1241,7 +1242,7 @@ int  ganhou (Pilhas p, WinDef w)
         {
             id++;
         }
-        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i+1] == ' ' || w.tipo[i+1] == '\0'))
+        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
         {
             if (!(p->numCartas==w.numCartas[id]))
                 return 1;
@@ -1266,6 +1267,7 @@ int  ganhou (Pilhas p, WinDef w)
         if (i+1 == tamanhoString && p->prox != NULL)
         {
             i=0;
+            j=0;
             p=p->prox;
         }
     }
