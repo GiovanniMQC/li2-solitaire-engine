@@ -1278,6 +1278,22 @@ int winCheck (Pilhas p, WinDef w, int id, int *win, int numeroDeWins)
     return 2;
 }
 
+void naoWinCheck (Pilhas p, WinDef w, int i, int *j, int *id)
+{
+    if (w.tipo[i]== ' ')
+    {
+        (*id)++;
+    }
+    else if (p->tipo_Pilha[(*j)] == w.tipo[i])
+    {
+        (*j)++;
+    }
+    else
+    {
+        (*j)=0;
+    }
+}
+
 int ganhou (Pilhas p, WinDef w)
 {
     //p->tipo_Pilha
@@ -1297,17 +1313,9 @@ int ganhou (Pilhas p, WinDef w)
             
             return (winCheck(p, w, id, &win, numeroDeWins));
         }
-        else if (w.tipo[i]== ' ')
-        {
-            id++;
-        }
-        else if (p->tipo_Pilha[j] == w.tipo[i])
-        {
-            j++;
-        }
         else
         {
-            j=0;
+            naoWinCheck (p, w, i, &j, &id);
         }
 
         if (i+1 == tamanhoString && p->prox != NULL)
