@@ -1242,7 +1242,7 @@ int  ganhou (Pilhas p, WinDef w)
         }
         else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i+1] == ' ' || w.tipo[i+1] == '\0'))
         {
-            if (not(p->numCartas==w.numCartas[id]))
+            if (!(p->numCartas==w.numCartas[id]))
                 return 1;
             
             win++;
