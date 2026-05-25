@@ -1228,11 +1228,12 @@ int  ganhou (Pilhas p, WinDef w)
     int i, j=0, id=0, win=0;
     //p->tipo_Pilha
     //w.tipo
+
+    if (w.tipo == NULL)
+        return 1;
+    
     int tamanhoString = tamanhoS(w.tipo); // "aaaaaa aaaaa abbaa aaaaaaaaaaawasfaaa"
                                           // "aaaaa"
-
-    
-
 
     for (i=0; i<tamanhoString; i++)
     {
