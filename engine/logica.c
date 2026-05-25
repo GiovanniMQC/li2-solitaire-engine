@@ -1234,7 +1234,7 @@ int numeroDePilhasParaGanhar (Pilhas p, WinDef w, int tamanhoString)
         {
             id++;
         }
-        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i+1] == ' ' || w.tipo[i+1] == '\0'))
+        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
         {
             contador++;
         }
