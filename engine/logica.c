@@ -1266,11 +1266,23 @@ int checkIgual (Pilhas p, WinDef w, int i, int j)
     return 1;
 }
 
+int winCheck (Pilhas p, WinDef w, int id, int *win, int numeroDeWins)
+{
+    if (!(p->numCartas==w.numCartas[id]))
+        return 1;
+        
+    (*win)++;
+    if ((*win) == numeroDeWins)
+        return 0;
+    
+    return 2;
+}
+
 int ganhou (Pilhas p, WinDef w)
 {
     //p->tipo_Pilha
     //w.tipo
-    
+
     if (w.tipo == NULL)
         return 1;
     
@@ -1280,14 +1292,10 @@ int ganhou (Pilhas p, WinDef w)
     {
         if (checkIgual(p,w,i,j) == 0)
         {
-            if (!(p->numCartas==w.numCartas[id]))
-            return 1;
+            if (winCheck(p, w, id, &win, numeroDeWins)==2)
+                contadorReset(&p, &i, &j);
             
-            win++;
-            if (win == numeroDeWins)
-                return 0;
-            
-            contadorReset(&p, &i, &j);
+            return (winCheck(p, w, id, &win, numeroDeWins));
         }
         else if (w.tipo[i]== ' ')
         {
