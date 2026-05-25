@@ -1193,6 +1193,7 @@ int tamanhoS (char *s)
     return i;
 }
 
+/*
 int ganhou (Pilhas p, WinDef w)
 {
     int id = 0;
@@ -1218,6 +1219,55 @@ int ganhou (Pilhas p, WinDef w)
     free(copia);
     
     if (id == w.qntsWins) return 0; // Ganhou!
+    return 1;
+}
+*/
+
+int  ganhou (Pilhas p, WinDef w)
+{
+    int i, j=0, id=0, win=0;
+    //p->tipo_Pilha
+    //w.tipo
+    int tamanhoString = tamanhoS(w.tipo); // "aaaaaa aaaaa abbaa aaaaaaaaaaawasfaaa"
+                                          // "aaaaa"
+
+    
+
+
+    for (i=0; i<tamanhoString; i++)
+    {
+        if (w.tipo[i]== ' ')
+        {
+            id++;
+        }
+        else if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i+1] == ' ' || w.tipo[i+1] == '\0'))
+        {
+            if (not(p->numCartas==w.numCartas[id]))
+                return 1;
+            
+            win++;
+            if (win == w.qntsWins)
+                return 0;
+            
+            p=p->prox;
+            i=0;
+            j=0;
+        }
+        else if (p->tipo_Pilha[j] == w.tipo[i])
+        {
+            j++;
+        }
+        else
+        {
+            j=0;
+        }
+
+        if (i+1 == tamanhoString && p->prox != NULL)
+        {
+            i=0;
+            p=p->prox;
+        }
+    }
     return 1;
 }
 
