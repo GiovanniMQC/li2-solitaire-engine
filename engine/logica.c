@@ -1252,33 +1252,42 @@ int numeroDePilhasParaGanhar (Pilhas p, WinDef w, int tamanhoString)
     return contador;
 } 
 
+void contadorReset (Pilhas *p, int *i, int *j)
+{
+    (*p)=(*p)->prox;
+    (*i)=-1;
+    (*j)=0;
+}
+
+int checkIgual (Pilhas p, WinDef w, int i, int j)
+{
+    if (p->tipo_Pilha[j] == '\0' && (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
+        return 0;
+    return 1;
+}
 
 int ganhou (Pilhas p, WinDef w)
 {
     //p->tipo_Pilha
     //w.tipo
-
+    
     if (w.tipo == NULL)
         return 1;
     
-    int tamanhoString = tamanhoS(w.tipo); // "aaaaaa aaaaa abbaa aaaaaaaaaaawasfaaa"
-                                          // "aaaaa"
-    int j=0, id=0, win=0, numeroDeWins = numeroDePilhasParaGanhar (p, w, tamanhoString);
+    int j=0, id=0, win=0, tamanhoString = tamanhoS(w.tipo), numeroDeWins = numeroDePilhasParaGanhar (p, w, tamanhoString);
         
     for (int i=0; i<tamanhoString; i++)
     {
-        if (p->tipo_Pilha[j] == '\0'&& (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
+        if (checkIgual(p,w,i,j) == 0)
         {
             if (!(p->numCartas==w.numCartas[id]))
             return 1;
             
             win++;
             if (win == numeroDeWins)
-            return 0;
+                return 0;
             
-            p=p->prox;
-            i=-1;
-            j=0;
+            contadorReset(&p, &i, &j);
         }
         else if (w.tipo[i]== ' ')
         {
@@ -1295,9 +1304,7 @@ int ganhou (Pilhas p, WinDef w)
 
         if (i+1 == tamanhoString && p->prox != NULL)
         {
-            i=-1;
-            j=0;
-            p=p->prox;
+            contadorReset(&p, &i, &j);
         }
     }
     return 1;
