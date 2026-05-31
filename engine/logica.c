@@ -1398,7 +1398,7 @@ void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
 
     // Checa se existe algo NULL
     if (pilhaOrigem == NULL || pilhaDestino == NULL || 
-        pilhaOrigem->tipo_Pilha == NULL || pilhaDestino->tipo_Pilha == NULL) {
+        pilhaOrigem->tipo_Pilha == NULL || pilhaDestino->tipo_Pilha == NULL || pilhaOrigem->numCartas < 1 || pilhaDestino->numCartas < 1) {
         printf("Posição inválida\n");
         return;
     }
