@@ -1266,14 +1266,17 @@ int checkIgual (Pilhas p, WinDef w, int i, int j)
     return 1;
 }
 
-int winCheck (Pilhas p, WinDef w, int id, int *win, int numeroDeWins)
+int winCheck (Pilhas p, WinDef w, int *id, int *win, int numeroDeWins, int *i)
 {
-    if (p->numCartas != w.numCartas[id])
+    if (p->numCartas != w.numCartas[(*id)])
         return 1;
         
-    if ((*win) >= numeroDeWins)
-    return 0;
     (*win)++;
+    (*i)=-1;
+    (*id) = 0;
+
+    if ((*win) == numeroDeWins)
+    return 0;
         
     return 2;
 }
@@ -1291,7 +1294,6 @@ void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
     else
     {
         (*j)=0;
-        (*i)=-1;
     }
 }
 
@@ -1309,10 +1311,13 @@ int ganhou (Pilhas p, WinDef w)
     {
         if (checkIgual(p,w,i,j) == 0)
         {
-            if (winCheck(p, w, id, &win, numeroDeWins)==2)
+            if (winCheck(p, w, &id, &win, numeroDeWins, &i)==2)
                 contadorReset(&p, &i, &j);
             else
-            return (winCheck(p, w, id, &win, numeroDeWins));
+            {
+                win--;
+                return (winCheck(p, w, &id, &win, numeroDeWins, &i));
+            }
         }
         else
         {
