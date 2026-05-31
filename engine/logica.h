@@ -49,5 +49,7 @@ int REItopo (Pilhas p, int posOrig[]);
 int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[]);
 int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[]);
 void libera_movimentos_array(MovimentoDef *movs, int qts);
+void undo(EstadoJogo *g);
+void guarda_historico_se_valido(EstadoJogo *g, int posOrig[], int posDest[]);
 
 #endif

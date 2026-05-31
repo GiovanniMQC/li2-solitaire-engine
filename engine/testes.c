@@ -169,6 +169,30 @@ void teste_limpa_memoria() {
     CU_ASSERT_PTR_NULL(p); // A estrutura principal foi liberta corretamente?
 }
 
+void teste_undo() {
+    struct celula dest = {.numCartas = 1, .pilha = malloc(2 * sizeof(struct carta))};
+    struct celula orig = {.numCartas = 0, .prox = &dest, .pilha = malloc(2 * sizeof(struct carta))};
+    histMovimentos hist = {{1, 1}, {2, 1}, 1};
+    EstadoJogo g = {.pilhas = &orig, .qts_his_mov = 1, .historico = &hist};
+    dest.pilha[0] = (struct carta){1, 10};
+    
+    undo(&g);
+    
+    CU_ASSERT_EQUAL(g.qts_his_mov, 0);
+    CU_ASSERT_EQUAL(orig.numCartas, 1);
+    CU_ASSERT_EQUAL(orig.pilha[0].valor, 10);
+    free(orig.pilha); free(dest.pilha);
+}
+
+void teste_guarda_historico_se_valido() {
+    EstadoJogo g = {0};
+    int posOrig[2] = {1, 1}, posDest[2] = {2, 1};
+    
+    guarda_historico_se_valido(&g, posOrig, posDest);
+    
+    CU_ASSERT_EQUAL(g.qts_his_mov, 0); // O movimento é inválido, logo não entra para o histórico
+}
+
 int main() {
     if (CUE_SUCCESS != CU_initialize_registry()) 
         return CU_get_error();
@@ -195,7 +219,9 @@ int main() {
     CU_add_test(pSuite, "teste_as_topo", teste_as_topo),
     CU_add_test(pSuite, "teste_eso_uma", teste_eso_uma),
     CU_add_test(pSuite, "teste_mesmo_naipe", teste_mesmo_naipe),
-    CU_add_test(pSuite, "teste_limpa_memoria", teste_limpa_memoria);
+    CU_add_test(pSuite, "teste_limpa_memoria", teste_limpa_memoria),
+    CU_add_test(pSuite, "teste_undo", teste_undo),
+    CU_add_test(pSuite, "teste_guarda_historico_se_valido", teste_guarda_historico_se_valido);
 
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
