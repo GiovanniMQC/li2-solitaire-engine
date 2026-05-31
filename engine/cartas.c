@@ -150,13 +150,13 @@ int opcao_inicio()
 {
     unsigned int jogada_escolhida = 0;
     
-    printf("1 - Jogar, 2 - Reiniciar, 3 - Salvar, 4 - Sair: ");
+    printf("1 - Jogar, 2 - Undo, 3 - Reiniciar, 4 - Salvar, 5 - Sair: ");
     scanf("%d", &jogada_escolhida);
     
-    while(jogada_escolhida > 4 || jogada_escolhida < 1)
+    while(jogada_escolhida > 5 || jogada_escolhida < 1)
     {
         printf("Opção inválida\n");
-        printf("1 - Jogar, 2 - Reiniciar, 3 - Salvar, 4 - Sair: ");
+        printf("1 - Jogar, 2 - Undo, 3 - Reiniciar, 4 - Salvar, 5 - Sair: ");
         scanf("%d", &jogada_escolhida);
     }
 

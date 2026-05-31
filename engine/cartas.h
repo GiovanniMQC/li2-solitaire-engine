@@ -57,11 +57,20 @@ typedef struct wins{
     int *numCartas;   // Array alocado dinamicamente (ex: malloc(qntsWins * sizeof(int)))
 } WinDef;
 
+typedef struct hist{
+    int posOrig[2];
+    int posDest[2];
+    int cartasMovidas;
+} histMovimentos;
+
 // A estrutura principal que guarda toda a informação de uma Paciência lida do ficheiro
 typedef struct {
     char *nome_paciencia; // Nome retirado do ficheiro
     char *caminho_ficheiro; // Caminho do ficheiro da paciencia (para restart)
     int nBaralhos;        // Quantidade de baralhos
+
+    histMovimentos *historico; // Array com movimentos feitos
+    int qts_his_mov;
     
     Pilhas pilhas;        // Lista ligada com todas as pilhas do jogo
     int qts_pilhas;       // Quantidade total de pilhas instanciadas
