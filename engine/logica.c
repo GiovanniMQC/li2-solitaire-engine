@@ -1260,6 +1260,7 @@ void contadorReset (Pilhas *p, int *i, int *j, int *id)
     (*id)=0;
 }
 
+// verifica se duas strings acabaram 
 int checkIgual (Pilhas p, WinDef w, int i, int j)
 {
     if (p->tipo_Pilha[j] == '\0' && (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
@@ -1267,6 +1268,7 @@ int checkIgual (Pilhas p, WinDef w, int i, int j)
     return 1;
 }
 
+// apos ver o winCheck verifica e aumenta valores/reseta valores
 void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
 {
     if (w.tipo[(*i)]== ' ')
@@ -1283,21 +1285,23 @@ void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
     }
 }
 
+// depois de verificar que esta na pilha correta, verifica se as cartas são iguais
 int winCheck (Pilhas p, WinDef w, int *id, int *win, int numeroDeWins, int *i)
 {
     if (p->numCartas != w.numCartas[(*id)])
         return 1;
         
     (*win)++;
-    (*i)=-1;
-    (*id) = 0;
 
     if ((*win) == numeroDeWins)
     return 0;
-        
+    
+    (*i)=-1;
+    (*id) = 0;
     return 2;
 }
 
+// verifica se o jogo foi ganho
 int ganhou (Pilhas p, WinDef w)
 {
     //p->tipo_Pilha
@@ -1306,8 +1310,14 @@ int ganhou (Pilhas p, WinDef w)
     if (w.tipo == NULL)
         return 1;
     
+    // j é o indice da string do tipo da pilha
+    // id é o indice do numero de cartas necessario para ganhar
+    // win é o num de pilhas que estão completas
+    // tamanhoString serve para saber o maior valor do i
+    // numeroDeWins vê o numero a que o win tem de ser igual para dar como vitoria
     int j=0, id=0, win=0, tamanhoString = tamanhoS(w.tipo), numeroDeWins = numeroDePilhasParaGanhar (p, w, tamanhoString);
-        
+    
+    // i é o indice da string dos tipos de pilhas para ganhar
     for (int i=0; i<tamanhoString; i++)
     {
         if (checkIgual(p,w,i,j) == 0)
