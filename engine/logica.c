@@ -1271,10 +1271,10 @@ int winCheck (Pilhas p, WinDef w, int id, int *win, int numeroDeWins)
     if (!(p->numCartas==w.numCartas[id]))
         return 1;
         
+    if ((*win) >= numeroDeWins)
+    return 0;
     (*win)++;
-    if ((*win) == numeroDeWins)
-        return 0;
-    
+        
     return 2;
 }
 
@@ -1310,7 +1310,7 @@ int ganhou (Pilhas p, WinDef w)
         {
             if (winCheck(p, w, id, &win, numeroDeWins)==2)
                 contadorReset(&p, &i, &j);
-            
+            else
             return (winCheck(p, w, id, &win, numeroDeWins));
         }
         else
