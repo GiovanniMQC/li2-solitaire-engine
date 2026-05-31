@@ -653,13 +653,33 @@ void limpa_memoria_jogo(Pilhas *p)
 }
 
 // Atualiza os valores para compatíveis com array e verifica se a jogada é válida
-void jogar_Coluna(EstadoJogo *g, int posOrig[], int posDest[])
+int jogar_Coluna(EstadoJogo *g, int posOrig[], int posDest[])
 {
     posOrig[0]--;
     posOrig[1]--;
     posDest[0]--;
     
-    movimentoValido(*g, posOrig, posDest);
+    return movimentoValido(g, posOrig, posDest);
+}
+
+// Tenta efetuar a jogada e, se for válida com sucesso, guarda no histórico
+void guarda_historico_se_valido(EstadoJogo *g, int posOrig[], int posDest[]) {
+    // Guarda as variaveis limpas antes da funcao jogar_Coluna subtrair 1 a tudo
+    int origLinhaSave = posOrig[1];
+    int origColSave = posOrig[0];
+    int destColSave = posDest[0];
+    
+    Pilhas pilhaDest = procura_pilha(g->pilhas, posDest[0] - 1);
+    int destLinhaSave = pilhaDest ? (pilhaDest->numCartas + 1) : 1;
+
+    if (jogar_Coluna(g, posOrig, posDest) == 1) { // Só guarda se a jogada for validada com sucesso
+        g->historico = realloc(g->historico, (g->qts_his_mov + 1) * sizeof(histMovimentos));
+        g->historico[g->qts_his_mov].posOrig[0] = origColSave;
+        g->historico[g->qts_his_mov].posOrig[1] = origLinhaSave;
+        g->historico[g->qts_his_mov].posDest[0] = destColSave;
+        g->historico[g->qts_his_mov].posDest[1] = destLinhaSave;
+        g->qts_his_mov++;
+    }
 }
 
 // Recebe a pilha e pede ao jogador as posições de jogadas.
@@ -676,8 +696,9 @@ void pedir_jogada(EstadoJogo *g)
 
     printf("Digite a coluna destino: ");
     scanf("%d", &posDest[0]);
-
-    jogar_Coluna(g, posOrig, posDest);
+    
+    // Executa a jogada e atualiza o histórico
+    guarda_historico_se_valido(g, posOrig, posDest);
 }
 
 // Retorna o próximo ID numérico disponível na pasta saves
@@ -756,18 +777,42 @@ void comando_restart(EstadoJogo *g, int *gameOver) {
     *gameOver = 0;
 }
 
+void undo(EstadoJogo *g)
+{
+    int numHist = g->qts_his_mov;
+    int posOrig[2] = {0};
+    int posDest[2] = {0};
+    if(numHist > 0)
+    {
+        posOrig[0] = g->historico[numHist-1].posDest[0];
+        posOrig[1] = g->historico[numHist-1].posDest[1];
+        posDest[0] = g->historico[numHist-1].posOrig[0];
+        posDest[1] = g->historico[numHist-1].posOrig[1];
+
+        posOrig[0]--;
+        posOrig[1]--;
+        posDest[0]--;
+        mover_cartas(&(g->pilhas), posOrig, posDest);
+        
+        g->qts_his_mov--;
+    }
+}
+
 // A partir da jogada selecionada, processa a jogada correta para o numero dado
 void processar_jogada(EstadoJogo *g, struct baralho baralhos[], int *contagemBaralho, int tamPilhas[], int *gameOver)
 {
     unsigned int jogadaEscolhida = opcao_inicio();
     
-    if (jogadaEscolhida == 4) {
+    if (jogadaEscolhida == 5) {
         comando_sair(gameOver);
-    } else if (jogadaEscolhida == 3) {
+    } else if (jogadaEscolhida == 4) {
         comando_salvar(g);
-    } else if (jogadaEscolhida == 2) {
+    } else if (jogadaEscolhida == 3) {
         comando_restart(g, gameOver);
-    } else if (jogadaEscolhida == 1) {
+    } else if(jogadaEscolhida == 2) {
+        undo(g);
+    }
+    else if (jogadaEscolhida == 1) {
         pedir_jogada(g);
     }
 }
@@ -801,75 +846,50 @@ int verifica_colunas (Pilhas p, int coordenadaAtestar[], int colunaDest)
     return 1;
 }
 
-//subfunção do check gameover para ver se já não existem jogadas validas
-int existe_jogadaValida (Pilhas p)
-{
-    Pilhas p3 = p;
+// Função auxiliar para verificar se existe um destino válido para uma carta, retorna 1 se existe
+int tenta_destino_jogada_valida(EstadoJogo *g, Pilhas pOrig, int colOrig, int linha) {
+    Pilhas pDest = g->pilhas;
+    int colDest = 0;
     
-    for (int colunaOrig = 0; colunaOrig<10; colunaOrig++)
-    {
-        if (p3->numCartas > 0)
-        {
-            int coordenadaAtestar[2] = {colunaOrig, ((p3->numCartas)-(sequencias(p3)))};
-
-            for (int colunaDest = 0; colunaDest<10; colunaDest++)
-            {
-                if (verifica_colunas(p, coordenadaAtestar, colunaDest) == 0)
-                    return 0;
+    while (pDest != NULL) {
+        if (colOrig != colDest && pDest->tipo_Pilha != NULL) {
+            int posOrig[2] = {colOrig, linha};
+            int posDest[2] = {colDest, 0};
+            
+            for (int i = 0; i < g->qts_mov_perm; i++) {
+                if (strcmp(g->mov_perm[i].tipo_origem, pOrig->tipo_Pilha) == 0 &&
+                    strcmp(g->mov_perm[i].tipo_destino, pDest->tipo_Pilha) == 0) {
+                    if (valida_todas_regras(g->mov_perm[i], g->pilhas, posOrig, posDest) == 1) {
+                        return 1; // Encontrou pelo menos um movimento válido
+                    }
+                }
             }
         }
-        p3 = p3->prox;
+        pDest = pDest->prox;
+        colDest++;
     }
-    return 1;
+    return 0;
 }
 
-// subfunção do check gameover para ver se ganhou (as pilhas de pintas estão todas feitas)
-int verifica_ganhou(Pilhas p, Pilhas testeSeq, int i)
+// Verifica se há pelo menos uma jogada válida restante no tabuleiro, retorna 1 se existe
+int existe_jogadaValida(EstadoJogo *g)
 {
-    if (testeSeq->numCartas != 0 && sequencias(testeSeq)==13)
-    {
-        int origem[2] = {i, (testeSeq->numCartas)-13};
-        int destino[2] = {10+(testeSeq->pilha[testeSeq->numCartas-1].naipe),0};
-        mover_cartas(&p, origem, destino);
-    }
-
-    Pilhas copas = procura_pilha(p, 10), espadas = copas->prox, ouros = espadas->prox, paus = ouros->prox;
+    Pilhas pOrig = g->pilhas;
+    int colOrig = 0;
     
-    if (copas->numCartas != 0 && espadas->numCartas != 0 && ouros->numCartas != 0 && paus->numCartas != 0)
-    {
-        return 1;
-    }
-    return 0;
-}
-
-//verifica se o jogo acabou
-int check_gameOver(Pilhas p)
-{
-    Pilhas testeSeq = p;
-
-    for (int i = 0; i<10; i++)
-    {
-        if(verifica_ganhou(p, testeSeq, i))
-        {
-            printf("Ganhaste!\n");
-            return 1;
+    while (pOrig != NULL) {
+        if (pOrig->tipo_Pilha != NULL && pOrig->numCartas > 0) {
+            for (int linha = 0; linha < pOrig->numCartas; linha++) {
+                if (tenta_destino_jogada_valida(g, pOrig, colOrig, linha) == 1) {
+                    return 1;
+                }
+            }
         }
-            
-        testeSeq = testeSeq->prox;
+        pOrig = pOrig->prox;
+        colOrig++;
     }
-
-    if (existe_jogadaValida(p) == 1)
-    {
-        return 2;
-    }
-
     return 0;
 }
-
-
-
-
-
 
 //
 // FUNCOES DA PARTE 3 PARA FICAR MAIS ORGANIZADO
@@ -991,15 +1011,16 @@ int mesmaCor (Pilhas p, int posOrig[])
     return 0;
 }
 
+// Auxiliar que checa se a pilha destino está vazia
 int pilhaDestinoVazia (Pilhas p, int posDest[])
 {
     Pilhas pilhaDestino = procura_pilha(p, posDest[0]);
 
     if (pilhaDestino->pilha != NULL && pilhaDestino->numCartas > 0) 
     {
-        return 1; // Falha a restrição porque a pilha NÃO está vazia
+        return 1; // Falha a restrição porque a pilha não está vazia
     }
-    return 0; // Passa a restrição porque a pilha está vazia!
+    return 0; // Passa a restrição porque a pilha está vazia
 }
 
 // Imprime o valor da carta em um arquivo de save (A, 2-10, J, Q, K)
@@ -1013,6 +1034,7 @@ void salva_valor(FILE *save, int valor)
     else if (valor == 13) fprintf(save, "K");
 }
 
+// Converte o num do naipe em um caractere correto para o save
 void salva_naipe(FILE *save, int naipe)
 {
     const char NAIPES[] = {'H', 'S', 'D', 'C'};
@@ -1043,6 +1065,7 @@ void salva_pilhas(FILE *save, Pilhas p)
     }
 }
 
+// Cria o arquivo de save com o número baseado na contagem de saves
 int salvaJogo (EstadoJogo g, int contagemSaves)
 {
     char nomeArquivo[30];
@@ -1073,6 +1096,7 @@ int processar_entrada_save(struct dirent *entrada) {
     return 0;
 }
 
+// Entra na pasta de saves e lista os arquivos de save
 void listar_saves(void)
 {
     struct dirent *entrada;
@@ -1289,12 +1313,12 @@ int winCheck (Pilhas p, WinDef w, int *id, int *win, int numeroDeWins, int *i)
         return 1;
         
     (*win)++;
-    (*i)=-1;
-    (*id) = 0;
-
+    
     if ((*win) == numeroDeWins)
     return 0;
-        
+    
+    (*i)=-1;
+    (*id) = 0;
     return 2;
 }
 
@@ -1363,6 +1387,7 @@ int avalia_regra_destino(FlagsMovimento regra, Pilhas p, int posOrig[], int posD
     }
 }
 
+// Checa a pilha origem e destino separadamente
 int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
 {
     int resultado = avalia_regra_origem(regra, p, posOrig);
@@ -1370,7 +1395,7 @@ int avalia_regra(FlagsMovimento regra, Pilhas p, int posOrig[], int posDest[])
     return avalia_regra_destino(regra, p, posOrig, posDest);
 }
 
-// Retorna 1 se todas as flags do movimento passarem, e 0 caso alguma falhe
+// Valida o movimento para todas as flags, Retorna 1 se todas as flags do movimento passarem, e 0 caso alguma falhe
 int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[])
 {
     int restricoes_atendidas = 1;
@@ -1392,32 +1417,33 @@ int valida_todas_regras(MovimentoDef mov, Pilhas p, int posOrig[], int posDest[]
     return restricoes_atendidas;
 }
 
-void movimentoValido(EstadoJogo g, int posOrig[], int posDest[])
+// Checa se o movimento entre duas posições é válido
+int movimentoValido(EstadoJogo *g, int posOrig[], int posDest[])
 {
-    Pilhas pilhaOrigem = procura_pilha(g.pilhas, posOrig[0]);
-    Pilhas pilhaDestino = procura_pilha(g.pilhas, posDest[0]);
+    Pilhas pilhaOrigem = procura_pilha(g->pilhas, posOrig[0]), pilhaDestino = procura_pilha(g->pilhas, posDest[0]);
 
     // Checa se existe algo NULL
     if (pilhaOrigem == NULL || pilhaDestino == NULL || 
-        pilhaOrigem->tipo_Pilha == NULL || pilhaDestino->tipo_Pilha == NULL || pilhaOrigem->numCartas < 1 || pilhaDestino->numCartas < 1) {
+        pilhaOrigem->tipo_Pilha == NULL || pilhaDestino->tipo_Pilha == NULL || pilhaOrigem->numCartas < 1) {
         printf("Posição inválida\n");
-        return;
+        return 0;
     }
 
     // Percorre as regras de movimento e compara com tipo da pilha
-    for (int i = 0; i < g.qts_mov_perm; i++) {
-        if (strcmp(g.mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
-            strcmp(g.mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
+    for (int i = 0; i < g->qts_mov_perm; i++) {
+        if (strcmp(g->mov_perm[i].tipo_origem, pilhaOrigem->tipo_Pilha) == 0 &&
+            strcmp(g->mov_perm[i].tipo_destino, pilhaDestino->tipo_Pilha) == 0) {
             
-            if (valida_todas_regras(g.mov_perm[i], g.pilhas, posOrig, posDest) == 1) {
-                Pilhas p = g.pilhas;
+            if (valida_todas_regras(g->mov_perm[i], g->pilhas, posOrig, posDest) == 1) {
+                Pilhas p = g->pilhas;
                 mover_cartas(&p, posOrig, posDest);
-                return; // Movimento feito com sucesso, encerra a função
+                return 1;
             }
         }
     }
 
     printf("Movimento Inválido\n");
+    return 0;
 }
 
 // Testa todas as regras automáticas para um par específico de pilhas de origem e destino

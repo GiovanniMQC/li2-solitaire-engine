@@ -9,9 +9,9 @@ EstadoJogo* carrega_save_interativo(void) {
     listar_saves();
     
     int id_save;
-    printf("\nDigite o numero do save que deseja carregar: ");
+    printf("\nDigite o número do save que deseja carregar: ");
     if (scanf("%d", &id_save) != 1) {
-        printf("Entrada invalida.\n");
+        printf("Entrada inválida.\n");
         return NULL;
     }
     
@@ -19,7 +19,7 @@ EstadoJogo* carrega_save_interativo(void) {
     sprintf(caminho_save, "saves/save_%d.txt", id_save);
     EstadoJogo *jogo = carregar_save(caminho_save);
     if (jogo == NULL) {
-        printf("Erro ao carregar o save. Verifique se o numero esta correto.\n");
+        printf("Erro ao carregar o save. Verifique se o número está correto.\n");
         return NULL;
     }
     printf("\nSave carregado com sucesso!\n");
@@ -32,10 +32,10 @@ EstadoJogo* carrega_save_ou_paciencia(const char *escolhido) {
         return carrega_save_interativo();
     }
     
-    printf("\nVoce selecionou: %s\n", escolhido);
+    printf("\nVocê selecionou: %s\n", escolhido);
     EstadoJogo *jogo = lerPaciencia(escolhido);
     if (jogo == NULL) {
-        printf("Erro ao carregar a paciencia.\n");
+        printf("Erro ao carregar a paciência.\n");
         return NULL;
     }
     return jogo;
@@ -59,11 +59,16 @@ void libera_memoria_final(EstadoJogo *jogo) {
 void loop_principal(EstadoJogo *jogo, struct baralho b[], int *contagemBaralho, int tamPilhas[], int *gameOver) {
     while (*gameOver == 0) {
         processar_auto_movimentos(jogo);
+        // if(!existe_jogadaValida(jogo)) 
+        // {
+        //     printf("Não existem jogadas possíveis!");
+        //     *gameOver = 2;
+        // }
         printf("\n");
         print_pilhas(jogo->pilhas, acharLimite(jogo->pilhas));
         
         if (ganhou(jogo->pilhas, jogo->win_args) == 0) {
-            printf("\nParabens! Voce ganhou %s!\n", jogo->nome_paciencia);
+            printf("\nParabéns! Você ganhou %s!\n", jogo->nome_paciencia);
             *gameOver = 1;
         } else {
             processar_jogada(jogo, b, contagemBaralho, tamPilhas, gameOver);
@@ -80,7 +85,7 @@ EstadoJogo* inicializar_paciencia() {
     char *escolhido = escolherPaciencia(lista, total);
 
     if (escolhido == NULL) {
-        printf("\nSelecao invalida ou nenhum arquivo encontrado.\n");
+        printf("\nSeleção inválida ou nenhum arquivo encontrado.\n");
         return NULL;
     }
 
