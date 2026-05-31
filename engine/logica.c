@@ -1291,7 +1291,7 @@ void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
     else
     {
         (*j)=0;
-        (*i)=0;
+        (*i)=-1;
     }
 }
 
