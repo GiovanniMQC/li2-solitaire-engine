@@ -1252,11 +1252,12 @@ int numeroDePilhasParaGanhar (Pilhas p, WinDef w, int tamanhoString)
     return contador;
 } 
 
-void contadorReset (Pilhas *p, int *i, int *j)
+void contadorReset (Pilhas *p, int *i, int *j, int *id)
 {
     (*p)=(*p)->prox;
     (*i)=-1;
     (*j)=0;
+    (*id)=0;
 }
 
 int checkIgual (Pilhas p, WinDef w, int i, int j)
@@ -1264,21 +1265,6 @@ int checkIgual (Pilhas p, WinDef w, int i, int j)
     if (p->tipo_Pilha[j] == '\0' && (w.tipo[i] == ' ' || w.tipo[i] == '\0'))
         return 0;
     return 1;
-}
-
-int winCheck (Pilhas p, WinDef w, int *id, int *win, int numeroDeWins, int *i)
-{
-    if (p->numCartas != w.numCartas[(*id)])
-        return 1;
-        
-    (*win)++;
-    (*i)=-1;
-    (*id) = 0;
-
-    if ((*win) == numeroDeWins)
-    return 0;
-        
-    return 2;
 }
 
 void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
@@ -1297,6 +1283,21 @@ void naoWinCheck (Pilhas p, WinDef w, int *i, int *j, int *id)
     }
 }
 
+int winCheck (Pilhas p, WinDef w, int *id, int *win, int numeroDeWins, int *i)
+{
+    if (p->numCartas != w.numCartas[(*id)])
+        return 1;
+        
+    (*win)++;
+    (*i)=-1;
+    (*id) = 0;
+
+    if ((*win) == numeroDeWins)
+    return 0;
+        
+    return 2;
+}
+
 int ganhou (Pilhas p, WinDef w)
 {
     //p->tipo_Pilha
@@ -1312,7 +1313,7 @@ int ganhou (Pilhas p, WinDef w)
         if (checkIgual(p,w,i,j) == 0)
         {
             if (winCheck(p, w, &id, &win, numeroDeWins, &i)==2)
-                contadorReset(&p, &i, &j);
+                contadorReset(&p, &i, &j, &id);
             else
             {
                 win--;
@@ -1326,7 +1327,7 @@ int ganhou (Pilhas p, WinDef w)
 
         if (i+1 == tamanhoString && p->prox != NULL)
         {
-            contadorReset(&p, &i, &j);
+            contadorReset(&p, &i, &j, &id);
         }
     }
     return 1;
