@@ -777,6 +777,7 @@ void comando_restart(EstadoJogo *g, int *gameOver) {
     *gameOver = 0;
 }
 
+// Faz o movimento inverso a partir do histórico de jogadas
 void undo(EstadoJogo *g)
 {
     int numHist = g->qts_his_mov;
@@ -1513,7 +1514,7 @@ int tenta_auto_movimentos(EstadoJogo *g) {
     return 0; 
 }
 
+// Mantem o loop de tentar auto movimentos até não ter nenhum possível
 void processar_auto_movimentos(EstadoJogo *g) {
-    // Fica a executar movimentos consecutivamente até que o tabuleiro não mude mais
     while (tenta_auto_movimentos(g) == 1) { }
 }
